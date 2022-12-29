@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  mysql:
+    container_name: mysql
+    image: mysql:latest
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: polsl-course-schedule-api
+    ports:
+      - "3306:3306"
+
+  phpmyadmin:
+    container_name: phpmyadmin
+    image: phpmyadmin:latest
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: root
+      PMA_PASSWORD: root
+    depends_on:
+      - mysql
+
+  mail-catcher:
+    container_name: mail-catcher
+    image: schickling/mailcatcher
+    ports:
+      - '1025:1025'
+      - '1080:1080'
