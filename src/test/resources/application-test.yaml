@@ -12,3 +12,14 @@ spring:
     username: root
     password: root
     driver-class-name: com.mysql.cj.jdbc.Driver
+
+  mail:
+    username: greenmail-user
+    password: greenmail-password
+    host: 127.0.0.1
+    port: 3025
+    test-connection: false
+    protocol: smtp
+
+email-sender:
+  sender: test@polsl-course-schedule-api.com
