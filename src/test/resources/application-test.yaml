@@ -23,3 +23,6 @@ spring:
 
 email-sender:
   sender: test@polsl-course-schedule-api.com
+
+email-verification:
+  expiration-hours: 24

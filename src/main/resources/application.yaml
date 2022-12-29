@@ -26,3 +26,6 @@ spring:
 
 email-sender:
   sender: no-reply@polsl-course-schedule-api.com
+
+email-verification:
+  expiration-hours: 24
