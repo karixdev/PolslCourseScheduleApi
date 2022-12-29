@@ -18,6 +18,7 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeRequests(auth -> auth
+                        .antMatchers("/api/v1/auth/**").permitAll()
                         .anyRequest().permitAll()
                 )
                 .build();
