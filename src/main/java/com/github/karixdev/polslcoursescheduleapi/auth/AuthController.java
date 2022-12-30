@@ -1,6 +1,8 @@
 package com.github.karixdev.polslcoursescheduleapi.auth;
 
 import com.github.karixdev.polslcoursescheduleapi.auth.payload.request.RegisterRequest;
+import com.github.karixdev.polslcoursescheduleapi.auth.payload.request.SignInRequest;
+import com.github.karixdev.polslcoursescheduleapi.auth.response.SignInResponse;
 import com.github.karixdev.polslcoursescheduleapi.shared.payload.response.SuccessResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -25,6 +27,16 @@ public class AuthController {
         return new ResponseEntity<>(
                 service.register(payload),
                 HttpStatus.CREATED
+        );
+    }
+
+    @PostMapping("/sign-in")
+    public ResponseEntity<SignInResponse> signIn(
+            @Valid @RequestBody SignInRequest payload
+    ) {
+        return new ResponseEntity<>(
+                service.signIn(payload),
+                HttpStatus.OK
         );
     }
 }

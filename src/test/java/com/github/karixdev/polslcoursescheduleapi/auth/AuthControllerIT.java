@@ -1,8 +1,10 @@
 package com.github.karixdev.polslcoursescheduleapi.auth;
 
 import com.github.karixdev.polslcoursescheduleapi.ContainersEnvironment;
+import com.github.karixdev.polslcoursescheduleapi.auth.response.SignInResponse;
 import com.github.karixdev.polslcoursescheduleapi.emailverification.EmailVerificationToken;
 import com.github.karixdev.polslcoursescheduleapi.emailverification.EmailVerificationTokenRepository;
+import com.github.karixdev.polslcoursescheduleapi.jwt.JwtService;
 import com.github.karixdev.polslcoursescheduleapi.user.User;
 import com.github.karixdev.polslcoursescheduleapi.user.UserRepository;
 import com.github.karixdev.polslcoursescheduleapi.user.UserRole;
@@ -39,6 +41,9 @@ public class AuthControllerIT extends ContainersEnvironment {
 
     @Autowired
     UserService userService;
+
+    @Autowired
+    JwtService jwtService;
 
     @RegisterExtension
     static GreenMailExtension greenMail =
@@ -132,5 +137,105 @@ public class AuthControllerIT extends ContainersEnvironment {
             String recipient = receivedMessage.getAllRecipients()[0].toString();
             assertThat(recipient).isEqualTo("email@email.com");
         });
+    }
+
+    @Test
+    void shouldNotSignInNotEnabledUser() {
+        userService.createUser(
+                "email@email.com",
+                "password",
+                UserRole.ROLE_USER,
+                Boolean.FALSE
+        );
+
+        String payload = """
+                {
+                    "email": "email@email.com",
+                    "password": "password"
+                }
+                """;
+
+        webClient.post().uri("/api/v1/auth/sign-in")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(payload)
+                .exchange()
+                .expectStatus().isUnauthorized();
+    }
+
+    @Test
+    void shouldNotSignInNotExistingUser() {
+        String payload = """
+                {
+                    "email": "i-do-not-exist@email.com",
+                    "password": "password"
+                }
+                """;
+
+        webClient.post().uri("/api/v1/auth/sign-in")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(payload)
+                .exchange()
+                .expectStatus().isUnauthorized();
+    }
+
+    @Test
+    void shouldNotSignInUserGivenInvalidCredentials() {
+        userService.createUser(
+                "email@email.com",
+                "password",
+                UserRole.ROLE_USER,
+                Boolean.TRUE
+        );
+
+        String payload = """
+                {
+                    "email": "email@email.pl",
+                    "password": "password"
+                }
+                """;
+
+        webClient.post().uri("/api/v1/auth/sign-in")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(payload)
+                .exchange()
+                .expectStatus().isUnauthorized();
+    }
+
+    @Test
+    void shouldSignInUserWithValidCredentials() {
+        userService.createUser(
+                "email@email.com",
+                "password",
+                UserRole.ROLE_USER,
+                Boolean.TRUE
+        );
+
+        String payload = """
+                {
+                    "email": "email@email.com",
+                    "password": "password"
+                }
+                """;
+
+        var response = webClient.post().uri("/api/v1/auth/sign-in")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(payload)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(SignInResponse.class)
+                .returnResult()
+                .getResponseBody();
+
+        assertThat(response).isNotNull();
+
+        assertThat(response.getUserResponse().getEmail()).isEqualTo("email@email.com");
+        assertThat(response.getUserResponse().getIsEnabled()).isEqualTo(Boolean.TRUE);
+        assertThat(response.getUserResponse().getUserRole()).isEqualTo(UserRole.ROLE_USER);
+
+        assertThat(jwtService.isTokenValid(response.getAccessToken())).isTrue();
     }
 }
