@@ -1,5 +1,6 @@
 package com.github.karixdev.polslcoursescheduleapi.user;
 
+import com.github.karixdev.polslcoursescheduleapi.shared.exception.ResourceNotFoundException;
 import com.github.karixdev.polslcoursescheduleapi.user.exception.EmailNotAvailableException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -41,5 +42,13 @@ public class UserService {
     public void enableUser(User user) {
         user.setIsEnabled(Boolean.TRUE);
         repository.save(user);
+    }
+
+    public User findByEmail(String email) {
+        return repository.findByEmail(email)
+                .orElseThrow(() -> {
+                    throw new ResourceNotFoundException(
+                            "User with provided email not found");
+                });
     }
 }

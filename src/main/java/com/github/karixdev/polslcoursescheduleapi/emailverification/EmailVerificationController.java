@@ -1,13 +1,13 @@
 package com.github.karixdev.polslcoursescheduleapi.emailverification;
 
+import com.github.karixdev.polslcoursescheduleapi.emailverification.request.ResendEmailVerificationTokenRequest;
 import com.github.karixdev.polslcoursescheduleapi.shared.payload.response.SuccessResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v1/email-verification")
@@ -21,6 +21,16 @@ public class EmailVerificationController {
     ) {
         return new ResponseEntity<>(
                 service.verify(token),
+                HttpStatus.OK
+        );
+    }
+
+    @PostMapping("/resend")
+    public ResponseEntity<SuccessResponse> resend(
+            @Valid @RequestBody ResendEmailVerificationTokenRequest payload
+    ) {
+        return new ResponseEntity<>(
+                service.resend(payload),
                 HttpStatus.OK
         );
     }

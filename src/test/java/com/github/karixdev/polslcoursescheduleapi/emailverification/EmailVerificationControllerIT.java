@@ -36,6 +36,9 @@ public class EmailVerificationControllerIT extends ContainersEnvironment {
     UserRepository userRepository;
 
     @Autowired
+    EmailVerificationProperties properties;
+
+    @Autowired
     Clock clock;
 
     @AfterEach
@@ -123,5 +126,85 @@ public class EmailVerificationControllerIT extends ContainersEnvironment {
 
         assertThat(tokenRepository.findAll().get(0).getConfirmedAt()).isNotNull();
         assertThat(userRepository.findAll().get(0).getIsEnabled()).isTrue();
+    }
+
+    @Test
+    void shouldNotResendTokenForNotExistingUser() {
+        String payload = """
+                {
+                    "email": "i-do-not-exist@email.com"
+                }
+                """;
+
+        webClient.post().uri("/api/v1/email-verification/resend")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(payload)
+                .exchange()
+                .expectStatus().isNotFound();
+
+        assertThat(tokenRepository.findAll()).isEmpty();
+    }
+
+    @Test
+    void shouldNotResendTokenForAlreadyEnabledUser() {
+        userService.createUser(
+                "email@email.com",
+                "password",
+                UserRole.ROLE_USER,
+                Boolean.TRUE
+        );
+
+        String payload = """
+                {
+                    "email": "email@email.com"
+                }
+                """;
+
+        webClient.post().uri("/api/v1/email-verification/resend")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(payload)
+                .exchange()
+                .expectStatus().isBadRequest();
+
+        assertThat(tokenRepository.findAll()).isEmpty();
+    }
+
+    @Test
+    void shouldNotResendTokenForUserWhoRequestedTooManyTokensInHour() {
+        User user = userService.createUser(
+                "email@email.com",
+                "password",
+                UserRole.ROLE_USER,
+                Boolean.FALSE
+        );
+
+        for (int i = 0; i < properties.getMaxNumberOfMailsPerHour(); i++) {
+            LocalDateTime now = LocalDateTime.now(clock);
+
+            tokenRepository.save(EmailVerificationToken.builder()
+                    .user(user)
+                    .token("token-" + i)
+                    .createdAt(now.minusMinutes(10 + i))
+                    .expiresAt(now.minusMinutes(10 + i).plusHours(24))
+                    .build());
+        }
+
+        String payload = """
+                {
+                    "email": "email@email.com"
+                }
+                """;
+
+        webClient.post().uri("/api/v1/email-verification/resend")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(payload)
+                .exchange()
+                .expectStatus().isBadRequest();
+
+        assertThat(tokenRepository.findAll())
+                .hasSize(properties.getMaxNumberOfMailsPerHour());
     }
 }

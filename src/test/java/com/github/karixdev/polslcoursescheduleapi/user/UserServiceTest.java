@@ -95,4 +95,19 @@ public class UserServiceTest {
         assertThat(user.getIsEnabled()).isTrue();
         verify(repository).save(any());
     }
+
+    @Test
+    void GivenExistingUserEmail_WhenFindByEmail_ThenReturnsCorrectUser() {
+        // Given
+        String email = "i-do-not-exist@email.com";
+
+        when(repository.findByEmail(eq(email)))
+                .thenReturn(Optional.of(user));
+
+        // When
+        User result = underTest.findByEmail(email);
+
+        // Then
+        assertThat(result).isEqualTo(user);
+    }
 }
