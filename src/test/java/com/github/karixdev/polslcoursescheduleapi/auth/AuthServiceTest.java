@@ -1,6 +1,7 @@
 package com.github.karixdev.polslcoursescheduleapi.auth;
 
 import com.github.karixdev.polslcoursescheduleapi.auth.payload.request.RegisterRequest;
+import com.github.karixdev.polslcoursescheduleapi.emailverification.EmailVerificationService;
 import com.github.karixdev.polslcoursescheduleapi.shared.payload.response.SuccessResponse;
 import com.github.karixdev.polslcoursescheduleapi.user.UserRole;
 import com.github.karixdev.polslcoursescheduleapi.user.UserService;
@@ -11,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
@@ -21,6 +23,9 @@ public class AuthServiceTest {
 
     @Mock
     UserService userService;
+
+    @Mock
+    EmailVerificationService emailVerificationService;
 
     @Test
     void GivenRegisterRequest_WhenRegister_ThenCallsUserServiceCreateUserAndReturnsSuccessResponse() {
@@ -40,5 +45,7 @@ public class AuthServiceTest {
                 eq(UserRole.ROLE_USER),
                 eq(false)
         );
+
+        verify(emailVerificationService).createToken(any());
     }
 }
