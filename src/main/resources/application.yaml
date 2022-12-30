@@ -30,3 +30,10 @@ email-sender:
 email-verification:
   expiration-hours: 24
   max-number-of-mails-per-hour: 5
+
+jwt:
+  issuer: polsl-course-schedule-api
+  token-expiration-hours: 1
+  key:
+    public: classpath:certs/public.pem
+    private: classpath:certs/private.pem

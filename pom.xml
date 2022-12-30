@@ -68,6 +68,11 @@
 			<version>1.6.12</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.auth0</groupId>
+			<artifactId>java-jwt</artifactId>
+			<version>4.2.1</version>
+		</dependency>
 
 		<dependency>
 			<groupId>com.mysql</groupId>
