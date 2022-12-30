@@ -36,4 +36,10 @@ public class UserService {
 
         return user;
     }
+
+    @Transactional
+    public void enableUser(User user) {
+        user.setIsEnabled(Boolean.TRUE);
+        repository.save(user);
+    }
 }

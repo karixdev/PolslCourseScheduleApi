@@ -29,3 +29,4 @@ email-sender:
 
 email-verification:
   expiration-hours: 24
+  max-number-of-mails-per-hour: 5

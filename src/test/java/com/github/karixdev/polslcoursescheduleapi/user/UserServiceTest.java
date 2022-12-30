@@ -82,4 +82,17 @@ public class UserServiceTest {
         assertThat(result).isEqualTo(user);
         verify(repository).save(eq(user));
     }
+
+    @Test
+    void GivenUser_WhenEnableUser_ThenSetsIsEnabledToTrue() {
+        // Given
+        user.setIsEnabled(Boolean.FALSE);
+
+        // When
+        underTest.enableUser(user);
+
+        // Then
+        assertThat(user.getIsEnabled()).isTrue();
+        verify(repository).save(any());
+    }
 }
