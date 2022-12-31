@@ -144,4 +144,68 @@ public class ScheduleControllerIT extends ContainersEnvironment {
                 .jsonPath("$.name").isEqualTo("schedule-name")
                 .jsonPath("$.group_number").isEqualTo(3);
     }
+
+    @Test
+    void shouldNotDeleteForStandardUser() {
+        UserPrincipal userPrincipal = new UserPrincipal(
+                userService.createUser(
+                        "email@email.com",
+                        "password",
+                        UserRole.ROLE_USER,
+                        true
+                ));
+
+        String token = jwtService.createToken(userPrincipal);
+
+        webClient.delete().uri("/api/v1/schedule/1")
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus().isForbidden();
+    }
+
+
+    @Test
+    void shouldNotDeleteNotExistingSchedule() {
+        UserPrincipal userPrincipal = new UserPrincipal(
+                userService.createUser(
+                        "email@email.com",
+                        "password",
+                        UserRole.ROLE_ADMIN,
+                        true
+                ));
+
+        String token = jwtService.createToken(userPrincipal);
+
+        webClient.delete().uri("/api/v1/schedule/1")
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void shouldDeleteSchedule() {
+        UserPrincipal userPrincipal = new UserPrincipal(
+                userService.createUser(
+                        "email@email.com",
+                        "password",
+                        UserRole.ROLE_ADMIN,
+                        true
+                ));
+
+        Schedule schedule = scheduleRepository.save(Schedule.builder()
+                .type(0)
+                .planPolslId(1)
+                .semester(2)
+                .groupNumber(3)
+                .name("schedule-name")
+                .addedBy(userPrincipal.getUser())
+                .build());
+
+        String token = jwtService.createToken(userPrincipal);
+
+        webClient.delete().uri("/api/v1/schedule/" + schedule.getId())
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus().isOk();
+    }
 }

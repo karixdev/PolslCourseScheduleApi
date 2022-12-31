@@ -6,6 +6,8 @@ import com.github.karixdev.polslcoursescheduleapi.schedule.ScheduleService;
 import com.github.karixdev.polslcoursescheduleapi.schedule.exception.ScheduleNameNotAvailableException;
 import com.github.karixdev.polslcoursescheduleapi.schedule.payload.request.ScheduleRequest;
 import com.github.karixdev.polslcoursescheduleapi.schedule.payload.response.ScheduleResponse;
+import com.github.karixdev.polslcoursescheduleapi.shared.exception.ResourceNotFoundException;
+import com.github.karixdev.polslcoursescheduleapi.shared.payload.response.SuccessResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
@@ -15,8 +17,10 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -104,5 +108,29 @@ public class ScheduleControllerTest {
                         jsonPath("$.name").value("schedule-name"),
                         jsonPath("$.group_number").value(4)
                 );
+    }
+
+    @Test
+    void GivenNotExistingScheduleId_WhenDelete_ThenRespondsWithNotFoundStatus() throws Exception {
+        Long id = 1L;
+
+        doThrow(ResourceNotFoundException.class)
+                .when(service)
+                .delete(eq(id));
+
+        mockMvc.perform(delete("/api/v1/schedule/" + id))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void GivenExistingScheduleId_WhenDelete_ThenRespondsWithOkStatusAndSuccessMessage() throws Exception {
+        Long id = 1L;
+
+        when(service.delete(eq(id)))
+                .thenReturn(new SuccessResponse());
+
+        mockMvc.perform(delete("/api/v1/schedule/" + id))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("success"));
     }
 }

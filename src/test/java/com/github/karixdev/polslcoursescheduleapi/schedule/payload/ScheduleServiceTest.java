@@ -7,6 +7,7 @@ import com.github.karixdev.polslcoursescheduleapi.schedule.exception.ScheduleNam
 import com.github.karixdev.polslcoursescheduleapi.schedule.payload.request.ScheduleRequest;
 import com.github.karixdev.polslcoursescheduleapi.schedule.payload.response.ScheduleResponse;
 import com.github.karixdev.polslcoursescheduleapi.security.UserPrincipal;
+import com.github.karixdev.polslcoursescheduleapi.shared.exception.ResourceNotFoundException;
 import com.github.karixdev.polslcoursescheduleapi.user.User;
 import com.github.karixdev.polslcoursescheduleapi.user.UserRole;
 import org.assertj.core.api.Assertions;
@@ -109,5 +110,34 @@ public class ScheduleServiceTest {
         assertThat(result.getGroupNumber()).isEqualTo(3);
 
         verify(repository).save(any());
+    }
+
+    @Test
+    void GivenNotExistingScheduleId_WhenDelete_ThenThrowsResourceNotFoundExceptionWithCorrectMessage() {
+        // Given
+        Long id = 101L;
+
+        when(repository.findById(eq(id)))
+                .thenReturn(Optional.empty());
+
+        // When & Then
+        assertThatThrownBy(() -> underTest.delete(id))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("Schedule with provided id not found");
+    }
+
+    @Test
+    void GivenExistingScheduleId_WhenDelete_ThenDeletesSchedule() {
+        // Given
+        Long id = 1L;
+
+        when(repository.findById(eq(id)))
+                .thenReturn(Optional.of(schedule));
+
+        // When
+        underTest.delete(id);
+
+        // Then
+        verify(repository).delete(eq(schedule));
     }
 }

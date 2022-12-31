@@ -4,14 +4,12 @@ import com.github.karixdev.polslcoursescheduleapi.schedule.payload.request.Sched
 import com.github.karixdev.polslcoursescheduleapi.schedule.payload.response.ScheduleResponse;
 import com.github.karixdev.polslcoursescheduleapi.security.CurrentUser;
 import com.github.karixdev.polslcoursescheduleapi.security.UserPrincipal;
+import com.github.karixdev.polslcoursescheduleapi.shared.payload.response.SuccessResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
@@ -30,6 +28,17 @@ public class ScheduleController {
         return new ResponseEntity<>(
                 service.add(payload, userPrincipal),
                 HttpStatus.CREATED
+        );
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<SuccessResponse> delete(
+            @PathVariable(name = "id") Long id
+    ) {
+        return new ResponseEntity<>(
+                service.delete(id),
+                HttpStatus.OK
         );
     }
 }

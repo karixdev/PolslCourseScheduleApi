@@ -4,9 +4,12 @@ import com.github.karixdev.polslcoursescheduleapi.schedule.exception.ScheduleNam
 import com.github.karixdev.polslcoursescheduleapi.schedule.payload.request.ScheduleRequest;
 import com.github.karixdev.polslcoursescheduleapi.schedule.payload.response.ScheduleResponse;
 import com.github.karixdev.polslcoursescheduleapi.security.UserPrincipal;
+import com.github.karixdev.polslcoursescheduleapi.shared.exception.ResourceNotFoundException;
+import com.github.karixdev.polslcoursescheduleapi.shared.payload.response.SuccessResponse;
 import com.github.karixdev.polslcoursescheduleapi.user.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.ResourceAccessException;
 
 import javax.transaction.Transactional;
 
@@ -37,5 +40,17 @@ public class ScheduleService {
         schedule = repository.save(schedule);
 
         return new ScheduleResponse(schedule);
+    }
+
+    @Transactional
+    public SuccessResponse delete(Long id) {
+        Schedule schedule = repository.findById(id)
+                .orElseThrow(() -> {
+                    throw new ResourceNotFoundException("Schedule with provided id not found");
+                });
+
+        repository.delete(schedule);
+
+        return new SuccessResponse();
     }
 }
