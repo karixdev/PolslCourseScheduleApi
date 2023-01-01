@@ -62,7 +62,7 @@ public class CourseServiceTest {
     }
 
     @Test
-    void GivenPlanPolslResponseWithEmptyCourseCellList_WhenCreateCoursesFromPlanPolslResponse_ThenThrowsEmptyCourseCellListExceptionWithCorrectMessage() {
+    void GivenPlanPolslResponseWithEmptyCourseCellList_WhenUpdateScheduleCourses_ThenThrowsEmptyCourseCellListExceptionWithCorrectMessage() {
         // Given
         PlanPolslResponse response = new PlanPolslResponse(
                 List.of(new TimeCell("07:00-08:00")),
@@ -73,14 +73,14 @@ public class CourseServiceTest {
                 .thenReturn(LocalTime.of(7, 0));
 
         // When & Then
-        assertThatThrownBy(() -> underTest.createCoursesFromPlanPolslResponse(
+        assertThatThrownBy(() -> underTest.updateScheduleCourses(
                 response, schedule))
                 .isInstanceOf(EmptyCourseCellListException.class)
                 .hasMessage("Course cell list is empty");
     }
 
     @Test
-    void GivenPlanPolslResponseAndSchedule_WhenCreateCoursesFromPlanPolslResponse_ThenSavesListWithCourses() {
+    void GivenPlanPolslResponseAndSchedule_WhenUpdateScheduleCourses_ThenSavesListWithCoursesAndDeletesOldCourses() {
         // Given
         PlanPolslResponse response = new PlanPolslResponse(
                 List.of(new TimeCell("07:00-08:00")),
@@ -102,9 +102,10 @@ public class CourseServiceTest {
                 .thenReturn(course);
 
         // When
-        underTest.createCoursesFromPlanPolslResponse(response, schedule);
+        underTest.updateScheduleCourses(response, schedule);
 
         // Then
+        verify(repository).deleteAll(any());
         verify(repository).saveAll(eq(List.of(course)));
     }
 }
