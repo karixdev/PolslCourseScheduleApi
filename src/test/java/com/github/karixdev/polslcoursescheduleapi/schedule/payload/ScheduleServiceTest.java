@@ -1,9 +1,11 @@
 package com.github.karixdev.polslcoursescheduleapi.schedule.payload;
 
+import com.github.karixdev.polslcoursescheduleapi.planpolsl.payload.TimeCell;
 import com.github.karixdev.polslcoursescheduleapi.schedule.Schedule;
 import com.github.karixdev.polslcoursescheduleapi.schedule.ScheduleRepository;
 import com.github.karixdev.polslcoursescheduleapi.schedule.ScheduleService;
 import com.github.karixdev.polslcoursescheduleapi.schedule.exception.ScheduleNameNotAvailableException;
+import com.github.karixdev.polslcoursescheduleapi.schedule.exception.ScheduleNoStartTimeException;
 import com.github.karixdev.polslcoursescheduleapi.schedule.payload.request.ScheduleRequest;
 import com.github.karixdev.polslcoursescheduleapi.schedule.payload.response.ScheduleResponse;
 import com.github.karixdev.polslcoursescheduleapi.security.UserPrincipal;
@@ -19,6 +21,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalTime;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -139,5 +143,35 @@ public class ScheduleServiceTest {
 
         // Then
         verify(repository).delete(eq(schedule));
+    }
+
+    @Test
+    void GivenEmptyTimeCellsList_WhenGetScheduleStartTime_ThenThrowsScheduleNoStartTimeExceptionWithProperMessage() {
+        // Given
+        List<TimeCell> timeCells = List.of();
+
+        // When & Then
+        assertThatThrownBy(() -> underTest.getScheduleStartTime(timeCells))
+                .isInstanceOf(ScheduleNoStartTimeException.class)
+                .hasMessage("Schedules does not have start time");
+    }
+
+    @Test
+    void GivenNotEmptyTimeCellsList_WhenGetScheduleStartTime_ThenReturnsCorrectStartTime() {
+        // Given
+        List<TimeCell> timeCells = List.of(
+                new TimeCell("10:00-08:00"),
+                new TimeCell("07:00-08:00"),
+                new TimeCell("04:00-08:00"),
+                new TimeCell("03:00-08:00"),
+                new TimeCell("20:00-08:00"),
+                new TimeCell("12:00-08:00")
+        );
+
+        // When
+        LocalTime result = underTest.getScheduleStartTime(timeCells);
+
+        // Then
+        assertThat(result).isEqualTo(LocalTime.of(3, 0));
     }
 }
