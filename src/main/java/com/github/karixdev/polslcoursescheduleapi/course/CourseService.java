@@ -4,6 +4,7 @@ import com.github.karixdev.polslcoursescheduleapi.course.exception.EmptyCourseCe
 import com.github.karixdev.polslcoursescheduleapi.planpolsl.payload.PlanPolslResponse;
 import com.github.karixdev.polslcoursescheduleapi.schedule.Schedule;
 import com.github.karixdev.polslcoursescheduleapi.schedule.ScheduleService;
+import com.github.karixdev.polslcoursescheduleapi.schedule.exception.ScheduleNoStartTimeException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,15 +18,20 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class CourseService {
     private final CourseRepository repository;
-    private final ScheduleService scheduleService;
     private final CourseMapper mapper;
 
     @Transactional
     public void updateScheduleCourses(PlanPolslResponse response, Schedule schedule) {
-        LocalTime startTime = scheduleService
-                .getScheduleStartTime(response.getTimeCells());
+        List<LocalTime> times = response.getTimeCells().stream()
+                .map(timeCell -> LocalTime.parse(timeCell.getText().split("-")[0]))
+                .sorted()
+                .toList();
 
-        int startTimeHour = startTime.getHour();
+        if (times.isEmpty()) {
+            throw new ScheduleNoStartTimeException();
+        }
+
+        int startTimeHour = times.get(0).getHour();
 
         if (response.getCourseCells().isEmpty()) {
             throw new EmptyCourseCellListException();

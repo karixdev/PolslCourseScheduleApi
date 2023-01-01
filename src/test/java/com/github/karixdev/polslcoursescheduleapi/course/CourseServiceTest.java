@@ -33,9 +33,6 @@ public class CourseServiceTest {
     CourseRepository repository;
 
     @Mock
-    ScheduleService scheduleService;
-
-    @Mock
     CourseMapper mapper;
 
     Schedule schedule;
@@ -69,9 +66,6 @@ public class CourseServiceTest {
                 List.of()
         );
 
-        when(scheduleService.getScheduleStartTime(any()))
-                .thenReturn(LocalTime.of(7, 0));
-
         // When & Then
         assertThatThrownBy(() -> underTest.updateScheduleCourses(
                 response, schedule))
@@ -86,9 +80,6 @@ public class CourseServiceTest {
                 List.of(new TimeCell("07:00-08:00")),
                 List.of(new CourseCell(304, 420, 56, 154, "course"))
         );
-
-        when(scheduleService.getScheduleStartTime(any()))
-                .thenReturn(LocalTime.of(7, 0));
 
         Course course = Course.builder()
                 .schedule(schedule)
