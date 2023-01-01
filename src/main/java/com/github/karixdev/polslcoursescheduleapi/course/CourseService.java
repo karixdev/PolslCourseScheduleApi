@@ -9,7 +9,9 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.LocalTime;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -19,7 +21,7 @@ public class CourseService {
     private final CourseMapper mapper;
 
     @Transactional
-    public void createCoursesFromPlanPolslResponse(PlanPolslResponse response, Schedule schedule) {
+    public void updateScheduleCourses(PlanPolslResponse response, Schedule schedule) {
         LocalTime startTime = scheduleService
                 .getScheduleStartTime(response.getTimeCells());
 
@@ -36,6 +38,7 @@ public class CourseService {
                         schedule))
                 .toList();
 
+        repository.deleteAll(schedule.getCourses());
         repository.saveAll(courses);
     }
 }

@@ -1,10 +1,13 @@
 package com.github.karixdev.polslcoursescheduleapi.schedule;
 
+import com.github.karixdev.polslcoursescheduleapi.course.Course;
 import com.github.karixdev.polslcoursescheduleapi.user.User;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.LinkedHashSet;
 import java.util.Objects;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -81,6 +84,13 @@ public class Schedule {
     )
     private User addedBy;
 
+    @ToString.Exclude
+    @OneToMany(
+            mappedBy = "schedule",
+            orphanRemoval = true
+    )
+    @Builder.Default
+    private Set<Course> courses = new LinkedHashSet<>();
 
     @Override
     public boolean equals(Object o) {
@@ -93,11 +103,12 @@ public class Schedule {
                 Objects.equals(semester, schedule.semester) &&
                 Objects.equals(name, schedule.name) &&
                 Objects.equals(groupNumber, schedule.groupNumber) &&
-                Objects.equals(addedBy.getId(), schedule.addedBy.getId());
+                Objects.equals(addedBy.getId(), schedule.addedBy.getId()) &&
+                Objects.equals(courses, schedule.courses);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, type, planPolslId, semester, name, groupNumber, addedBy.getId());
+        return Objects.hash(id, type, planPolslId, semester, name, groupNumber, addedBy.getId(), courses);
     }
 }
