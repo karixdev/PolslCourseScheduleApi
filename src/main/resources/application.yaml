@@ -37,3 +37,8 @@ jwt:
   key:
     public: classpath:certs/public.pem
     private: classpath:certs/private.pem
+
+plan-polsl:
+  base-url: https://plan.polsl.pl/plan.php
+  win-w: 1000
+  win-h: 1000
