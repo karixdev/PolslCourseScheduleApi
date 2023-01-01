@@ -27,3 +27,8 @@ email-sender:
 email-verification:
   expiration-hours: 24
   max-number-of-mails-per-hour: 5
+
+plan-polsl:
+  base-url: https://plan.polsl.pl/plan.php
+  win-w: 1000
+  win-h: 1000
