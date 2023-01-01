@@ -1,4 +1,4 @@
-package com.github.karixdev.polslcoursescheduleapi.schedule.payload;
+package com.github.karixdev.polslcoursescheduleapi.schedule;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.karixdev.polslcoursescheduleapi.schedule.ScheduleController;

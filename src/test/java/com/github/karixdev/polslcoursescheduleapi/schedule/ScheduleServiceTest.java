@@ -1,4 +1,4 @@
-package com.github.karixdev.polslcoursescheduleapi.schedule.payload;
+package com.github.karixdev.polslcoursescheduleapi.schedule;
 
 import com.github.karixdev.polslcoursescheduleapi.planpolsl.payload.TimeCell;
 import com.github.karixdev.polslcoursescheduleapi.schedule.Schedule;

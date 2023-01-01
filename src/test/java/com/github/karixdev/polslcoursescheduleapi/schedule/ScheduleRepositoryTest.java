@@ -1,4 +1,4 @@
-package com.github.karixdev.polslcoursescheduleapi.schedule.payload;
+package com.github.karixdev.polslcoursescheduleapi.schedule;
 
 import com.github.karixdev.polslcoursescheduleapi.ContainersEnvironment;
 import com.github.karixdev.polslcoursescheduleapi.schedule.Schedule;
