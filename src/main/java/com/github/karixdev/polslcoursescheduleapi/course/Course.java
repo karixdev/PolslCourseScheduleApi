@@ -11,7 +11,9 @@ import java.util.Objects;
 @Getter
 @Setter
 @ToString
-@RequiredArgsConstructor
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 @Entity
 @Table(name = "course")
 public class Course {
@@ -43,13 +45,13 @@ public class Course {
             name = "starts_at",
             nullable = false
     )
-    LocalTime startsAt;
+    private LocalTime startsAt;
 
     @Column(
             name = "ends_at",
             nullable = false
     )
-    LocalTime endsAt;
+    private LocalTime endsAt;
 
     @Enumerated(EnumType.STRING)
     @Column(
