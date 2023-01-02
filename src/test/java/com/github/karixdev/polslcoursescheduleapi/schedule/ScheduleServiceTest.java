@@ -1,6 +1,9 @@
 package com.github.karixdev.polslcoursescheduleapi.schedule;
 
+import com.github.karixdev.polslcoursescheduleapi.course.Course;
 import com.github.karixdev.polslcoursescheduleapi.course.CourseService;
+import com.github.karixdev.polslcoursescheduleapi.course.Weeks;
+import com.github.karixdev.polslcoursescheduleapi.course.payload.response.CourseResponse;
 import com.github.karixdev.polslcoursescheduleapi.planpolsl.PlanPolslService;
 import com.github.karixdev.polslcoursescheduleapi.planpolsl.payload.TimeCell;
 import com.github.karixdev.polslcoursescheduleapi.schedule.Schedule;
@@ -9,7 +12,9 @@ import com.github.karixdev.polslcoursescheduleapi.schedule.ScheduleService;
 import com.github.karixdev.polslcoursescheduleapi.schedule.exception.ScheduleNameNotAvailableException;
 import com.github.karixdev.polslcoursescheduleapi.schedule.exception.ScheduleNoStartTimeException;
 import com.github.karixdev.polslcoursescheduleapi.schedule.payload.request.ScheduleRequest;
+import com.github.karixdev.polslcoursescheduleapi.schedule.payload.response.ScheduleCollectionResponse;
 import com.github.karixdev.polslcoursescheduleapi.schedule.payload.response.ScheduleResponse;
+import com.github.karixdev.polslcoursescheduleapi.schedule.payload.response.ScheduleWithCoursesResponse;
 import com.github.karixdev.polslcoursescheduleapi.security.UserPrincipal;
 import com.github.karixdev.polslcoursescheduleapi.shared.exception.ResourceNotFoundException;
 import com.github.karixdev.polslcoursescheduleapi.user.User;
@@ -23,9 +28,11 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -175,5 +182,147 @@ public class ScheduleServiceTest {
         verify(planPolslService).getPlanPolslResponse(eq(otherSchedule));
 
         verify(courseService, times(2)).updateScheduleCourses(any(), any());
+    }
+
+    @Test
+    void WhenGetAll_ThenReturnsCorrectScheduleCollectionResponse() {
+        when(repository.findAllOrderByGroupNumberAndSemesterAsc())
+                .thenReturn(List.of(
+                        Schedule.builder()
+                                .id(101L)
+                                .type(1)
+                                .planPolslId(2)
+                                .semester(1)
+                                .name("schedule-1")
+                                .groupNumber(2)
+                                .addedBy(user)
+                                .build(),
+                        Schedule.builder()
+                                .id(100L)
+                                .type(1)
+                                .planPolslId(2)
+                                .semester(1)
+                                .name("schedule-2")
+                                .groupNumber(4)
+                                .addedBy(user)
+                                .build(),
+                        Schedule.builder()
+                                .id(99L)
+                                .type(1)
+                                .planPolslId(2)
+                                .semester(3)
+                                .name("schedule-3")
+                                .groupNumber(4)
+                                .addedBy(user)
+                                .build()
+                ));
+
+        // When
+        ScheduleCollectionResponse result = underTest.getAll();
+
+        // Then
+        assertThat(result.getSemesters().keySet()).hasSize(2);
+        assertThat(result.getSemesters().keySet()).contains(1, 3);
+
+        assertThat(result.getSemesters().get(1)).hasSize(2);
+        assertThat(result.getSemesters().get(3)).hasSize(1);
+    }
+
+    @Test
+    void GivenNotExistingScheduleId_WhenGetSchedulesWithCourses_ThenThrowsResourceNotFoundExceptionWithCorrectMessage() {
+        // Given
+        Long id = 1337L;
+
+        when(repository.findScheduleById(eq(id)))
+                .thenReturn(Optional.empty());
+
+        // When & Then
+        assertThatThrownBy(() -> underTest.getSchedulesWithCourses(id))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("Schedule with provided id not found");
+    }
+
+    @Test
+    void GivenExistingScheduleId_WhenGetSchedulesWithCourses_ThenReturnsCorrectScheduleWithCoursesResponse() {
+        schedule.setCourses(Set.of(
+                Course.builder()
+                        .schedule(schedule)
+                        .weeks(Weeks.EVERY)
+                        .description("course-1")
+                        .dayOfWeek(DayOfWeek.THURSDAY)
+                        .startsAt(LocalTime.of(10, 15))
+                        .endsAt(LocalTime.of(11, 45))
+                        .build(),
+                Course.builder()
+                        .schedule(schedule)
+                        .weeks(Weeks.EVERY)
+                        .description("course-2")
+                        .dayOfWeek(DayOfWeek.MONDAY)
+                        .startsAt(LocalTime.of(10, 15))
+                        .endsAt(LocalTime.of(11, 45))
+                        .build(),
+                Course.builder()
+                        .schedule(schedule)
+                        .weeks(Weeks.ODD)
+                        .description("course-3")
+                        .dayOfWeek(DayOfWeek.MONDAY)
+                        .startsAt(LocalTime.of(8, 30))
+                        .endsAt(LocalTime.of(10, 0))
+                        .build(),
+                Course.builder()
+                        .schedule(schedule)
+                        .weeks(Weeks.EVERY)
+                        .description("course-4")
+                        .dayOfWeek(DayOfWeek.WEDNESDAY)
+                        .startsAt(LocalTime.of(16, 30))
+                        .endsAt(LocalTime.of(18, 0))
+                        .build(),
+                Course.builder()
+                        .schedule(schedule)
+                        .weeks(Weeks.EVERY)
+                        .description("course-5")
+                        .dayOfWeek(DayOfWeek.TUESDAY)
+                        .startsAt(LocalTime.of(7, 30))
+                        .endsAt(LocalTime.of(9, 0))
+                        .build(),
+                Course.builder()
+                        .schedule(schedule)
+                        .weeks(Weeks.ODD)
+                        .description("course-6")
+                        .dayOfWeek(DayOfWeek.FRIDAY)
+                        .startsAt(LocalTime.of(8, 30))
+                        .endsAt(LocalTime.of(10, 0))
+                        .build()
+        ));
+
+        when(repository.findScheduleById(eq(schedule.getId())))
+                .thenReturn(Optional.of(schedule));
+
+        // When
+        ScheduleWithCoursesResponse result = underTest.getSchedulesWithCourses(schedule.getId());
+
+        // Then
+        assertThat(result.getGroupNumber())
+                .isEqualTo(schedule.getGroupNumber());
+        assertThat(result.getId())
+                .isEqualTo(schedule.getId());
+        assertThat(result.getName())
+                .isEqualTo(schedule.getName());
+        assertThat(result.getSemester())
+                .isEqualTo(schedule.getSemester());
+
+        assertThat(result.getCourses().keySet())
+                .hasSize(5);
+
+        assertThat(result.getCourses().get(DayOfWeek.MONDAY))
+                .hasSize(2);
+
+        CourseResponse mondayCourse1 =
+                result.getCourses().get(DayOfWeek.MONDAY).get(0);
+        CourseResponse mondayCourse2 =
+                result.getCourses().get(DayOfWeek.MONDAY).get(1);
+
+        assertThat(mondayCourse1.getStartsAt())
+                .isBefore(mondayCourse2.getStartsAt());
     }
 }
