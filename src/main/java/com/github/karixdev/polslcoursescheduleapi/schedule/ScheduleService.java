@@ -1,11 +1,13 @@
 package com.github.karixdev.polslcoursescheduleapi.schedule;
 
 import com.github.karixdev.polslcoursescheduleapi.course.CourseService;
+import com.github.karixdev.polslcoursescheduleapi.course.payload.response.CourseResponse;
 import com.github.karixdev.polslcoursescheduleapi.planpolsl.PlanPolslService;
 import com.github.karixdev.polslcoursescheduleapi.planpolsl.payload.PlanPolslResponse;
 import com.github.karixdev.polslcoursescheduleapi.schedule.exception.ScheduleNameNotAvailableException;
 import com.github.karixdev.polslcoursescheduleapi.schedule.payload.request.ScheduleRequest;
 import com.github.karixdev.polslcoursescheduleapi.schedule.payload.response.ScheduleCollectionResponse;
+import com.github.karixdev.polslcoursescheduleapi.schedule.payload.response.ScheduleWithCoursesResponse;
 import com.github.karixdev.polslcoursescheduleapi.schedule.payload.response.ScheduleResponse;
 import com.github.karixdev.polslcoursescheduleapi.security.UserPrincipal;
 import com.github.karixdev.polslcoursescheduleapi.shared.exception.ResourceNotFoundException;
@@ -15,10 +17,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.DayOfWeek;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -87,5 +87,33 @@ public class ScheduleService {
         });
 
         return new ScheduleCollectionResponse(semesters);
+    }
+
+    public ScheduleWithCoursesResponse getSchedulesWithCourses(Long id) {
+        Schedule schedule = repository.findScheduleById(id)
+                .orElseThrow(() -> {
+                    throw new ResourceNotFoundException(
+                            "Schedule with provided id not found");
+                });
+
+        Map<DayOfWeek, List<CourseResponse>> courses = new LinkedHashMap<>();
+
+        schedule.getCourses().stream()
+                .sorted((course1, course2) -> {
+                    if (course1.getDayOfWeek().compareTo(course2.getDayOfWeek()) != 0) {
+                        return course1.getDayOfWeek().compareTo(course2.getDayOfWeek());
+                    }
+
+                    return course1.getStartsAt().compareTo(course2.getStartsAt());
+                })
+                .forEach(course -> {
+                    if (!courses.containsKey(course.getDayOfWeek())) {
+                        courses.put(course.getDayOfWeek(), new ArrayList<>());
+                    }
+
+                    courses.get(course.getDayOfWeek()).add(new CourseResponse(course));
+                });
+
+        return new ScheduleWithCoursesResponse(schedule, courses);
     }
 }

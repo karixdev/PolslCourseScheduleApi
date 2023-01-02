@@ -38,7 +38,7 @@ public class SecurityConfig {
                 .authorizeRequests(auth -> auth
                         .antMatchers("/api/v1/auth/**").permitAll()
                         .antMatchers("/api/v1/email-verification/**").permitAll()
-                        .antMatchers(HttpMethod.GET, "/api/v1/schedule").permitAll()
+                        .antMatchers(HttpMethod.GET, "/api/v1/schedule/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter(), UsernamePasswordAuthenticationFilter.class)

@@ -119,4 +119,38 @@ public class ScheduleRepositoryTest extends ContainersEnvironment {
         assertThat(schedule1.getSemester())
                 .isLessThan(schedule3.getSemester());
     }
+
+    @Test
+    void GivenNotExistingScheduleId_WhenFindScheduleById_ThenReturnsEmptyOptional() {
+        // Given
+        Long id = 1337L;
+
+        // When
+        Optional<Schedule> result = underTest.findScheduleById(id);
+
+        // Then
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void GivenExistingScheduleId_WhenFindScheduleById_ThenOptionalWithProperSchedule() {
+        // Given
+        Schedule schedule = em.persistAndFlush(Schedule.builder()
+                .type(1)
+                .planPolslId(2)
+                .semester(3)
+                .name("name")
+                .groupNumber(4)
+                .addedBy(user)
+                .build());
+
+        Long id = schedule.getId();
+
+        // When
+        Optional<Schedule> result = underTest.findScheduleById(id);
+
+        // Then
+        assertThat(result).isPresent();
+        assertThat(result.get()).isEqualTo(schedule);
+    }
 }

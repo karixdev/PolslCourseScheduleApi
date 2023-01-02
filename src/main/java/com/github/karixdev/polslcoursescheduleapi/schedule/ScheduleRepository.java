@@ -23,4 +23,12 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
             ORDER BY schedule.semester, schedule.groupNumber ASC
             """)
     List<Schedule> findAllOrderByGroupNumberAndSemesterAsc();
+
+    @Query("""
+            SELECT schedule
+            FROM Schedule schedule
+            LEFT JOIN FETCH schedule.courses
+            WHERE schedule.id = :id
+            """)
+    Optional<Schedule> findScheduleById(@Param("id") Long id);
 }
