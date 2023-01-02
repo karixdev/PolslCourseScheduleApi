@@ -18,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
@@ -98,5 +99,82 @@ public class CourseServiceTest {
         // Then
         verify(repository).deleteAll(any());
         verify(repository).saveAll(eq(List.of(course)));
+    }
+
+    @Test
+    void GivenPlanPolslResponseAndSchedule_WhenUpdateScheduleCourses_ThenSavesAndDeletesCorrectSets() {
+        // Given
+        CourseCell courseCell = new CourseCell(
+                304, 420, 56, 154, "course"
+        );
+
+        CourseCell otherCourseCell = new CourseCell(
+                304, 420, 56, 154, "other-course"
+        );
+
+        PlanPolslResponse response = new PlanPolslResponse(
+                List.of(new TimeCell("07:00-08:00")),
+                List.of(courseCell, otherCourseCell)
+        );
+
+        Course courseThatShouldBeDeleted1 = Course.builder()
+                .id(1L)
+                .description("course-that-should-be-deleted-1")
+                .weeks(Weeks.EVERY)
+                .dayOfWeek(DayOfWeek.MONDAY)
+                .startsAt(LocalTime.of(9, 0))
+                .endsAt(LocalTime.of(10, 0))
+                .schedule(schedule)
+                .build();
+
+        Course courseThatShouldBeDeleted2 = Course.builder()
+                .id(2L)
+                .schedule(schedule)
+                .weeks(Weeks.EVERY)
+                .description("course")
+                .dayOfWeek(DayOfWeek.WEDNESDAY)
+                .startsAt(LocalTime.of(8, 30))
+                .endsAt(LocalTime.of(11, 0))
+                .schedule(schedule)
+                .build();
+
+        Course otherCourse = Course.builder()
+                .id(3L)
+                .schedule(schedule)
+                .weeks(Weeks.EVERY)
+                .description("other-course")
+                .dayOfWeek(DayOfWeek.FRIDAY)
+                .startsAt(LocalTime.of(8, 30))
+                .endsAt(LocalTime.of(11, 0))
+                .schedule(schedule)
+                .build();
+
+        schedule.setCourses(Set.of(
+                courseThatShouldBeDeleted1,
+                courseThatShouldBeDeleted2,
+                otherCourse
+        ));
+
+        Course course = Course.builder()
+                .schedule(schedule)
+                .weeks(Weeks.EVERY)
+                .description("course")
+                .dayOfWeek(DayOfWeek.WEDNESDAY)
+                .startsAt(LocalTime.of(8, 30))
+                .endsAt(LocalTime.of(10, 0))
+                .build();
+
+        when(mapper.mapCellToCourse(eq(courseCell), anyInt(), eq(schedule)))
+                .thenReturn(course);
+
+        when(mapper.mapCellToCourse(eq(otherCourseCell), anyInt(), eq(schedule)))
+                .thenReturn(otherCourse);
+
+        // When
+        underTest.updateScheduleCourses(response, schedule);
+
+        // Then
+        verify(repository).deleteAll(eq(Set.of(courseThatShouldBeDeleted1, courseThatShouldBeDeleted2)));
+        verify(repository).saveAll(eq(Set.of(course)));
     }
 }
