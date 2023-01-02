@@ -42,3 +42,6 @@ plan-polsl:
   base-url: https://plan.polsl.pl/plan.php
   win-w: 1000
   win-h: 1000
+
+schedule-job:
+  cron: 0 0 */1 * * *

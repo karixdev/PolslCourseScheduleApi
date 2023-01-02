@@ -1,5 +1,7 @@
 package com.github.karixdev.polslcoursescheduleapi.schedule;
 
+import com.github.karixdev.polslcoursescheduleapi.course.CourseService;
+import com.github.karixdev.polslcoursescheduleapi.planpolsl.PlanPolslService;
 import com.github.karixdev.polslcoursescheduleapi.planpolsl.payload.TimeCell;
 import com.github.karixdev.polslcoursescheduleapi.schedule.Schedule;
 import com.github.karixdev.polslcoursescheduleapi.schedule.ScheduleRepository;
@@ -29,8 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ScheduleServiceTest {
@@ -39,6 +40,12 @@ public class ScheduleServiceTest {
 
     @Mock
     ScheduleRepository repository;
+
+    @Mock
+    PlanPolslService planPolslService;
+
+    @Mock
+    CourseService courseService;
 
     Schedule schedule;
 
@@ -146,32 +153,27 @@ public class ScheduleServiceTest {
     }
 
     @Test
-    void GivenEmptyTimeCellsList_WhenGetScheduleStartTime_ThenThrowsScheduleNoStartTimeExceptionWithProperMessage() {
-        // Given
-        List<TimeCell> timeCells = List.of();
+    void WhenUpdateSchedules_ThenCallsPlanPolslServiceAndCourseService() {
+        Schedule otherSchedule = Schedule.builder()
+                .id(2L)
+                .type(0)
+                .planPolslId(11)
+                .semester(1)
+                .groupNumber(4)
+                .name("schedule-name")
+                .addedBy(user)
+                .build();
 
-        // When & Then
-        assertThatThrownBy(() -> underTest.getScheduleStartTime(timeCells))
-                .isInstanceOf(ScheduleNoStartTimeException.class)
-                .hasMessage("Schedules does not have start time");
-    }
-
-    @Test
-    void GivenNotEmptyTimeCellsList_WhenGetScheduleStartTime_ThenReturnsCorrectStartTime() {
-        // Given
-        List<TimeCell> timeCells = List.of(
-                new TimeCell("10:00-08:00"),
-                new TimeCell("07:00-08:00"),
-                new TimeCell("04:00-08:00"),
-                new TimeCell("03:00-08:00"),
-                new TimeCell("20:00-08:00"),
-                new TimeCell("12:00-08:00")
-        );
+        when(repository.findAll())
+                .thenReturn(List.of(schedule, otherSchedule));
 
         // When
-        LocalTime result = underTest.getScheduleStartTime(timeCells);
+        underTest.updateSchedules();
 
         // Then
-        assertThat(result).isEqualTo(LocalTime.of(3, 0));
+        verify(planPolslService).getPlanPolslResponse(eq(schedule));
+        verify(planPolslService).getPlanPolslResponse(eq(otherSchedule));
+
+        verify(courseService, times(2)).updateScheduleCourses(any(), any());
     }
 }

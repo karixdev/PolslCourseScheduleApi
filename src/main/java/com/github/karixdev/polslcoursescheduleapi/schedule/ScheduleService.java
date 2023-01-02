@@ -1,8 +1,9 @@
 package com.github.karixdev.polslcoursescheduleapi.schedule;
 
-import com.github.karixdev.polslcoursescheduleapi.planpolsl.payload.TimeCell;
+import com.github.karixdev.polslcoursescheduleapi.course.CourseService;
+import com.github.karixdev.polslcoursescheduleapi.planpolsl.PlanPolslService;
+import com.github.karixdev.polslcoursescheduleapi.planpolsl.payload.PlanPolslResponse;
 import com.github.karixdev.polslcoursescheduleapi.schedule.exception.ScheduleNameNotAvailableException;
-import com.github.karixdev.polslcoursescheduleapi.schedule.exception.ScheduleNoStartTimeException;
 import com.github.karixdev.polslcoursescheduleapi.schedule.payload.request.ScheduleRequest;
 import com.github.karixdev.polslcoursescheduleapi.schedule.payload.response.ScheduleResponse;
 import com.github.karixdev.polslcoursescheduleapi.security.UserPrincipal;
@@ -11,16 +12,15 @@ import com.github.karixdev.polslcoursescheduleapi.shared.payload.response.Succes
 import com.github.karixdev.polslcoursescheduleapi.user.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.ResourceAccessException;
 
 import javax.transaction.Transactional;
-import java.time.LocalTime;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class ScheduleService {
     private final ScheduleRepository repository;
+    private final PlanPolslService planPolslService;
+    private final CourseService courseService;
 
     @Transactional
     public ScheduleResponse add(ScheduleRequest payload, UserPrincipal userPrincipal) {
@@ -58,16 +58,13 @@ public class ScheduleService {
         return new SuccessResponse();
     }
 
-    public LocalTime getScheduleStartTime(List<TimeCell> timeCells) {
-        List<LocalTime> times = timeCells.stream()
-                .map(timeCell -> LocalTime.parse(timeCell.getText().split("-")[0]))
-                .sorted()
-                .toList();
+    @Transactional
+    public void updateSchedules() {
+        repository.findAll().forEach(schedule -> {
+            PlanPolslResponse response =
+                    planPolslService.getPlanPolslResponse(schedule);
 
-        if (times.isEmpty()) {
-            throw new ScheduleNoStartTimeException();
-        }
-
-        return times.get(0);
+            courseService.updateScheduleCourses(response, schedule);
+        });
     }
 }
