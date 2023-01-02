@@ -18,7 +18,7 @@ public class ContainersEnvironment {
                     .withPassword("root");
 
     @DynamicPropertySource
-    static void overrideYoutubeApiBaseUrl(DynamicPropertyRegistry dynamicPropertyRegistry) {
+    static void overrideDatabaseConnectionProperties(DynamicPropertyRegistry dynamicPropertyRegistry) {
         dynamicPropertyRegistry.add(
                 "spring.datasource.url",
                 mySQLContainer::getJdbcUrl);
