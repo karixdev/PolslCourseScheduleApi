@@ -4,6 +4,7 @@ import com.github.karixdev.polslcoursescheduleapi.jwt.JwtAuthFilter;
 import com.github.karixdev.polslcoursescheduleapi.jwt.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
@@ -37,6 +38,7 @@ public class SecurityConfig {
                 .authorizeRequests(auth -> auth
                         .antMatchers("/api/v1/auth/**").permitAll()
                         .antMatchers("/api/v1/email-verification/**").permitAll()
+                        .antMatchers(HttpMethod.GET, "/api/v1/schedule").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter(), UsernamePasswordAuthenticationFilter.class)

@@ -5,6 +5,7 @@ import com.github.karixdev.polslcoursescheduleapi.schedule.ScheduleController;
 import com.github.karixdev.polslcoursescheduleapi.schedule.ScheduleService;
 import com.github.karixdev.polslcoursescheduleapi.schedule.exception.ScheduleNameNotAvailableException;
 import com.github.karixdev.polslcoursescheduleapi.schedule.payload.request.ScheduleRequest;
+import com.github.karixdev.polslcoursescheduleapi.schedule.payload.response.ScheduleCollectionResponse;
 import com.github.karixdev.polslcoursescheduleapi.schedule.payload.response.ScheduleResponse;
 import com.github.karixdev.polslcoursescheduleapi.shared.exception.ResourceNotFoundException;
 import com.github.karixdev.polslcoursescheduleapi.shared.payload.response.SuccessResponse;
@@ -16,12 +17,14 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.List;
+import java.util.Map;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -132,5 +135,32 @@ public class ScheduleControllerTest {
         mockMvc.perform(delete("/api/v1/schedule/" + id))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("success"));
+    }
+
+    @Test
+    void WhenGetAll_ThenRespondsWithOkStatusAndProperBody() throws Exception {
+        when(service.getAll())
+                .thenReturn(new ScheduleCollectionResponse(
+                        Map.of(
+                                1, List.of(
+                                        new ScheduleResponse(
+                                                1L, 1, "schedule-1", 2)),
+                                2, List.of(
+                                        new ScheduleResponse(
+                                                2L, 2, "schedule-2", 3))
+                        )
+                ));
+
+        mockMvc.perform(get("/api/v1/schedule")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpectAll(
+                        jsonPath("$.semesters.1[0].id").value(1),
+                        jsonPath("$.semesters.1[0].group_number").value(2),
+                        jsonPath("$.semesters.1[0].name").value("schedule-1"),
+                        jsonPath("$.semesters.2[0].id").value(2),
+                        jsonPath("$.semesters.2[0].group_number").value(3),
+                        jsonPath("$.semesters.2[0].name").value("schedule-2")
+                );
     }
 }

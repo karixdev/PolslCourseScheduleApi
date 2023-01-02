@@ -1,6 +1,7 @@
 package com.github.karixdev.polslcoursescheduleapi.schedule;
 
 import com.github.karixdev.polslcoursescheduleapi.schedule.payload.request.ScheduleRequest;
+import com.github.karixdev.polslcoursescheduleapi.schedule.payload.response.ScheduleCollectionResponse;
 import com.github.karixdev.polslcoursescheduleapi.schedule.payload.response.ScheduleResponse;
 import com.github.karixdev.polslcoursescheduleapi.security.CurrentUser;
 import com.github.karixdev.polslcoursescheduleapi.security.UserPrincipal;
@@ -38,6 +39,14 @@ public class ScheduleController {
     ) {
         return new ResponseEntity<>(
                 service.delete(id),
+                HttpStatus.OK
+        );
+    }
+
+    @GetMapping
+    public ResponseEntity<ScheduleCollectionResponse> getAll() {
+        return new ResponseEntity<>(
+                service.getAll(),
                 HttpStatus.OK
         );
     }

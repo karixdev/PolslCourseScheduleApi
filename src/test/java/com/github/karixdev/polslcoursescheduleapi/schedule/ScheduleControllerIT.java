@@ -33,6 +33,9 @@ public class ScheduleControllerIT extends ContainersEnvironment {
     ScheduleRepository scheduleRepository;
 
     @Autowired
+    ScheduleService scheduleService;
+
+    @Autowired
     JwtService jwtService;
 
     @AfterEach
@@ -207,5 +210,46 @@ public class ScheduleControllerIT extends ContainersEnvironment {
                 .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus().isOk();
+    }
+
+    @Test
+    void shouldGetAllSchedules() {
+        UserPrincipal userPrincipal = new UserPrincipal(
+                userService.createUser(
+                        "email@email.com",
+                        "password",
+                        UserRole.ROLE_ADMIN,
+                        true
+                ));
+
+        scheduleRepository.save(Schedule.builder()
+                .type(0)
+                .planPolslId(1)
+                .semester(2)
+                .groupNumber(3)
+                .name("schedule-name")
+                .addedBy(userPrincipal.getUser())
+                .build());
+
+        scheduleRepository.save(Schedule.builder()
+                .type(0)
+                .planPolslId(101)
+                .semester(1)
+                .groupNumber(2)
+                .name("schedule-name-2")
+                .addedBy(userPrincipal.getUser())
+                .build());
+
+        webClient.get().uri("/api/v1/schedule")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.semesters.1[0].id").isNotEmpty()
+                .jsonPath("$.semesters.1[0].group_number").isEqualTo(2)
+                .jsonPath("$.semesters.1[0].name").isEqualTo("schedule-name-2")
+                .jsonPath("$.semesters.2[0].id").isNotEmpty()
+                .jsonPath("$.semesters.2[0].group_number").isEqualTo(3)
+                .jsonPath("$.semesters.2[0].name").isEqualTo("schedule-name");
     }
 }

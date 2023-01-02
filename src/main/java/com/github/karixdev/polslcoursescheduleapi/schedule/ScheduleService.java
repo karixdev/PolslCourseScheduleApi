@@ -5,6 +5,7 @@ import com.github.karixdev.polslcoursescheduleapi.planpolsl.PlanPolslService;
 import com.github.karixdev.polslcoursescheduleapi.planpolsl.payload.PlanPolslResponse;
 import com.github.karixdev.polslcoursescheduleapi.schedule.exception.ScheduleNameNotAvailableException;
 import com.github.karixdev.polslcoursescheduleapi.schedule.payload.request.ScheduleRequest;
+import com.github.karixdev.polslcoursescheduleapi.schedule.payload.response.ScheduleCollectionResponse;
 import com.github.karixdev.polslcoursescheduleapi.schedule.payload.response.ScheduleResponse;
 import com.github.karixdev.polslcoursescheduleapi.security.UserPrincipal;
 import com.github.karixdev.polslcoursescheduleapi.shared.exception.ResourceNotFoundException;
@@ -14,6 +15,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -66,5 +71,21 @@ public class ScheduleService {
 
             courseService.updateScheduleCourses(response, schedule);
         });
+    }
+
+    public ScheduleCollectionResponse getAll() {
+        Map<Integer, List<ScheduleResponse>> semesters =
+                new HashMap<>();
+
+        repository.findAllOrderByGroupNumberAndSemesterAsc().forEach(schedule -> {
+            Integer semester = schedule.getSemester();
+
+            if (!semesters.containsKey(semester)) {
+                semesters.put(semester, new ArrayList<>());
+            }
+            semesters.get(semester).add(new ScheduleResponse(schedule));
+        });
+
+        return new ScheduleCollectionResponse(semesters);
     }
 }

@@ -9,6 +9,7 @@ import com.github.karixdev.polslcoursescheduleapi.schedule.ScheduleService;
 import com.github.karixdev.polslcoursescheduleapi.schedule.exception.ScheduleNameNotAvailableException;
 import com.github.karixdev.polslcoursescheduleapi.schedule.exception.ScheduleNoStartTimeException;
 import com.github.karixdev.polslcoursescheduleapi.schedule.payload.request.ScheduleRequest;
+import com.github.karixdev.polslcoursescheduleapi.schedule.payload.response.ScheduleCollectionResponse;
 import com.github.karixdev.polslcoursescheduleapi.schedule.payload.response.ScheduleResponse;
 import com.github.karixdev.polslcoursescheduleapi.security.UserPrincipal;
 import com.github.karixdev.polslcoursescheduleapi.shared.exception.ResourceNotFoundException;
@@ -175,5 +176,49 @@ public class ScheduleServiceTest {
         verify(planPolslService).getPlanPolslResponse(eq(otherSchedule));
 
         verify(courseService, times(2)).updateScheduleCourses(any(), any());
+    }
+
+    @Test
+    void WhenGetAll_ThenReturnsCorrectScheduleCollectionResponse() {
+        when(repository.findAllOrderByGroupNumberAndSemesterAsc())
+                .thenReturn(List.of(
+                        Schedule.builder()
+                                .id(101L)
+                                .type(1)
+                                .planPolslId(2)
+                                .semester(1)
+                                .name("schedule-1")
+                                .groupNumber(2)
+                                .addedBy(user)
+                                .build(),
+                        Schedule.builder()
+                                .id(100L)
+                                .type(1)
+                                .planPolslId(2)
+                                .semester(1)
+                                .name("schedule-2")
+                                .groupNumber(4)
+                                .addedBy(user)
+                                .build(),
+                        Schedule.builder()
+                                .id(99L)
+                                .type(1)
+                                .planPolslId(2)
+                                .semester(3)
+                                .name("schedule-3")
+                                .groupNumber(4)
+                                .addedBy(user)
+                                .build()
+                ));
+
+        // When
+        ScheduleCollectionResponse result = underTest.getAll();
+
+        // Then
+        assertThat(result.getSemesters().keySet()).hasSize(2);
+        assertThat(result.getSemesters().keySet()).contains(1, 3);
+
+        assertThat(result.getSemesters().get(1)).hasSize(2);
+        assertThat(result.getSemesters().get(3)).hasSize(1);
     }
 }
