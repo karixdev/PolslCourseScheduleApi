@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 
 @RestController
-@RequestMapping("/api/v1/discord-web-hook")
+@RequestMapping("/api/v1/discord-webhook")
 @RequiredArgsConstructor
 public class DiscordWebhookController {
     private final DiscordWebhookService service;

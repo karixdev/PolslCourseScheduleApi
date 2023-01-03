@@ -51,7 +51,7 @@ public class DiscordWebhookControllerTest {
 
         String content = mapper.writeValueAsString(payload);
 
-        mockMvc.perform(post("/api/v1/discord-web-hook")
+        mockMvc.perform(post("/api/v1/discord-webhook")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(content))
@@ -67,7 +67,7 @@ public class DiscordWebhookControllerTest {
 
         String content = mapper.writeValueAsString(payload);
 
-        mockMvc.perform(post("/api/v1/discord-web-hook")
+        mockMvc.perform(post("/api/v1/discord-webhook")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(content))
@@ -87,7 +87,7 @@ public class DiscordWebhookControllerTest {
                 .when(service)
                 .create(eq(payload), any());
 
-        mockMvc.perform(post("/api/v1/discord-web-hook")
+        mockMvc.perform(post("/api/v1/discord-webhook")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(content))
@@ -140,7 +140,7 @@ public class DiscordWebhookControllerTest {
         when(service.create(eq(payload), any()))
                 .thenReturn(new DiscordWebhookResponse(discordWebhook));
 
-        mockMvc.perform(post("/api/v1/discord-web-hook")
+        mockMvc.perform(post("/api/v1/discord-webhook")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(content))
@@ -172,7 +172,7 @@ public class DiscordWebhookControllerTest {
                 .when(service)
                 .delete(eq(1337L), any());
 
-        mockMvc.perform(delete("/api/v1/discord-web-hook/1337"))
+        mockMvc.perform(delete("/api/v1/discord-webhook/1337"))
                 .andExpect(status().isNotFound());
     }
 
@@ -182,7 +182,7 @@ public class DiscordWebhookControllerTest {
                 .when(service)
                 .delete(eq(1L), any());
 
-        mockMvc.perform(delete("/api/v1/discord-web-hook/1"))
+        mockMvc.perform(delete("/api/v1/discord-webhook/1"))
                 .andExpect(status().isForbidden());
     }
 
@@ -191,7 +191,7 @@ public class DiscordWebhookControllerTest {
         when(service.delete(eq(1L), any()))
                 .thenReturn(new SuccessResponse());
 
-        mockMvc.perform(delete("/api/v1/discord-web-hook/1")
+        mockMvc.perform(delete("/api/v1/discord-webhook/1")
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("success"));

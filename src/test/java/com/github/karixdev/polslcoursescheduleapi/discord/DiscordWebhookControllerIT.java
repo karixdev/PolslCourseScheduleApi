@@ -71,7 +71,7 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
                 }
                 """;
 
-        webClient.post().uri("/api/v1/discord-web-hook")
+        webClient.post().uri("/api/v1/discord-webhook")
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(payload)
@@ -105,7 +105,7 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
 
         String token = jwtService.createToken(userPrincipal);
 
-        webClient.post().uri("/api/v1/discord-web-hook")
+        webClient.post().uri("/api/v1/discord-webhook")
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
@@ -133,7 +133,7 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
 
         String token = jwtService.createToken(userPrincipal);
 
-        webClient.post().uri("/api/v1/discord-web-hook")
+        webClient.post().uri("/api/v1/discord-webhook")
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
@@ -173,7 +173,7 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
 
         String token = jwtService.createToken(userPrincipal);
 
-        webClient.post().uri("/api/v1/discord-web-hook")
+        webClient.post().uri("/api/v1/discord-webhook")
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
@@ -218,7 +218,7 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
 
         String token = jwtService.createToken(userPrincipal);
 
-        webClient.post().uri("/api/v1/discord-web-hook")
+        webClient.post().uri("/api/v1/discord-webhook")
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
@@ -236,7 +236,7 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
 
     @Test
     void shouldNotDeleteWebhookForNoAuthenticatedUser() {
-        webClient.delete().uri("/api/v1/discord-web-hook/1")
+        webClient.delete().uri("/api/v1/discord-webhook/1")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isUnauthorized();
@@ -254,7 +254,7 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
 
         String token = jwtService.createToken(userPrincipal);
 
-        webClient.delete().uri("/api/v1/discord-web-hook/1")
+        webClient.delete().uri("/api/v1/discord-webhook/1")
                 .header("Authorization", "Bearer " + token)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -286,7 +286,7 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
 
         String token = jwtService.createToken(otherUserPrincipal);
 
-        webClient.delete().uri("/api/v1/discord-web-hook/" + discordWebhook.getId())
+        webClient.delete().uri("/api/v1/discord-webhook/" + discordWebhook.getId())
                 .header("Authorization", "Bearer " + token)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -318,7 +318,7 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
 
         String token = jwtService.createToken(otherUserPrincipal);
 
-        webClient.delete().uri("/api/v1/discord-web-hook/" + discordWebhook.getId())
+        webClient.delete().uri("/api/v1/discord-webhook/" + discordWebhook.getId())
                 .header("Authorization", "Bearer " + token)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -345,7 +345,7 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
 
         String token = jwtService.createToken(userPrincipal);
 
-        webClient.delete().uri("/api/v1/discord-web-hook/" + discordWebhook.getId())
+        webClient.delete().uri("/api/v1/discord-webhook/" + discordWebhook.getId())
                 .header("Authorization", "Bearer " + token)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()

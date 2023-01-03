@@ -32,7 +32,7 @@ public class DiscordWebhookService {
     public DiscordWebhookResponse create(DiscordWebhookRequest payload, UserPrincipal userPrincipal) {
         String url = payload.getUrl();
 
-        if (!url.startsWith(properties.getWebHookBaseUrl())) {
+        if (!url.startsWith(properties.getWebhookBaseUrl())) {
             throw new DiscordWebhookInvalidUrlException();
         }
 

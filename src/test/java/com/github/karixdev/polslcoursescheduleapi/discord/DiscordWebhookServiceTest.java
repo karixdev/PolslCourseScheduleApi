@@ -85,7 +85,7 @@ public class DiscordWebhookServiceTest {
 
         UserPrincipal userPrincipal = new UserPrincipal(user);
 
-        when(properties.getWebHookBaseUrl())
+        when(properties.getWebhookBaseUrl())
                 .thenReturn("https://discord.com/api/webhooks/");
 
         // When & Then
@@ -105,7 +105,7 @@ public class DiscordWebhookServiceTest {
         );
         UserPrincipal userPrincipal = new UserPrincipal(user);
 
-        when(properties.getWebHookBaseUrl())
+        when(properties.getWebhookBaseUrl())
                 .thenReturn("https://discord.com/api/webhooks/");
 
         when(repository.findByUrl(eq(url)))
@@ -134,7 +134,7 @@ public class DiscordWebhookServiceTest {
         );
         UserPrincipal userPrincipal = new UserPrincipal(user);
 
-        when(properties.getWebHookBaseUrl())
+        when(properties.getWebhookBaseUrl())
                 .thenReturn("https://discord.com/api/webhooks/");
 
         when(repository.findByUrl(eq(url)))
@@ -157,7 +157,7 @@ public class DiscordWebhookServiceTest {
         );
         UserPrincipal userPrincipal = new UserPrincipal(user);
 
-        when(properties.getWebHookBaseUrl())
+        when(properties.getWebhookBaseUrl())
                 .thenReturn("https://discord.com/api/webhooks/");
 
         when(repository.findByUrl(eq(url)))

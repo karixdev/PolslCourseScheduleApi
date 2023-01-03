@@ -7,12 +7,12 @@ import org.springframework.stereotype.Service;
 @Getter
 @Service
 public class DiscordProperties {
-    private final String webHookBaseUrl;
+    private final String webhookBaseUrl;
 
     public DiscordProperties(
             @Value("${discord.webhook-base-url}")
-            String webHookBaseUrl
+            String webhookBaseUrl
     ) {
-        this.webHookBaseUrl = webHookBaseUrl;
+        this.webhookBaseUrl = webhookBaseUrl;
     }
 }
