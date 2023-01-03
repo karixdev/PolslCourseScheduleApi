@@ -1,4 +1,4 @@
-package com.github.karixdev.polslcoursescheduleapi.course;
+package com.github.karixdev.polslcoursescheduleapi.discord;
 
 import com.github.karixdev.polslcoursescheduleapi.discord.DiscordApiService;
 import com.github.karixdev.polslcoursescheduleapi.discord.exception.DiscordWebHookNotWorkingUrlException;
