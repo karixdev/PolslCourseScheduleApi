@@ -98,7 +98,7 @@ public class CourseServiceTest {
 
         // Then
         verify(repository).deleteAll(any());
-        verify(repository).saveAll(eq(List.of(course)));
+        verify(repository).saveAll(eq(Set.of(course)));
     }
 
     @Test
