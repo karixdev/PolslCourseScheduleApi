@@ -85,5 +85,9 @@ public class DiscordWebHookResponseTest {
         assertThat(result).hasJsonPath("$.schedules[0].name");
         assertThat(result).hasJsonPath("$.schedules[0].group_number");
 
+        assertThat(result).hasJsonPath("$.schedules[1].id");
+        assertThat(result).hasJsonPath("$.schedules[1].semester");
+        assertThat(result).hasJsonPath("$.schedules[1].name");
+        assertThat(result).hasJsonPath("$.schedules[1].group_number");
     }
 }
