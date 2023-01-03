@@ -4,6 +4,7 @@ import com.github.karixdev.polslcoursescheduleapi.discord.payload.request.Discor
 import com.github.karixdev.polslcoursescheduleapi.discord.payload.response.DiscordWebhookResponse;
 import com.github.karixdev.polslcoursescheduleapi.security.CurrentUser;
 import com.github.karixdev.polslcoursescheduleapi.security.UserPrincipal;
+import com.github.karixdev.polslcoursescheduleapi.shared.payload.response.SuccessResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +30,7 @@ public class DiscordWebhookController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity delete(
+    public ResponseEntity<SuccessResponse> delete(
             @PathVariable(name = "id") Long id,
             @CurrentUser UserPrincipal userPrincipal
     ) {
