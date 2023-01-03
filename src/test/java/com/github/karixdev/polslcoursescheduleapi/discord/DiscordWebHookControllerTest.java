@@ -4,6 +4,9 @@ import com.github.karixdev.polslcoursescheduleapi.discord.exception.DiscordWebHo
 import com.github.karixdev.polslcoursescheduleapi.discord.payload.request.DiscordWebHookRequest;
 import com.github.karixdev.polslcoursescheduleapi.discord.payload.response.DiscordWebHookResponse;
 import com.github.karixdev.polslcoursescheduleapi.schedule.Schedule;
+import com.github.karixdev.polslcoursescheduleapi.shared.exception.PermissionDeniedException;
+import com.github.karixdev.polslcoursescheduleapi.shared.exception.ResourceNotFoundException;
+import com.github.karixdev.polslcoursescheduleapi.shared.payload.response.SuccessResponse;
 import com.github.karixdev.polslcoursescheduleapi.user.User;
 import com.github.karixdev.polslcoursescheduleapi.user.UserRole;
 import org.junit.jupiter.api.Test;
@@ -21,6 +24,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -160,5 +164,36 @@ public class DiscordWebHookControllerTest {
                         jsonPath("$.schedules[1].name").isNotEmpty(),
                         jsonPath("$.schedules[1].group_number").isNotEmpty()
                 );
+    }
+
+    @Test
+    void GivenNotExistingDiscordWebHookId_WhenDelete_ThenRespondsWithNotFoundStatus() throws Exception {
+        doThrow(ResourceNotFoundException.class)
+                .when(service)
+                .delete(eq(1337L), any());
+
+        mockMvc.perform(delete("/api/v1/discord-web-hook/1337"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void GivenUserThatIsNotAdminNorOwnerOfDiscordWebHook_WhenDelete_ThenRespondsWithNotFoundStatus() throws Exception {
+        doThrow(PermissionDeniedException.class)
+                .when(service)
+                .delete(eq(1L), any());
+
+        mockMvc.perform(delete("/api/v1/discord-web-hook/1"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void GivenExistingDiscordWebHookIdAndItsOwner_WhenDelete_ThenRespondsWithOkStatusAndSuccessResponse() throws Exception {
+        when(service.delete(eq(1L), any()))
+                .thenReturn(new SuccessResponse());
+
+        mockMvc.perform(delete("/api/v1/discord-web-hook/1")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("success"));
     }
 }

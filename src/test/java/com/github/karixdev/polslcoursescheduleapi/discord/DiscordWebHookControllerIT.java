@@ -5,6 +5,7 @@ import com.github.karixdev.polslcoursescheduleapi.jwt.JwtService;
 import com.github.karixdev.polslcoursescheduleapi.schedule.Schedule;
 import com.github.karixdev.polslcoursescheduleapi.schedule.ScheduleRepository;
 import com.github.karixdev.polslcoursescheduleapi.security.UserPrincipal;
+import com.github.karixdev.polslcoursescheduleapi.user.User;
 import com.github.karixdev.polslcoursescheduleapi.user.UserRepository;
 import com.github.karixdev.polslcoursescheduleapi.user.UserRole;
 import com.github.karixdev.polslcoursescheduleapi.user.UserService;
@@ -20,7 +21,6 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.util.List;
-import java.util.Set;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -232,5 +232,125 @@ public class DiscordWebHookControllerIT extends ContainersEnvironment {
         assertThat(allWebHooks).hasSize(1);
         assertThat(allWebHooks.get(0).getUrl())
                 .isEqualTo("http://localhost:8888/web-hook-url");
+    }
+
+    @Test
+    void shouldNotDeleteWebHookForNoAuthenticatedUser() {
+        webClient.delete().uri("/api/v1/discord-web-hook/1")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isUnauthorized();
+    }
+
+    @Test
+    void shouldNotDeleteNotExistingWebHook() {
+        UserPrincipal userPrincipal = new UserPrincipal(
+                userService.createUser(
+                        "email@email.com",
+                        "password",
+                        UserRole.ROLE_ADMIN,
+                        true
+                ));
+
+        String token = jwtService.createToken(userPrincipal);
+
+        webClient.delete().uri("/api/v1/discord-web-hook/1")
+                .header("Authorization", "Bearer " + token)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void shouldNotDeleteForUserWhoIsNotAdminNorOwnerOfWebHook() {
+        User user = userService.createUser(
+                "email@email.com",
+                "password",
+                UserRole.ROLE_ADMIN,
+                true
+        );
+
+        UserPrincipal otherUserPrincipal = new UserPrincipal(
+                userService.createUser(
+                        "email-1@email.com",
+                        "password",
+                        UserRole.ROLE_USER,
+                        true
+                ));
+
+        DiscordWebHook discordWebHook = discordWebHookRepository.save(
+                DiscordWebHook.builder()
+                        .url("http://discord.com/api")
+                        .addedBy(user)
+                        .build());
+
+        String token = jwtService.createToken(otherUserPrincipal);
+
+        webClient.delete().uri("/api/v1/discord-web-hook/" + discordWebHook.getId())
+                .header("Authorization", "Bearer " + token)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isForbidden();
+    }
+
+    @Test
+    void shouldDeleteForUserWhoAdminAndNotTheOwnerOfWebHook() {
+        User user = userService.createUser(
+                "email@email.com",
+                "password",
+                UserRole.ROLE_ADMIN,
+                true
+        );
+
+        UserPrincipal otherUserPrincipal = new UserPrincipal(
+                userService.createUser(
+                        "email-1@email.com",
+                        "password",
+                        UserRole.ROLE_ADMIN,
+                        true
+                ));
+
+        DiscordWebHook discordWebHook = discordWebHookRepository.save(
+                DiscordWebHook.builder()
+                        .url("http://discord.com/api")
+                        .addedBy(user)
+                        .build());
+
+        String token = jwtService.createToken(otherUserPrincipal);
+
+        webClient.delete().uri("/api/v1/discord-web-hook/" + discordWebHook.getId())
+                .header("Authorization", "Bearer " + token)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk();
+
+        assertThat(discordWebHookRepository.findAll()).isEmpty();
+    }
+
+    @Test
+    void shouldDeleteForUserTheOwnerOfWebHook() {
+        UserPrincipal userPrincipal = new UserPrincipal(
+                userService.createUser(
+                        "email@email.com",
+                        "password",
+                        UserRole.ROLE_USER,
+                        true
+                ));
+
+        DiscordWebHook discordWebHook = discordWebHookRepository.save(
+                DiscordWebHook.builder()
+                        .url("http://discord.com/api")
+                        .addedBy(userPrincipal.getUser())
+                        .build());
+
+        String token = jwtService.createToken(userPrincipal);
+
+        webClient.delete().uri("/api/v1/discord-web-hook/" + discordWebHook.getId())
+                .header("Authorization", "Bearer " + token)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk();
+
+        assertThat(discordWebHookRepository.findAll()).isEmpty();
     }
 }

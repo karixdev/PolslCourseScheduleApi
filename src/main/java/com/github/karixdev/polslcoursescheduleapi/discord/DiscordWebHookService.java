@@ -8,6 +8,11 @@ import com.github.karixdev.polslcoursescheduleapi.discord.payload.response.Disco
 import com.github.karixdev.polslcoursescheduleapi.schedule.Schedule;
 import com.github.karixdev.polslcoursescheduleapi.schedule.ScheduleService;
 import com.github.karixdev.polslcoursescheduleapi.security.UserPrincipal;
+import com.github.karixdev.polslcoursescheduleapi.shared.exception.PermissionDeniedException;
+import com.github.karixdev.polslcoursescheduleapi.shared.exception.ResourceNotFoundException;
+import com.github.karixdev.polslcoursescheduleapi.shared.payload.response.SuccessResponse;
+import com.github.karixdev.polslcoursescheduleapi.user.User;
+import com.github.karixdev.polslcoursescheduleapi.user.UserRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -54,5 +59,25 @@ public class DiscordWebHookService {
                 discordWebHook.getUrl());
 
         return new DiscordWebHookResponse(discordWebHook);
+    }
+
+    public SuccessResponse delete(Long id, UserPrincipal userPrincipal) {
+        DiscordWebHook discordWebHook = repository.findById(id)
+                .orElseThrow(() -> {
+                   throw new ResourceNotFoundException(
+                           "Discord webhook with provided id not found");
+                });
+
+        User user = userPrincipal.getUser();
+
+        if (user.getUserRole() != UserRole.ROLE_ADMIN &&
+            !discordWebHook.getAddedBy().equals(user)) {
+            throw new PermissionDeniedException(
+                    "You are not the owner of the Discord webhook");
+        }
+
+        repository.delete(discordWebHook);
+
+        return new SuccessResponse();
     }
 }

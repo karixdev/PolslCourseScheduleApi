@@ -9,6 +9,8 @@ import com.github.karixdev.polslcoursescheduleapi.schedule.Schedule;
 import com.github.karixdev.polslcoursescheduleapi.schedule.ScheduleService;
 import com.github.karixdev.polslcoursescheduleapi.schedule.payload.response.ScheduleResponse;
 import com.github.karixdev.polslcoursescheduleapi.security.UserPrincipal;
+import com.github.karixdev.polslcoursescheduleapi.shared.exception.PermissionDeniedException;
+import com.github.karixdev.polslcoursescheduleapi.shared.exception.ResourceNotFoundException;
 import com.github.karixdev.polslcoursescheduleapi.user.User;
 import com.github.karixdev.polslcoursescheduleapi.user.UserRole;
 import com.github.karixdev.polslcoursescheduleapi.user.repsonse.UserResponse;
@@ -188,5 +190,100 @@ public class DiscordWebHookServiceTest {
         assertThat(result.getSchedules()).isEqualTo(Set.of(
                 new ScheduleResponse(schedule)
         ));
+    }
+
+    @Test
+    void GivenNotExistingDiscordWebHookId_WhenDelete_ThenThrowsResourceNotFoundExceptionWithCorrectMessage() {
+        // Given
+        Long id = 1337L;
+
+        when(repository.findById(id))
+                .thenReturn(Optional.empty());
+
+        // When & Then
+        assertThatThrownBy(() -> underTest.delete(id, new UserPrincipal(user)))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("Discord webhook with provided id not found");
+    }
+
+    @Test
+    void GivenUserThatIsNotAdminNorOwnerOfDiscordWebHook_WhenDelete_ThenThrowsPermissionDeniedExceptionWithCorrectMessage() {
+        // Given
+        Long id = 1L;
+
+        when(repository.findById(id))
+                .thenReturn(Optional.of(
+                        DiscordWebHook.builder()
+                                .id(1L)
+                                .url("http://discord.com/api")
+                                .schedules(Set.of(schedule))
+                                .addedBy(user)
+                                .build()
+                ));
+
+        User otherUser = User.builder()
+                .id(2L)
+                .email("email-2@email.com")
+                .password("password")
+                .isEnabled(true)
+                .userRole(UserRole.ROLE_USER)
+                .build();
+
+        // When & Then
+        assertThatThrownBy(() -> underTest.delete(id, new UserPrincipal(otherUser)))
+                .isInstanceOf(PermissionDeniedException.class)
+                .hasMessage("You are not the owner of the Discord webhook");
+    }
+
+    @Test
+    void GivenAdminUserWhoIsNotTheOwnerOfDiscordWebHook_WhenDelete_ThenDeletesDiscordWebHook() {
+        // Given
+        Long id = 1L;
+
+        DiscordWebHook discordWebHook = DiscordWebHook.builder()
+                .id(1L)
+                .url("http://discord.com/api")
+                .schedules(Set.of(schedule))
+                .addedBy(user)
+                .build();
+
+        when(repository.findById(id))
+                .thenReturn(Optional.of(discordWebHook));
+
+        User otherUser = User.builder()
+                .id(2L)
+                .email("email-2@email.com")
+                .password("password")
+                .isEnabled(true)
+                .userRole(UserRole.ROLE_ADMIN)
+                .build();
+
+        // When
+        underTest.delete(id, new UserPrincipal(otherUser));
+
+        // Then
+        verify(repository).delete(eq(discordWebHook));
+    }
+
+    @Test
+    void GivenOwnerOfDiscordWebHook_WhenDelete_ThenDeletesDiscordWebHook() {
+        // Given
+        Long id = 1L;
+
+        DiscordWebHook discordWebHook = DiscordWebHook.builder()
+                .id(1L)
+                .url("http://discord.com/api")
+                .schedules(Set.of(schedule))
+                .addedBy(user)
+                .build();
+
+        when(repository.findById(id))
+                .thenReturn(Optional.of(discordWebHook));
+
+        // When
+        underTest.delete(id, new UserPrincipal(user));
+
+        // Then
+        verify(repository).delete(eq(discordWebHook));
     }
 }
