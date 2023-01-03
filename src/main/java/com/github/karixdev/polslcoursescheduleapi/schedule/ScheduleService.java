@@ -116,4 +116,12 @@ public class ScheduleService {
 
         return new ScheduleWithCoursesResponse(schedule, courses);
     }
+
+    public Schedule getById(Long id) {
+        Optional<Schedule> optionalSchedule = repository.findById(id);
+        return optionalSchedule
+                .orElseThrow(() -> {
+                    throw new ResourceNotFoundException("Schedule with provided id not found");
+                });
+    }
 }

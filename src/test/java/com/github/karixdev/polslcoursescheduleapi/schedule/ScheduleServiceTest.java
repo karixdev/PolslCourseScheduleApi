@@ -325,4 +325,33 @@ public class ScheduleServiceTest {
         assertThat(mondayCourse1.getStartsAt())
                 .isBefore(mondayCourse2.getStartsAt());
     }
+
+    @Test
+    void GivenNotExistingScheduleId_WhenGetById_ThenThrowsResourceNotFoundExceptionWithProperMessage() {
+        // Given
+        Long id = 1337L;
+
+        when(repository.findById(eq(id)))
+                .thenReturn(Optional.empty());
+
+        // When & Then
+        assertThatThrownBy(() -> underTest.getById(id))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("Schedule with provided id not found");
+    }
+
+    @Test
+    void GivenExistingScheduleId_WhenGetById_ThenReturnsCorrectObject() {
+        // Given
+        Long id = schedule.getId();
+
+        when(repository.findById(eq(id)))
+                .thenReturn(Optional.of(schedule));
+
+        // When
+        Schedule result = underTest.getById(id);
+
+        // Then
+        assertThat(result).isEqualTo(schedule);
+    }
 }
