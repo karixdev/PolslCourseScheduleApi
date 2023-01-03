@@ -22,24 +22,19 @@ public class EmailVerificationTokenRepositoryTest {
     @Autowired
     TestEntityManager em;
 
-    User user;
+    @Test
+    void GivenNonExistingToken_WhenFindByToken_ThenReturnsEmptyOptional() {
+        // Given
+        String token = "i-do-not-exist";
 
-    @BeforeEach
-    void setUp() {
-        user = User.builder()
-                .email("email@email.pl")
+        User user = User.builder()
+                .email("email-1@email.pl")
                 .password("secret-password")
                 .userRole(UserRole.ROLE_USER)
                 .isEnabled(Boolean.FALSE)
                 .build();
 
-        em.persistAndFlush(user);
-    }
-
-    @Test
-    void GivenNonExistingToken_WhenFindByToken_ThenReturnsEmptyOptional() {
-        // Given
-        String token = "i-do-not-exist";
+        em.persist(user);
 
         EmailVerificationToken eToken = EmailVerificationToken.builder()
                 .user(user)
@@ -61,6 +56,15 @@ public class EmailVerificationTokenRepositoryTest {
     void GivenExistingToken_WhenFindByToken_ThenReturnsOptionalWithCorrectEmailVerificationToken() {
         // Given
         String token = "token";
+
+        User user = User.builder()
+                .email("email-2@email.pl")
+                .password("secret-password")
+                .userRole(UserRole.ROLE_USER)
+                .isEnabled(Boolean.FALSE)
+                .build();
+
+        em.persist(user);
 
         EmailVerificationToken eToken = EmailVerificationToken.builder()
                 .user(user)
