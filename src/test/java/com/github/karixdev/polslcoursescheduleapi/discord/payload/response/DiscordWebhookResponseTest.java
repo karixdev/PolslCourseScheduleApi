@@ -1,10 +1,9 @@
 package com.github.karixdev.polslcoursescheduleapi.discord.payload.response;
 
-import com.github.karixdev.polslcoursescheduleapi.discord.DiscordWebHook;
+import com.github.karixdev.polslcoursescheduleapi.discord.DiscordWebhook;
 import com.github.karixdev.polslcoursescheduleapi.schedule.Schedule;
 import com.github.karixdev.polslcoursescheduleapi.user.User;
 import com.github.karixdev.polslcoursescheduleapi.user.UserRole;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
@@ -16,9 +15,9 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @JsonTest
-public class DiscordWebHookResponseTest {
+public class DiscordWebhookResponseTest {
     @Autowired
-    JacksonTester<DiscordWebHookResponse> jTester;
+    JacksonTester<DiscordWebhookResponse> jTester;
 
     @Test
     void testSerialization() throws IOException {
@@ -30,7 +29,7 @@ public class DiscordWebHookResponseTest {
                 .userRole(UserRole.ROLE_ADMIN)
                 .build();
 
-        DiscordWebHook discordWebHook = DiscordWebHook.builder()
+        DiscordWebhook discordWebHook = DiscordWebhook.builder()
                 .id(1L)
                 .url("url")
                 .schedules(Set.of(
@@ -56,8 +55,8 @@ public class DiscordWebHookResponseTest {
                 .addedBy(user)
                 .build();
 
-        DiscordWebHookResponse payload =
-                new DiscordWebHookResponse(discordWebHook);
+        DiscordWebhookResponse payload =
+                new DiscordWebhookResponse(discordWebHook);
 
         var result = jTester.write(payload);
 

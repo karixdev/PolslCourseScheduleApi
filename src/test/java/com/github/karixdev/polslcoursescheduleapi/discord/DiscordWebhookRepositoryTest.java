@@ -17,27 +17,27 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-public class DiscordWebHookRepositoryTest extends ContainersEnvironment {
+public class DiscordWebhookRepositoryTest extends ContainersEnvironment {
     @Autowired
-    DiscordWebHookRepository underTest;
+    DiscordWebhookRepository underTest;
 
     @Autowired
     TestEntityManager em;
 
     @Test
-    void GivenNotExistingDiscordWebHookUrl_WhenFindByUrl_ThenReturnsEmptyOptional() {
+    void GivenNotExistingDiscordWebhookUrl_WhenFindByUrl_ThenReturnsEmptyOptional() {
         // Given
         String url = "i-do-not-exist";
 
         // When
-        Optional<DiscordWebHook> result = underTest.findByUrl(url);
+        Optional<DiscordWebhook> result = underTest.findByUrl(url);
 
         // Then
         assertThat(result).isEmpty();
     }
 
     @Test
-    void GivenExistingDiscordWebHookUrl_WhenFindByUrl_ThenReturnsNotEmptyOptionalWithCorrectObject() {
+    void GivenExistingDiscordWebhookUrl_WhenFindByUrl_ThenReturnsNotEmptyOptionalWithCorrectObject() {
         // Given
         String url = "i-exist";
 
@@ -57,17 +57,17 @@ public class DiscordWebHookRepositoryTest extends ContainersEnvironment {
                 .addedBy(user)
                 .build());
 
-        DiscordWebHook webHook = em.persistAndFlush(DiscordWebHook.builder()
+        DiscordWebhook webhook = em.persistAndFlush(DiscordWebhook.builder()
                 .url(url)
                 .schedules(Set.of(schedule))
                 .addedBy(user)
                 .build());
 
         // When
-        Optional<DiscordWebHook> result = underTest.findByUrl(url);
+        Optional<DiscordWebhook> result = underTest.findByUrl(url);
 
         // Then
         assertThat(result).isPresent();
-        assertThat(result.get()).isEqualTo(webHook);
+        assertThat(result.get()).isEqualTo(webhook);
     }
 }

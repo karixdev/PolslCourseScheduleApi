@@ -28,7 +28,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @WireMockTest(httpPort = 8888)
-public class DiscordWebHookControllerIT extends ContainersEnvironment {
+public class DiscordWebhookControllerIT extends ContainersEnvironment {
     @Autowired
     WebTestClient webClient;
 
@@ -39,7 +39,7 @@ public class DiscordWebHookControllerIT extends ContainersEnvironment {
     JwtService jwtService;
 
     @Autowired
-    DiscordWebHookRepository discordWebHookRepository;
+    DiscordWebhookRepository discordWebhookRepository;
 
     @Autowired
     ScheduleRepository scheduleRepository;
@@ -48,22 +48,22 @@ public class DiscordWebHookControllerIT extends ContainersEnvironment {
     UserRepository userRepository;
 
     @DynamicPropertySource
-    static void overrideDiscordWebHookBaseUrl(DynamicPropertyRegistry dynamicPropertyRegistry) {
+    static void overrideDiscordWebhookBaseUrl(DynamicPropertyRegistry dynamicPropertyRegistry) {
         dynamicPropertyRegistry.add(
-                "discord.web-hook-base-url",
+                "discord.webhook-base-url",
                 () -> "http://localhost:8888/"
         );
     }
 
     @AfterEach
     void tearDown() {
-        discordWebHookRepository.deleteAll();
+        discordWebhookRepository.deleteAll();
         scheduleRepository.deleteAll();
         userRepository.deleteAll();
     }
 
     @Test
-    void shouldNotCreateWebHookForNoAuthenticatedUser() {
+    void shouldNotCreateWebhookForNoAuthenticatedUser() {
         String payload = """
                 {
                     "url": "http://localhost:8888/123/123",
@@ -80,7 +80,7 @@ public class DiscordWebHookControllerIT extends ContainersEnvironment {
     }
 
     @Test
-    void shouldNotCreateWebHookWithNotAvailableUrl() {
+    void shouldNotCreateWebhookWithNotAvailableUrl() {
         String payload = """
                 {
                     "url": "http://localhost:8888/123/123",
@@ -96,8 +96,8 @@ public class DiscordWebHookControllerIT extends ContainersEnvironment {
                         true
                 ));
 
-        discordWebHookRepository.save(
-                DiscordWebHook.builder()
+        discordWebhookRepository.save(
+                DiscordWebhook.builder()
                         .addedBy(userPrincipal.getUser())
                         .url("http://localhost:8888/123/123")
                         .build()
@@ -115,7 +115,7 @@ public class DiscordWebHookControllerIT extends ContainersEnvironment {
     }
 
     @Test
-    void shouldNotCreateWebHookWithNotExistingSchedules() {
+    void shouldNotCreateWebhookWithNotExistingSchedules() {
         String payload = """
                 {
                     "url": "http://localhost:8888/123/123",
@@ -143,7 +143,7 @@ public class DiscordWebHookControllerIT extends ContainersEnvironment {
     }
 
     @Test
-    void shouldNotCreateDiscordWebHookWhenDiscordApiReturnedError() {
+    void shouldNotCreateDiscordWebhookWhenDiscordApiReturnedError() {
         stubFor(post("/web-hook-url")
                 .willReturn(unauthorized()));
 
@@ -181,14 +181,14 @@ public class DiscordWebHookControllerIT extends ContainersEnvironment {
                 .exchange()
                 .expectStatus().isBadRequest();
 
-        List<DiscordWebHook> allWebHooks =
-                discordWebHookRepository.findAll();
+        List<DiscordWebhook> allWebhooks =
+                discordWebhookRepository.findAll();
 
-        assertThat(allWebHooks).isEmpty();
+        assertThat(allWebhooks).isEmpty();
     }
 
     @Test
-    void shouldCreateDiscordWebHook() {
+    void shouldCreateDiscordWebhook() {
         stubFor(post(urlPathEqualTo("/web-hook-url"))
                 .willReturn(ok()));
 
@@ -226,16 +226,16 @@ public class DiscordWebHookControllerIT extends ContainersEnvironment {
                 .exchange()
                 .expectStatus().isCreated();
 
-        List<DiscordWebHook> allWebHooks =
-                discordWebHookRepository.findAll();
+        List<DiscordWebhook> allWebhooks =
+                discordWebhookRepository.findAll();
 
-        assertThat(allWebHooks).hasSize(1);
-        assertThat(allWebHooks.get(0).getUrl())
+        assertThat(allWebhooks).hasSize(1);
+        assertThat(allWebhooks.get(0).getUrl())
                 .isEqualTo("http://localhost:8888/web-hook-url");
     }
 
     @Test
-    void shouldNotDeleteWebHookForNoAuthenticatedUser() {
+    void shouldNotDeleteWebhookForNoAuthenticatedUser() {
         webClient.delete().uri("/api/v1/discord-web-hook/1")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -243,7 +243,7 @@ public class DiscordWebHookControllerIT extends ContainersEnvironment {
     }
 
     @Test
-    void shouldNotDeleteNotExistingWebHook() {
+    void shouldNotDeleteNotExistingWebhook() {
         UserPrincipal userPrincipal = new UserPrincipal(
                 userService.createUser(
                         "email@email.com",
@@ -262,7 +262,7 @@ public class DiscordWebHookControllerIT extends ContainersEnvironment {
     }
 
     @Test
-    void shouldNotDeleteForUserWhoIsNotAdminNorOwnerOfWebHook() {
+    void shouldNotDeleteForUserWhoIsNotAdminNorOwnerOfWebhook() {
         User user = userService.createUser(
                 "email@email.com",
                 "password",
@@ -278,15 +278,15 @@ public class DiscordWebHookControllerIT extends ContainersEnvironment {
                         true
                 ));
 
-        DiscordWebHook discordWebHook = discordWebHookRepository.save(
-                DiscordWebHook.builder()
+        DiscordWebhook discordWebhook = discordWebhookRepository.save(
+                DiscordWebhook.builder()
                         .url("http://discord.com/api")
                         .addedBy(user)
                         .build());
 
         String token = jwtService.createToken(otherUserPrincipal);
 
-        webClient.delete().uri("/api/v1/discord-web-hook/" + discordWebHook.getId())
+        webClient.delete().uri("/api/v1/discord-web-hook/" + discordWebhook.getId())
                 .header("Authorization", "Bearer " + token)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -294,7 +294,7 @@ public class DiscordWebHookControllerIT extends ContainersEnvironment {
     }
 
     @Test
-    void shouldDeleteForUserWhoAdminAndNotTheOwnerOfWebHook() {
+    void shouldDeleteForUserWhoAdminAndNotTheOwnerOfWebhook() {
         User user = userService.createUser(
                 "email@email.com",
                 "password",
@@ -310,25 +310,25 @@ public class DiscordWebHookControllerIT extends ContainersEnvironment {
                         true
                 ));
 
-        DiscordWebHook discordWebHook = discordWebHookRepository.save(
-                DiscordWebHook.builder()
+        DiscordWebhook discordWebhook = discordWebhookRepository.save(
+                DiscordWebhook.builder()
                         .url("http://discord.com/api")
                         .addedBy(user)
                         .build());
 
         String token = jwtService.createToken(otherUserPrincipal);
 
-        webClient.delete().uri("/api/v1/discord-web-hook/" + discordWebHook.getId())
+        webClient.delete().uri("/api/v1/discord-web-hook/" + discordWebhook.getId())
                 .header("Authorization", "Bearer " + token)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk();
 
-        assertThat(discordWebHookRepository.findAll()).isEmpty();
+        assertThat(discordWebhookRepository.findAll()).isEmpty();
     }
 
     @Test
-    void shouldDeleteForUserTheOwnerOfWebHook() {
+    void shouldDeleteForUserTheOwnerOfWebhook() {
         UserPrincipal userPrincipal = new UserPrincipal(
                 userService.createUser(
                         "email@email.com",
@@ -337,20 +337,20 @@ public class DiscordWebHookControllerIT extends ContainersEnvironment {
                         true
                 ));
 
-        DiscordWebHook discordWebHook = discordWebHookRepository.save(
-                DiscordWebHook.builder()
+        DiscordWebhook discordWebhook = discordWebhookRepository.save(
+                DiscordWebhook.builder()
                         .url("http://discord.com/api")
                         .addedBy(userPrincipal.getUser())
                         .build());
 
         String token = jwtService.createToken(userPrincipal);
 
-        webClient.delete().uri("/api/v1/discord-web-hook/" + discordWebHook.getId())
+        webClient.delete().uri("/api/v1/discord-web-hook/" + discordWebhook.getId())
                 .header("Authorization", "Bearer " + token)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk();
 
-        assertThat(discordWebHookRepository.findAll()).isEmpty();
+        assertThat(discordWebhookRepository.findAll()).isEmpty();
     }
 }

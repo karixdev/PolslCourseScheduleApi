@@ -1,7 +1,7 @@
 package com.github.karixdev.polslcoursescheduleapi.discord;
 
-import com.github.karixdev.polslcoursescheduleapi.discord.payload.request.DiscordWebHookRequest;
-import com.github.karixdev.polslcoursescheduleapi.discord.payload.response.DiscordWebHookResponse;
+import com.github.karixdev.polslcoursescheduleapi.discord.payload.request.DiscordWebhookRequest;
+import com.github.karixdev.polslcoursescheduleapi.discord.payload.response.DiscordWebhookResponse;
 import com.github.karixdev.polslcoursescheduleapi.security.CurrentUser;
 import com.github.karixdev.polslcoursescheduleapi.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
@@ -14,12 +14,12 @@ import javax.validation.Valid;
 @RestController
 @RequestMapping("/api/v1/discord-web-hook")
 @RequiredArgsConstructor
-public class DiscordWebHookController {
-    private final DiscordWebHookService service;
+public class DiscordWebhookController {
+    private final DiscordWebhookService service;
 
     @PostMapping
-    public ResponseEntity<DiscordWebHookResponse> create(
-            @Valid @RequestBody DiscordWebHookRequest payload,
+    public ResponseEntity<DiscordWebhookResponse> create(
+            @Valid @RequestBody DiscordWebhookRequest payload,
             @CurrentUser UserPrincipal userPrincipal
     ) {
         return new ResponseEntity<>(

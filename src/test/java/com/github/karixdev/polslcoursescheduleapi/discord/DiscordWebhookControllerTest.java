@@ -1,8 +1,8 @@
 package com.github.karixdev.polslcoursescheduleapi.discord;
 
-import com.github.karixdev.polslcoursescheduleapi.discord.exception.DiscordWebHookUrlNotAvailableException;
-import com.github.karixdev.polslcoursescheduleapi.discord.payload.request.DiscordWebHookRequest;
-import com.github.karixdev.polslcoursescheduleapi.discord.payload.response.DiscordWebHookResponse;
+import com.github.karixdev.polslcoursescheduleapi.discord.exception.DiscordWebhookUrlNotAvailableException;
+import com.github.karixdev.polslcoursescheduleapi.discord.payload.request.DiscordWebhookRequest;
+import com.github.karixdev.polslcoursescheduleapi.discord.payload.response.DiscordWebhookResponse;
 import com.github.karixdev.polslcoursescheduleapi.schedule.Schedule;
 import com.github.karixdev.polslcoursescheduleapi.shared.exception.PermissionDeniedException;
 import com.github.karixdev.polslcoursescheduleapi.shared.exception.ResourceNotFoundException;
@@ -30,21 +30,21 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(
-        controllers = DiscordWebHookController.class,
+        controllers = DiscordWebhookController.class,
         excludeAutoConfiguration = SecurityAutoConfiguration.class
 )
-public class DiscordWebHookControllerTest {
+public class DiscordWebhookControllerTest {
     @Autowired
     MockMvc mockMvc;
 
     @MockBean
-    DiscordWebHookService service;
+    DiscordWebhookService service;
 
     ObjectMapper mapper = new ObjectMapper();
 
     @Test
     void GivenBlankUrl_WhenCreate_ThenRespondsWithBadRequestStatus() throws Exception {
-        DiscordWebHookRequest payload = new DiscordWebHookRequest(
+        DiscordWebhookRequest payload = new DiscordWebhookRequest(
                 "",
                 Set.of(1L)
         );
@@ -60,7 +60,7 @@ public class DiscordWebHookControllerTest {
 
     @Test
     void GivenEmptySchedulesIdsSet_WhenCreate_ThenRespondsWithConflictStatus() throws Exception {
-        DiscordWebHookRequest payload = new DiscordWebHookRequest(
+        DiscordWebhookRequest payload = new DiscordWebhookRequest(
                 "http://https://discord.com/api/webhooks/123/123",
                 Set.of()
         );
@@ -76,14 +76,14 @@ public class DiscordWebHookControllerTest {
 
     @Test
     void GivenNotAvailableUrl_WhenCreate_ThenRespondsWithConflictStatus() throws Exception {
-        DiscordWebHookRequest payload = new DiscordWebHookRequest(
+        DiscordWebhookRequest payload = new DiscordWebhookRequest(
                 "https://discord.com/api/webhooks/123/123",
                 Set.of(1L)
         );
 
         String content = mapper.writeValueAsString(payload);
 
-        doThrow(DiscordWebHookUrlNotAvailableException.class)
+        doThrow(DiscordWebhookUrlNotAvailableException.class)
                 .when(service)
                 .create(eq(payload), any());
 
@@ -96,7 +96,7 @@ public class DiscordWebHookControllerTest {
 
     @Test
     void GivenValidPayload_WhenCreate_ThenRespondsWithCreatedStatusAndProperBody() throws Exception {
-        DiscordWebHookRequest payload = new DiscordWebHookRequest(
+        DiscordWebhookRequest payload = new DiscordWebhookRequest(
                 "https://discord.com/api/webhooks/123/123",
                 Set.of(1L)
         );
@@ -111,7 +111,7 @@ public class DiscordWebHookControllerTest {
                 .userRole(UserRole.ROLE_ADMIN)
                 .build();
 
-        DiscordWebHook discordWebHook = DiscordWebHook.builder()
+        DiscordWebhook discordWebhook = DiscordWebhook.builder()
                 .id(1L)
                 .url("url")
                 .schedules(Set.of(
@@ -138,7 +138,7 @@ public class DiscordWebHookControllerTest {
                 .build();
 
         when(service.create(eq(payload), any()))
-                .thenReturn(new DiscordWebHookResponse(discordWebHook));
+                .thenReturn(new DiscordWebhookResponse(discordWebhook));
 
         mockMvc.perform(post("/api/v1/discord-web-hook")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -167,7 +167,7 @@ public class DiscordWebHookControllerTest {
     }
 
     @Test
-    void GivenNotExistingDiscordWebHookId_WhenDelete_ThenRespondsWithNotFoundStatus() throws Exception {
+    void GivenNotExistingDiscordWebhookId_WhenDelete_ThenRespondsWithNotFoundStatus() throws Exception {
         doThrow(ResourceNotFoundException.class)
                 .when(service)
                 .delete(eq(1337L), any());
@@ -177,7 +177,7 @@ public class DiscordWebHookControllerTest {
     }
 
     @Test
-    void GivenUserThatIsNotAdminNorOwnerOfDiscordWebHook_WhenDelete_ThenRespondsWithNotFoundStatus() throws Exception {
+    void GivenUserThatIsNotAdminNorOwnerOfDiscordWebhook_WhenDelete_ThenRespondsWithNotFoundStatus() throws Exception {
         doThrow(PermissionDeniedException.class)
                 .when(service)
                 .delete(eq(1L), any());
@@ -187,7 +187,7 @@ public class DiscordWebHookControllerTest {
     }
 
     @Test
-    void GivenExistingDiscordWebHookIdAndItsOwner_WhenDelete_ThenRespondsWithOkStatusAndSuccessResponse() throws Exception {
+    void GivenExistingDiscordWebhookIdAndItsOwner_WhenDelete_ThenRespondsWithOkStatusAndSuccessResponse() throws Exception {
         when(service.delete(eq(1L), any()))
                 .thenReturn(new SuccessResponse());
 

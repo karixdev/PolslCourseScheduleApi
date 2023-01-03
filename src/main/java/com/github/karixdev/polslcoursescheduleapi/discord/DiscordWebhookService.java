@@ -1,10 +1,10 @@
 package com.github.karixdev.polslcoursescheduleapi.discord;
 
-import com.github.karixdev.polslcoursescheduleapi.discord.exception.DiscordWebHookInvalidUrlException;
-import com.github.karixdev.polslcoursescheduleapi.discord.exception.DiscordWebHookUrlNotAvailableException;
+import com.github.karixdev.polslcoursescheduleapi.discord.exception.DiscordWebhookInvalidUrlException;
+import com.github.karixdev.polslcoursescheduleapi.discord.exception.DiscordWebhookUrlNotAvailableException;
 import com.github.karixdev.polslcoursescheduleapi.discord.exception.EmptySchedulesIdsSetException;
-import com.github.karixdev.polslcoursescheduleapi.discord.payload.request.DiscordWebHookRequest;
-import com.github.karixdev.polslcoursescheduleapi.discord.payload.response.DiscordWebHookResponse;
+import com.github.karixdev.polslcoursescheduleapi.discord.payload.request.DiscordWebhookRequest;
+import com.github.karixdev.polslcoursescheduleapi.discord.payload.response.DiscordWebhookResponse;
 import com.github.karixdev.polslcoursescheduleapi.schedule.Schedule;
 import com.github.karixdev.polslcoursescheduleapi.schedule.ScheduleService;
 import com.github.karixdev.polslcoursescheduleapi.security.UserPrincipal;
@@ -22,22 +22,22 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class DiscordWebHookService {
-    private final DiscordWebHookRepository repository;
+public class DiscordWebhookService {
+    private final DiscordWebhookRepository repository;
     private final ScheduleService scheduleService;
     private final DiscordApiService discordApiService;
     private final DiscordProperties properties;
 
     @Transactional
-    public DiscordWebHookResponse create(DiscordWebHookRequest payload, UserPrincipal userPrincipal) {
+    public DiscordWebhookResponse create(DiscordWebhookRequest payload, UserPrincipal userPrincipal) {
         String url = payload.getUrl();
 
         if (!url.startsWith(properties.getWebHookBaseUrl())) {
-            throw new DiscordWebHookInvalidUrlException();
+            throw new DiscordWebhookInvalidUrlException();
         }
 
         if (repository.findByUrl(url).isPresent()) {
-            throw new DiscordWebHookUrlNotAvailableException();
+            throw new DiscordWebhookUrlNotAvailableException();
         }
 
         if (payload.getSchedulesIds().isEmpty()) {
@@ -48,21 +48,21 @@ public class DiscordWebHookService {
                 .map(scheduleService::getById)
                 .collect(Collectors.toSet());
 
-        DiscordWebHook discordWebHook = repository.save(
-                DiscordWebHook.builder()
+        DiscordWebhook discordWebhook = repository.save(
+                DiscordWebhook.builder()
                         .url(url)
                         .schedules(schedules)
                         .addedBy(userPrincipal.getUser())
                         .build());
 
         discordApiService.sendWelcomeMessage(
-                discordWebHook.getUrl());
+                discordWebhook.getUrl());
 
-        return new DiscordWebHookResponse(discordWebHook);
+        return new DiscordWebhookResponse(discordWebhook);
     }
 
     public SuccessResponse delete(Long id, UserPrincipal userPrincipal) {
-        DiscordWebHook discordWebHook = repository.findById(id)
+        DiscordWebhook discordWebhook = repository.findById(id)
                 .orElseThrow(() -> {
                    throw new ResourceNotFoundException(
                            "Discord webhook with provided id not found");
@@ -71,12 +71,12 @@ public class DiscordWebHookService {
         User user = userPrincipal.getUser();
 
         if (user.getUserRole() != UserRole.ROLE_ADMIN &&
-            !discordWebHook.getAddedBy().equals(user)) {
+            !discordWebhook.getAddedBy().equals(user)) {
             throw new PermissionDeniedException(
                     "You are not the owner of the Discord webhook");
         }
 
-        repository.delete(discordWebHook);
+        repository.delete(discordWebhook);
 
         return new SuccessResponse();
     }

@@ -1,6 +1,6 @@
 package com.github.karixdev.polslcoursescheduleapi.discord;
 
-import com.github.karixdev.polslcoursescheduleapi.discord.exception.DiscordWebHookNotWorkingUrlException;
+import com.github.karixdev.polslcoursescheduleapi.discord.exception.DiscordWebhookNotWorkingUrlException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -25,7 +25,7 @@ public class DiscordApiService {
                 .bodyValue(payload)
                 .retrieve()
                 .onStatus(HttpStatus::is4xxClientError, clientResponse -> {
-                    throw new DiscordWebHookNotWorkingUrlException();
+                    throw new DiscordWebhookNotWorkingUrlException();
                 })
                 .toBodilessEntity()
                 .block();

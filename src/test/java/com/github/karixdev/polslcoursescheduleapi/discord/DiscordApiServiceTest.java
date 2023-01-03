@@ -1,7 +1,6 @@
 package com.github.karixdev.polslcoursescheduleapi.discord;
 
-import com.github.karixdev.polslcoursescheduleapi.discord.DiscordApiService;
-import com.github.karixdev.polslcoursescheduleapi.discord.exception.DiscordWebHookNotWorkingUrlException;
+import com.github.karixdev.polslcoursescheduleapi.discord.exception.DiscordWebhookNotWorkingUrlException;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,7 +22,7 @@ public class DiscordApiServiceTest {
     }
 
     @Test
-    void GivenUrlThatDiscordApiRespondsWith4xxStatus_WhenSendWelcomeMessage_ThenThrowsDiscordWebHookNotWorkingUrlExceptionWithProperMessage() {
+    void GivenUrlThatDiscordApiRespondsWith4xxStatus_WhenSendWelcomeMessage_ThenThrowsDiscordWebhookNotWorkingUrlExceptionWithProperMessage() {
         // Given
         String url = "http://localhost:8888/error-route";
 
@@ -32,7 +31,7 @@ public class DiscordApiServiceTest {
 
         // When & Then
         assertThatThrownBy(() -> underTest.sendWelcomeMessage(url))
-                .isInstanceOf(DiscordWebHookNotWorkingUrlException.class)
+                .isInstanceOf(DiscordWebhookNotWorkingUrlException.class)
                 .hasMessage("Provided discord web hook url is not working properly");
     }
 

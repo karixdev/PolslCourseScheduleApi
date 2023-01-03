@@ -8,11 +8,11 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface DiscordWebHookRepository extends JpaRepository<DiscordWebHook, Long> {
+public interface DiscordWebhookRepository extends JpaRepository<DiscordWebhook, Long> {
     @Query("""
-            SELECT discordWebHook
-            FROM DiscordWebHook discordWebHook
-            WHERE discordWebHook.url = :url
+            SELECT discordWebhook
+            FROM DiscordWebhook discordWebhook
+            WHERE discordWebhook.url = :url
             """)
-    Optional<DiscordWebHook> findByUrl(@Param("url") String url);
+    Optional<DiscordWebhook> findByUrl(@Param("url") String url);
 }

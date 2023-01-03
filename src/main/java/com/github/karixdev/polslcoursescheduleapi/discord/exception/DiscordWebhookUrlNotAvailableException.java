@@ -4,8 +4,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.CONFLICT)
-public class DiscordWebHookUrlNotAvailableException extends RuntimeException {
-    public DiscordWebHookUrlNotAvailableException() {
+public class DiscordWebhookUrlNotAvailableException extends RuntimeException {
+    public DiscordWebhookUrlNotAvailableException() {
         super("Discord web hook is not available");
     }
 }

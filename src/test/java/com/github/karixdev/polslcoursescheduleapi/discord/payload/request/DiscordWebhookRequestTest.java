@@ -10,9 +10,9 @@ import java.io.IOException;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @JsonTest
-public class DiscordWebHookRequestTest {
+public class DiscordWebhookRequestTest {
     @Autowired
-    JacksonTester<DiscordWebHookRequest> jTester;
+    JacksonTester<DiscordWebhookRequest> jTester;
 
     @Test
     void testDeserialization() throws IOException {
@@ -23,7 +23,7 @@ public class DiscordWebHookRequestTest {
                 }
                 """;
 
-        DiscordWebHookRequest result = jTester.parseObject(payload);
+        DiscordWebhookRequest result = jTester.parseObject(payload);
 
         assertThat(result.getUrl()).isEqualTo("url");
         assertThat(result.getSchedulesIds()).contains(1L, 2L, 3L);

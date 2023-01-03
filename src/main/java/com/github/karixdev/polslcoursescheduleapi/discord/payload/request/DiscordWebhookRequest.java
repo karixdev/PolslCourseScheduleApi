@@ -12,7 +12,7 @@ import java.util.Set;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class DiscordWebHookRequest {
+public class DiscordWebhookRequest {
     @JsonProperty("url")
     @NotBlank
     private String url;

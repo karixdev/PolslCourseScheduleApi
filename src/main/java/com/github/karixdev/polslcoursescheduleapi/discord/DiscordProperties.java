@@ -10,7 +10,7 @@ public class DiscordProperties {
     private final String webHookBaseUrl;
 
     public DiscordProperties(
-            @Value("${discord.web-hook-base-url}")
+            @Value("${discord.webhook-base-url}")
             String webHookBaseUrl
     ) {
         this.webHookBaseUrl = webHookBaseUrl;

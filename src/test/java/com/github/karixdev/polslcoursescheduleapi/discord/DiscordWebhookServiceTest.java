@@ -1,10 +1,10 @@
 package com.github.karixdev.polslcoursescheduleapi.discord;
 
-import com.github.karixdev.polslcoursescheduleapi.discord.exception.DiscordWebHookInvalidUrlException;
-import com.github.karixdev.polslcoursescheduleapi.discord.exception.DiscordWebHookUrlNotAvailableException;
+import com.github.karixdev.polslcoursescheduleapi.discord.exception.DiscordWebhookInvalidUrlException;
+import com.github.karixdev.polslcoursescheduleapi.discord.exception.DiscordWebhookUrlNotAvailableException;
 import com.github.karixdev.polslcoursescheduleapi.discord.exception.EmptySchedulesIdsSetException;
-import com.github.karixdev.polslcoursescheduleapi.discord.payload.request.DiscordWebHookRequest;
-import com.github.karixdev.polslcoursescheduleapi.discord.payload.response.DiscordWebHookResponse;
+import com.github.karixdev.polslcoursescheduleapi.discord.payload.request.DiscordWebhookRequest;
+import com.github.karixdev.polslcoursescheduleapi.discord.payload.response.DiscordWebhookResponse;
 import com.github.karixdev.polslcoursescheduleapi.schedule.Schedule;
 import com.github.karixdev.polslcoursescheduleapi.schedule.ScheduleService;
 import com.github.karixdev.polslcoursescheduleapi.schedule.payload.response.ScheduleResponse;
@@ -32,12 +32,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class DiscordWebHookServiceTest {
+public class DiscordWebhookServiceTest {
     @InjectMocks
-    DiscordWebHookService underTest;
+    DiscordWebhookService underTest;
 
     @Mock
-    DiscordWebHookRepository repository;
+    DiscordWebhookRepository repository;
 
     @Mock
     ScheduleService scheduleService;
@@ -74,11 +74,11 @@ public class DiscordWebHookServiceTest {
     }
 
     @Test
-    void GivenPayloadWithInvalidUrl_WhenCreate_ThenThrowsDiscordWebHookInvalidUrlExceptionWithProperMessage() {
+    void GivenPayloadWithInvalidUrl_WhenCreate_ThenThrowsDiscordWebhookInvalidUrlExceptionWithProperMessage() {
         // Given
         String url = "http://invalid.com/";
 
-        DiscordWebHookRequest payload = new DiscordWebHookRequest(
+        DiscordWebhookRequest payload = new DiscordWebhookRequest(
                 url,
                 Set.of(1L)
         );
@@ -90,16 +90,16 @@ public class DiscordWebHookServiceTest {
 
         // When & Then
         assertThatThrownBy(() -> underTest.create(payload, userPrincipal))
-                .isInstanceOf(DiscordWebHookInvalidUrlException.class)
+                .isInstanceOf(DiscordWebhookInvalidUrlException.class)
                 .hasMessage("Provided url is not valid");
     }
 
     @Test
-    void GivenPayloadWithNotAvailableDiscordWebHookUrl_WhenCreate_ThenThrowsDiscordWebHookUrlNotAvailableExceptionWithProperMessage() {
+    void GivenPayloadWithNotAvailableDiscordWebhookUrl_WhenCreate_ThenThrowsDiscordWebhookUrlNotAvailableExceptionWithProperMessage() {
         // Given
         String url = "https://discord.com/api/webhooks/not-available";
 
-        DiscordWebHookRequest payload = new DiscordWebHookRequest(
+        DiscordWebhookRequest payload = new DiscordWebhookRequest(
                 url,
                 Set.of(1L)
         );
@@ -110,7 +110,7 @@ public class DiscordWebHookServiceTest {
 
         when(repository.findByUrl(eq(url)))
                 .thenReturn(Optional.of(
-                        DiscordWebHook.builder()
+                        DiscordWebhook.builder()
                                 .url(url)
                                 .schedules(Set.of(schedule))
                                 .addedBy(user)
@@ -119,7 +119,7 @@ public class DiscordWebHookServiceTest {
 
         // When & Then
         assertThatThrownBy(() -> underTest.create(payload, userPrincipal))
-                .isInstanceOf(DiscordWebHookUrlNotAvailableException.class)
+                .isInstanceOf(DiscordWebhookUrlNotAvailableException.class)
                 .hasMessage("Discord web hook is not available");
     }
 
@@ -128,7 +128,7 @@ public class DiscordWebHookServiceTest {
         // Given
         String url = "https://discord.com/api/webhooks/available";
 
-        DiscordWebHookRequest payload = new DiscordWebHookRequest(
+        DiscordWebhookRequest payload = new DiscordWebhookRequest(
                 url,
                 Set.of()
         );
@@ -151,7 +151,7 @@ public class DiscordWebHookServiceTest {
         // Given
         String url = "https://discord.com/api/webhooks/available";
 
-        DiscordWebHookRequest payload = new DiscordWebHookRequest(
+        DiscordWebhookRequest payload = new DiscordWebhookRequest(
                 url,
                 Set.of(1L)
         );
@@ -164,7 +164,7 @@ public class DiscordWebHookServiceTest {
                 .thenReturn(Optional.empty());
 
         when(repository.save(any()))
-                .thenReturn(DiscordWebHook.builder()
+                .thenReturn(DiscordWebhook.builder()
                         .id(1L)
                         .url(url)
                         .schedules(Set.of(schedule))
@@ -175,7 +175,7 @@ public class DiscordWebHookServiceTest {
                 .thenReturn(schedule);
 
         // When
-        DiscordWebHookResponse result =
+        DiscordWebhookResponse result =
                 underTest.create(payload, userPrincipal);
 
         // Then
@@ -193,7 +193,7 @@ public class DiscordWebHookServiceTest {
     }
 
     @Test
-    void GivenNotExistingDiscordWebHookId_WhenDelete_ThenThrowsResourceNotFoundExceptionWithCorrectMessage() {
+    void GivenNotExistingDiscordWebhookId_WhenDelete_ThenThrowsResourceNotFoundExceptionWithCorrectMessage() {
         // Given
         Long id = 1337L;
 
@@ -207,13 +207,13 @@ public class DiscordWebHookServiceTest {
     }
 
     @Test
-    void GivenUserThatIsNotAdminNorOwnerOfDiscordWebHook_WhenDelete_ThenThrowsPermissionDeniedExceptionWithCorrectMessage() {
+    void GivenUserThatIsNotAdminNorOwnerOfDiscordWebhook_WhenDelete_ThenThrowsPermissionDeniedExceptionWithCorrectMessage() {
         // Given
         Long id = 1L;
 
         when(repository.findById(id))
                 .thenReturn(Optional.of(
-                        DiscordWebHook.builder()
+                        DiscordWebhook.builder()
                                 .id(1L)
                                 .url("http://discord.com/api")
                                 .schedules(Set.of(schedule))
@@ -236,11 +236,11 @@ public class DiscordWebHookServiceTest {
     }
 
     @Test
-    void GivenAdminUserWhoIsNotTheOwnerOfDiscordWebHook_WhenDelete_ThenDeletesDiscordWebHook() {
+    void GivenAdminUserWhoIsNotTheOwnerOfDiscordWebhook_WhenDelete_ThenDeletesDiscordWebhook() {
         // Given
         Long id = 1L;
 
-        DiscordWebHook discordWebHook = DiscordWebHook.builder()
+        DiscordWebhook discordWebhook = DiscordWebhook.builder()
                 .id(1L)
                 .url("http://discord.com/api")
                 .schedules(Set.of(schedule))
@@ -248,7 +248,7 @@ public class DiscordWebHookServiceTest {
                 .build();
 
         when(repository.findById(id))
-                .thenReturn(Optional.of(discordWebHook));
+                .thenReturn(Optional.of(discordWebhook));
 
         User otherUser = User.builder()
                 .id(2L)
@@ -262,15 +262,15 @@ public class DiscordWebHookServiceTest {
         underTest.delete(id, new UserPrincipal(otherUser));
 
         // Then
-        verify(repository).delete(eq(discordWebHook));
+        verify(repository).delete(eq(discordWebhook));
     }
 
     @Test
-    void GivenOwnerOfDiscordWebHook_WhenDelete_ThenDeletesDiscordWebHook() {
+    void GivenOwnerOfDiscordWebhook_WhenDelete_ThenDeletesDiscordWebhook() {
         // Given
         Long id = 1L;
 
-        DiscordWebHook discordWebHook = DiscordWebHook.builder()
+        DiscordWebhook discordWebhook = DiscordWebhook.builder()
                 .id(1L)
                 .url("http://discord.com/api")
                 .schedules(Set.of(schedule))
@@ -278,12 +278,12 @@ public class DiscordWebHookServiceTest {
                 .build();
 
         when(repository.findById(id))
-                .thenReturn(Optional.of(discordWebHook));
+                .thenReturn(Optional.of(discordWebhook));
 
         // When
         underTest.delete(id, new UserPrincipal(user));
 
         // Then
-        verify(repository).delete(eq(discordWebHook));
+        verify(repository).delete(eq(discordWebhook));
     }
 }

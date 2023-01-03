@@ -47,4 +47,4 @@ schedule-job:
   cron: 0 0 */1 * * *
 
 discord:
-  web-hook-base-url: https://discord.com/api/webhooks/
+  webhook-base-url: https://discord.com/api/webhooks/

@@ -17,23 +17,23 @@ import java.util.Set;
 @Builder
 @Entity
 @Table(
-        name = "discord_web_hook",
+        name = "discord_webhook",
         uniqueConstraints = {
                 @UniqueConstraint(
                         columnNames = "url",
-                        name = "discord_web_hook_url_unique"
+                        name = "discord_webhook_url_unique"
                 )
         }
 )
-public class DiscordWebHook {
+public class DiscordWebhook {
     @Id
     @GeneratedValue(
             strategy = GenerationType.SEQUENCE,
-            generator = "discord_web_hook_gen"
+            generator = "discord_webhook_gen"
     )
     @SequenceGenerator(
-            name = "discord_web_hook_gen",
-            sequenceName = "discord_web_hook_seq",
+            name = "discord_webhook_gen",
+            sequenceName = "discord_webhook_seq",
             allocationSize = 1
     )
     @Column(
@@ -61,19 +61,19 @@ public class DiscordWebHook {
     @ToString.Exclude
     @ManyToMany
     @JoinTable(
-            name = "discord_web_hook_schedules",
+            name = "discord_webhook_schedules",
             joinColumns = @JoinColumn(
-                    name = "discord_web_hook_id",
+                    name = "discord_webhook_id",
                     referencedColumnName = "id",
                     foreignKey = @ForeignKey(
-                            name = "discord_web_hook_schedules_web_hook_id_fk"
+                            name = "discord_webhook_schedules_webhook_id_fk"
                     )
             ),
             inverseJoinColumns = @JoinColumn(
                     name = "schedules_id",
                     referencedColumnName = "id",
                     foreignKey = @ForeignKey(
-                            name = "discord_web_hook_schedules_schedule_id_fk"
+                            name = "discord_webhook_schedules_schedule_id_fk"
                     )
             )
     )
@@ -84,7 +84,7 @@ public class DiscordWebHook {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        DiscordWebHook that = (DiscordWebHook) o;
+        DiscordWebhook that = (DiscordWebhook) o;
         return Objects.equals(id, that.id) &&
                 Objects.equals(url, that.url) &&
                 Objects.equals(addedBy.getId(), that.addedBy.getId()) &&
