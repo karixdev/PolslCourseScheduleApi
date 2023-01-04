@@ -20,7 +20,9 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
+import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Optional;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -352,5 +354,179 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
                 .expectStatus().isOk();
 
         assertThat(discordWebhookRepository.findAll()).isEmpty();
+    }
+
+    @Test
+    void shouldNotUpdateWebhookSchedulesForNoAuthenticatedUser() {
+        webClient.patch().uri("/api/v1/discord-webhook/1")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isUnauthorized();
+    }
+
+    @Test
+    void shouldNotUpdateSchedulesForNotExistingWebhook() {
+        UserPrincipal userPrincipal = new UserPrincipal(
+                userService.createUser(
+                        "email@email.com",
+                        "password",
+                        UserRole.ROLE_ADMIN,
+                        true
+                ));
+
+        String token = jwtService.createToken(userPrincipal);
+
+        String payload = """
+                {
+                    "schedules_ids": [1]
+                }
+                """;
+
+        webClient.patch().uri("/api/v1/discord-webhook/1")
+                .header("Authorization", "Bearer " + token)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(payload)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void shouldNotUpdateWebhookWithNotExistingSchedules() {
+        String payload = """
+                {
+                    "schedules_ids": [1]
+                }
+                """;
+
+        UserPrincipal userPrincipal = new UserPrincipal(
+                userService.createUser(
+                        "email@email.com",
+                        "password",
+                        UserRole.ROLE_ADMIN,
+                        true
+                ));
+
+        DiscordWebhook discordWebhook = discordWebhookRepository.save(
+                DiscordWebhook.builder()
+                        .url("http://discord.com/api")
+                        .addedBy(userPrincipal.getUser())
+                        .build());
+
+        String token = jwtService.createToken(userPrincipal);
+
+        webClient.patch().uri("/api/v1/discord-webhook/" + discordWebhook.getId())
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + token)
+                .bodyValue(payload)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void shouldUpdateForUserWhoIsAdminAndNotTheOwnerOfWebhook() {
+        UserPrincipal userPrincipal = new UserPrincipal(
+                userService.createUser(
+                        "email@email.com",
+                        "password",
+                        UserRole.ROLE_USER,
+                        true
+                ));
+
+        UserPrincipal otherUserPrincipal = new UserPrincipal(
+                userService.createUser(
+                        "email-2@email.com",
+                        "password",
+                        UserRole.ROLE_ADMIN,
+                        true
+                ));
+
+        Schedule schedule = scheduleRepository.save(Schedule.builder()
+                .type(0)
+                .planPolslId(1)
+                .semester(2)
+                .groupNumber(3)
+                .name("schedule-name")
+                .addedBy(userPrincipal.getUser())
+                .build());
+
+        DiscordWebhook discordWebhook = discordWebhookRepository.save(
+                DiscordWebhook.builder()
+                        .url("http://discord.com/api")
+                        .addedBy(userPrincipal.getUser())
+                        .build());
+
+        String payload = """
+                {
+                    "schedules_ids": [%d]
+                }
+                """.formatted(schedule.getId());
+
+        String token = jwtService.createToken(otherUserPrincipal);
+
+        webClient.patch().uri("/api/v1/discord-webhook/" + discordWebhook.getId())
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + token)
+                .bodyValue(payload)
+                .exchange()
+                .expectStatus().isOk();
+
+        Optional<DiscordWebhook> discordWebhookOptional =
+                discordWebhookRepository.findByUrl("http://discord.com/api");
+
+        assertThat(discordWebhookOptional).isPresent();
+
+        assertThat(discordWebhookOptional.get().getSchedules()).hasSize(1);
+    }
+
+    @Test
+    void shouldUpdateForUserTheOwnerOfWebhook() {
+        UserPrincipal userPrincipal = new UserPrincipal(
+                userService.createUser(
+                        "email@email.com",
+                        "password",
+                        UserRole.ROLE_USER,
+                        true
+                ));
+
+        Schedule schedule = scheduleRepository.save(Schedule.builder()
+                .type(0)
+                .planPolslId(1)
+                .semester(2)
+                .groupNumber(3)
+                .name("schedule-name")
+                .addedBy(userPrincipal.getUser())
+                .build());
+
+        DiscordWebhook discordWebhook = discordWebhookRepository.save(
+                DiscordWebhook.builder()
+                        .url("http://discord.com/api")
+                        .addedBy(userPrincipal.getUser())
+                        .build());
+
+        String payload = """
+                {
+                    "schedules_ids": [%d]
+                }
+                """.formatted(schedule.getId());
+
+        String token = jwtService.createToken(userPrincipal);
+
+        webClient.patch().uri("/api/v1/discord-webhook/" + discordWebhook.getId())
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + token)
+                .bodyValue(payload)
+                .exchange()
+                .expectStatus().isOk();
+
+        Optional<DiscordWebhook> discordWebhookOptional =
+                discordWebhookRepository.findByUrl("http://discord.com/api");
+
+        assertThat(discordWebhookOptional).isPresent();
+
+        assertThat(discordWebhookOptional.get().getSchedules()).hasSize(1);
     }
 }

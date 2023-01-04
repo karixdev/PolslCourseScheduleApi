@@ -1,6 +1,7 @@
 package com.github.karixdev.polslcoursescheduleapi.discord;
 
 import com.github.karixdev.polslcoursescheduleapi.discord.payload.request.DiscordWebhookRequest;
+import com.github.karixdev.polslcoursescheduleapi.discord.payload.request.UpdateDiscordWebhookRequest;
 import com.github.karixdev.polslcoursescheduleapi.discord.payload.response.DiscordWebhookResponse;
 import com.github.karixdev.polslcoursescheduleapi.security.CurrentUser;
 import com.github.karixdev.polslcoursescheduleapi.security.UserPrincipal;
@@ -36,6 +37,19 @@ public class DiscordWebhookController {
     ) {
         return new ResponseEntity<>(
                 service.delete(id, userPrincipal),
+                HttpStatus.OK
+        );
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<DiscordWebhookResponse> updateDiscordWebhookSchedules(
+            @Valid @RequestBody UpdateDiscordWebhookRequest payload,
+            @PathVariable(name = "id") Long id,
+            @CurrentUser UserPrincipal userPrincipal
+    ) {
+        return new ResponseEntity<>(
+                service.updateDiscordWebhookSchedules(
+                        payload, id, userPrincipal),
                 HttpStatus.OK
         );
     }

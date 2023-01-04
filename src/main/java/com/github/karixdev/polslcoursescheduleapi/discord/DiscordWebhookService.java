@@ -4,6 +4,7 @@ import com.github.karixdev.polslcoursescheduleapi.discord.exception.DiscordWebho
 import com.github.karixdev.polslcoursescheduleapi.discord.exception.DiscordWebhookUrlNotAvailableException;
 import com.github.karixdev.polslcoursescheduleapi.discord.exception.EmptySchedulesIdsSetException;
 import com.github.karixdev.polslcoursescheduleapi.discord.payload.request.DiscordWebhookRequest;
+import com.github.karixdev.polslcoursescheduleapi.discord.payload.request.UpdateDiscordWebhookRequest;
 import com.github.karixdev.polslcoursescheduleapi.discord.payload.response.DiscordWebhookResponse;
 import com.github.karixdev.polslcoursescheduleapi.schedule.Schedule;
 import com.github.karixdev.polslcoursescheduleapi.schedule.ScheduleService;
@@ -64,14 +65,14 @@ public class DiscordWebhookService {
     public SuccessResponse delete(Long id, UserPrincipal userPrincipal) {
         DiscordWebhook discordWebhook = repository.findById(id)
                 .orElseThrow(() -> {
-                   throw new ResourceNotFoundException(
-                           "Discord webhook with provided id not found");
+                    throw new ResourceNotFoundException(
+                            "Discord webhook with provided id not found");
                 });
 
         User user = userPrincipal.getUser();
 
         if (user.getUserRole() != UserRole.ROLE_ADMIN &&
-            !discordWebhook.getAddedBy().equals(user)) {
+                !discordWebhook.getAddedBy().equals(user)) {
             throw new PermissionDeniedException(
                     "You are not the owner of the Discord webhook");
         }
@@ -79,5 +80,50 @@ public class DiscordWebhookService {
         repository.delete(discordWebhook);
 
         return new SuccessResponse();
+    }
+
+    @Transactional
+    public DiscordWebhookResponse updateDiscordWebhookSchedules(
+            UpdateDiscordWebhookRequest payload,
+            Long id,
+            UserPrincipal userPrincipal
+    ) {
+        DiscordWebhook discordWebhook = getById(id);
+        User user = userPrincipal.getUser();
+
+        verifyIfUserIsOwnerOrAdmin(discordWebhook, user);
+
+        if (payload.getSchedulesIds().isEmpty()) {
+            throw new EmptySchedulesIdsSetException();
+        }
+
+        discordWebhook.setSchedules(
+                getSchedulesFromSchedulesIdsSet(
+                        payload.getSchedulesIds()));
+        discordWebhook = repository.save(discordWebhook);
+
+        return new DiscordWebhookResponse(discordWebhook);
+    }
+
+    private DiscordWebhook getById(Long id) {
+        return repository.findById(id)
+                .orElseThrow(() -> {
+                    throw new ResourceNotFoundException(
+                            "Discord webhook with provided id not found");
+                });
+    }
+
+    private void verifyIfUserIsOwnerOrAdmin(DiscordWebhook webhook, User user) {
+        if (user.getUserRole() != UserRole.ROLE_ADMIN &&
+                !webhook.getAddedBy().equals(user)) {
+            throw new PermissionDeniedException(
+                    "You are not the owner of the Discord webhook");
+        }
+    }
+
+    public Set<Schedule> getSchedulesFromSchedulesIdsSet(Set<Long> schedulesIds) {
+        return schedulesIds.stream()
+                .map(scheduleService::getById)
+                .collect(Collectors.toSet());
     }
 }

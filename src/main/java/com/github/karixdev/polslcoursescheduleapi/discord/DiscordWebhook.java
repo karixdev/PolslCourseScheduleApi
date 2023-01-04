@@ -59,7 +59,7 @@ public class DiscordWebhook {
     private User addedBy;
 
     @ToString.Exclude
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "discord_webhook_schedules",
             joinColumns = @JoinColumn(

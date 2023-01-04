@@ -2,6 +2,7 @@ package com.github.karixdev.polslcoursescheduleapi.discord;
 
 import com.github.karixdev.polslcoursescheduleapi.discord.exception.DiscordWebhookUrlNotAvailableException;
 import com.github.karixdev.polslcoursescheduleapi.discord.payload.request.DiscordWebhookRequest;
+import com.github.karixdev.polslcoursescheduleapi.discord.payload.request.UpdateDiscordWebhookRequest;
 import com.github.karixdev.polslcoursescheduleapi.discord.payload.response.DiscordWebhookResponse;
 import com.github.karixdev.polslcoursescheduleapi.schedule.Schedule;
 import com.github.karixdev.polslcoursescheduleapi.shared.exception.PermissionDeniedException;
@@ -24,8 +25,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -195,5 +195,112 @@ public class DiscordWebhookControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("success"));
+    }
+
+    @Test
+    void GivenEmptySchedulesIdsSet_WhenUpdateDiscordWebhookSchedules_ThenRespondsWithBadRequestStatus() throws Exception {
+        UpdateDiscordWebhookRequest payload = new UpdateDiscordWebhookRequest(
+                Set.of()
+        );
+
+        String content = mapper.writeValueAsString(payload);
+
+        mockMvc.perform(patch("/api/v1/discord-webhook/1337")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(content))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void GivenNotExistingDiscordWebhookId_WhenUpdateDiscordWebhookSchedules_ThenRespondsWithNotFoundStatus() throws Exception {
+        UpdateDiscordWebhookRequest payload = new UpdateDiscordWebhookRequest(
+                Set.of(1L)
+        );
+
+        String content = mapper.writeValueAsString(payload);
+
+        doThrow(ResourceNotFoundException.class)
+                .when(service)
+                .updateDiscordWebhookSchedules(eq(payload), eq(1337L), any());
+
+        mockMvc.perform(patch("/api/v1/discord-webhook/1337")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(content))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void GivenUserThatIsNotAdminNorOwnerOfDiscordWebhook_WhenUpdateDiscordWebhookSchedules_ThenRespondsWithForbiddenStatus() throws Exception {
+        UpdateDiscordWebhookRequest payload = new UpdateDiscordWebhookRequest(
+                Set.of(1L)
+        );
+
+        String content = mapper.writeValueAsString(payload);
+
+        doThrow(PermissionDeniedException.class)
+                .when(service)
+                .updateDiscordWebhookSchedules(eq(payload), eq(1337L), any());
+
+        mockMvc.perform(patch("/api/v1/discord-webhook/1337")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(content))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void GivenExistingDiscordWebhookIdAndItsOwner_WhenUpdateDiscordWebhookSchedules_ThenRespondsWithOkStatusAndSuccessResponse() throws Exception {
+        UpdateDiscordWebhookRequest payload = new UpdateDiscordWebhookRequest(
+                Set.of(1L)
+        );
+
+        String content = mapper.writeValueAsString(payload);
+
+        User user = User.builder()
+                .id(1L)
+                .email("email@email.com")
+                .password("password")
+                .isEnabled(true)
+                .userRole(UserRole.ROLE_ADMIN)
+                .build();
+
+        DiscordWebhook discordWebhook = DiscordWebhook.builder()
+                .id(1L)
+                .url("url")
+                .schedules(Set.of(
+                        Schedule.builder()
+                                .id(1L)
+                                .type(0)
+                                .planPolslId(1)
+                                .semester(2)
+                                .groupNumber(3)
+                                .name("schedule-name-1")
+                                .addedBy(user)
+                                .build()
+                ))
+                .addedBy(user)
+                .build();
+
+        when(service.updateDiscordWebhookSchedules(eq(payload), eq(1L), any()))
+                .thenReturn(new DiscordWebhookResponse(discordWebhook));
+
+        mockMvc.perform(patch("/api/v1/discord-webhook/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(content))
+                .andExpect(status().isOk())
+                .andExpectAll(
+                        jsonPath("$.id").value(1),
+
+                        jsonPath("$.url").value("url"),
+
+                        jsonPath("$.added_by").isNotEmpty(),
+                        jsonPath("$.added_by.email").value("email@email.com"),
+                        jsonPath("$.schedules").isNotEmpty(),
+
+                        jsonPath("$.schedules[0].id").isNotEmpty(),
+                        jsonPath("$.schedules[0].semester").isNotEmpty(),
+                        jsonPath("$.schedules[0].name").isNotEmpty(),
+                        jsonPath("$.schedules[0].group_number").isNotEmpty()
+                );
     }
 }
