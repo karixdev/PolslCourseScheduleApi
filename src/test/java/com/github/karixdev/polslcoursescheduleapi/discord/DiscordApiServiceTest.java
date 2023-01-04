@@ -47,12 +47,19 @@ public class DiscordApiServiceTest {
 
         DiscordWebhook discordWebhook = DiscordWebhook.builder()
                 .id(1L)
-                .url("http://discord.com/api")
+                .url("http://localhost:8888/api/error")
                 .schedules(Set.of(schedule))
                 .addedBy(user)
                 .build();
 
-        schedule.setDiscordWebhooks(Set.of(discordWebhook));
+        DiscordWebhook otherDiscordWebhook = DiscordWebhook.builder()
+                .id(2L)
+                .url("http://localhost:8888/api/success")
+                .schedules(Set.of(schedule))
+                .addedBy(user)
+                .build();
+
+        schedule.setDiscordWebhooks(Set.of(discordWebhook, otherDiscordWebhook));
     }
 
     @Test
@@ -82,31 +89,12 @@ public class DiscordApiServiceTest {
     }
 
     @Test
-    void GivenScheduleWithWebhookUrlThatDiscordApiRespondsWith4xxStatus_WhenSendScheduleCoursesUpdateMessage_ThenThrowsDiscordWebhookNotWorkingUrlExceptionWithProperMessage() {
-        // Given
-        String url = "http://localhost:8888/error-route";
-
-        stubFor(post("/error-route")
+    void GivenScheduleOneWithWebhookUrlThatDiscordApiRespondsWith4xxStatus_WhenSendScheduleCoursesUpdateMessage_ThenDoesNotThrow() {
+        stubFor(post(urlPathEqualTo("/api/error"))
                 .willReturn(unauthorized()));
 
-        schedule.getDiscordWebhooks()
-                .forEach(webhook -> webhook.setUrl(url));
-
-        // When & Then
-        assertThatThrownBy(() -> underTest.sendScheduleCoursesUpdateMessage(schedule))
-                .isInstanceOf(DiscordWebhookNotWorkingUrlException.class)
-                .hasMessage("Provided discord web hook url is not working properly");
-    }
-
-    @Test
-    void GivenScheduleWithWebhookUrl_WhenSendScheduleCoursesUpdateMessage_ThenDoesNotThrowAnyException () {
-        // Given
-        String url = "http://localhost:8888/success-route";
-
-        stubFor(post("/success-route")
+        stubFor(post(urlPathEqualTo("/api/success"))
                 .willReturn(noContent()));
-
-        schedule.getDiscordWebhooks().forEach(webhook -> webhook.setUrl(url));
 
         // When
         underTest.sendScheduleCoursesUpdateMessage(schedule);

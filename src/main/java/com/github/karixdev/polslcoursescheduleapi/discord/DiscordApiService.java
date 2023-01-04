@@ -48,16 +48,20 @@ public class DiscordApiService {
                     }
                     """.formatted(schedule.getName());
 
-            webClient.post().uri(discordWebhook.getUrl())
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .accept(MediaType.APPLICATION_JSON)
-                    .bodyValue(payload)
-                    .retrieve()
-                    .onStatus(HttpStatus::is4xxClientError, clientResponse -> {
-                        throw new DiscordWebhookNotWorkingUrlException();
-                    })
-                    .toBodilessEntity()
-                    .block();
+            try {
+                webClient.post().uri(discordWebhook.getUrl())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .bodyValue(payload)
+                        .retrieve()
+                        .onStatus(HttpStatus::is4xxClientError, clientResponse -> {
+                            throw new DiscordWebhookNotWorkingUrlException();
+                        })
+                        .toBodilessEntity()
+                        .block();
+            } catch (RuntimeException e) {
+                log.error("error occurred when sending webhook", e);
+            }
         });
     }
 }
