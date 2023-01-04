@@ -87,12 +87,11 @@ public class DiscordWebhook {
         DiscordWebhook that = (DiscordWebhook) o;
         return Objects.equals(id, that.id) &&
                 Objects.equals(url, that.url) &&
-                Objects.equals(addedBy.getId(), that.addedBy.getId()) &&
-                Objects.equals(schedules, that.schedules);
+                Objects.equals(addedBy.getId(), that.addedBy.getId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, url, addedBy.getId(), schedules);
+        return Objects.hash(id, url, addedBy.getId());
     }
 }
