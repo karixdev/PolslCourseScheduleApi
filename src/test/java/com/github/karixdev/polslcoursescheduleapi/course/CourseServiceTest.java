@@ -1,11 +1,11 @@
 package com.github.karixdev.polslcoursescheduleapi.course;
 
 import com.github.karixdev.polslcoursescheduleapi.course.exception.EmptyCourseCellListException;
+import com.github.karixdev.polslcoursescheduleapi.discord.DiscordApiService;
 import com.github.karixdev.polslcoursescheduleapi.planpolsl.payload.CourseCell;
 import com.github.karixdev.polslcoursescheduleapi.planpolsl.payload.PlanPolslResponse;
 import com.github.karixdev.polslcoursescheduleapi.planpolsl.payload.TimeCell;
 import com.github.karixdev.polslcoursescheduleapi.schedule.Schedule;
-import com.github.karixdev.polslcoursescheduleapi.schedule.ScheduleService;
 import com.github.karixdev.polslcoursescheduleapi.user.User;
 import com.github.karixdev.polslcoursescheduleapi.user.UserRole;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,6 +35,9 @@ public class CourseServiceTest {
 
     @Mock
     CourseMapper mapper;
+
+    @Mock
+    DiscordApiService discordApiService;
 
     Schedule schedule;
 
@@ -75,7 +78,7 @@ public class CourseServiceTest {
     }
 
     @Test
-    void GivenPlanPolslResponseAndSchedule_WhenUpdateScheduleCourses_ThenSavesListWithCoursesAndDeletesOldCourses() {
+    void GivenPlanPolslResponseAndSchedule_WhenUpdateScheduleCourses_ThenSavesListWithCoursesAndDeletesOldCoursesAndSendsDiscordNotification() {
         // Given
         PlanPolslResponse response = new PlanPolslResponse(
                 List.of(new TimeCell("07:00-08:00")),
@@ -97,12 +100,13 @@ public class CourseServiceTest {
         underTest.updateScheduleCourses(response, schedule);
 
         // Then
+        verify(discordApiService).sendScheduleCoursesUpdateMessage(eq(schedule));
         verify(repository).deleteAll(any());
         verify(repository).saveAll(eq(Set.of(course)));
     }
 
     @Test
-    void GivenPlanPolslResponseAndSchedule_WhenUpdateScheduleCourses_ThenSavesAndDeletesCorrectSets() {
+    void GivenPlanPolslResponseAndSchedule_WhenUpdateScheduleCourses_ThenSavesAndDeletesCorrectSetsAndSendDiscordNotification() {
         // Given
         CourseCell courseCell = new CourseCell(
                 304, 420, 56, 154, "course"
@@ -174,6 +178,7 @@ public class CourseServiceTest {
         underTest.updateScheduleCourses(response, schedule);
 
         // Then
+        verify(discordApiService).sendScheduleCoursesUpdateMessage(schedule);
         verify(repository).deleteAll(eq(Set.of(courseThatShouldBeDeleted1, courseThatShouldBeDeleted2)));
         verify(repository).saveAll(eq(Set.of(course)));
     }

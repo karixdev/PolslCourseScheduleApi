@@ -1,6 +1,7 @@
 package com.github.karixdev.polslcoursescheduleapi.schedule;
 
 import com.github.karixdev.polslcoursescheduleapi.course.Course;
+import com.github.karixdev.polslcoursescheduleapi.discord.DiscordWebhook;
 import com.github.karixdev.polslcoursescheduleapi.user.User;
 import lombok.*;
 
@@ -93,6 +94,14 @@ public class Schedule {
     @Builder.Default
     private Set<Course> courses = new LinkedHashSet<>();
 
+    @ToString.Exclude
+    @ManyToMany(
+            mappedBy = "schedules",
+            fetch = FetchType.EAGER
+    )
+    @Builder.Default
+    private Set<DiscordWebhook> discordWebhooks = new LinkedHashSet<>();
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -105,11 +114,12 @@ public class Schedule {
                 Objects.equals(name, schedule.name) &&
                 Objects.equals(groupNumber, schedule.groupNumber) &&
                 Objects.equals(addedBy.getId(), schedule.addedBy.getId()) &&
-                Objects.equals(courses, schedule.courses);
+                Objects.equals(courses, schedule.courses) &&
+                Objects.equals(discordWebhooks, schedule.discordWebhooks);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, type, planPolslId, semester, name, groupNumber, addedBy.getId(), courses);
+        return Objects.hash(id, type, planPolslId, semester, name, groupNumber, addedBy.getId(), courses, discordWebhooks);
     }
 }

@@ -1,24 +1,28 @@
 package com.github.karixdev.polslcoursescheduleapi.course;
 
 import com.github.karixdev.polslcoursescheduleapi.course.exception.EmptyCourseCellListException;
+import com.github.karixdev.polslcoursescheduleapi.discord.DiscordApiService;
 import com.github.karixdev.polslcoursescheduleapi.planpolsl.payload.PlanPolslResponse;
 import com.github.karixdev.polslcoursescheduleapi.schedule.Schedule;
 import com.github.karixdev.polslcoursescheduleapi.schedule.exception.ScheduleNoStartTimeException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.LocalTime;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CourseService {
     private final CourseRepository repository;
     private final CourseMapper mapper;
+
+    private final DiscordApiService discordApiService;
 
     @Transactional
     public void updateScheduleCourses(PlanPolslResponse response, Schedule schedule) {
@@ -55,9 +59,12 @@ public class CourseService {
 
             for (Course currentCourse : currentCourses) {
                 if (course.getDescription().equals(currentCourse.getDescription()) &&
-                        !doCoursesHaveSameParameters(course, currentCourse)) {
-                        coursesToDelete.add(currentCourse);
-                        break;
+                        !doCoursesHaveSameParameters(course, currentCourse) &&
+                        courses.stream().noneMatch(aCourse ->
+                                doCoursesHaveSameParameters(aCourse, currentCourse))
+                ) {
+                    coursesToDelete.add(currentCourse);
+                    break;
                 }
 
                 if (doCoursesHaveSameParameters(course, currentCourse)) {
@@ -87,6 +94,15 @@ public class CourseService {
 
         repository.deleteAll(coursesToDelete);
         repository.saveAll(coursesToSave);
+
+        try {
+            if (!coursesToSave.isEmpty() ||
+                !coursesToDelete.isEmpty()) {
+                sendNotification(schedule);
+            }
+        } catch (RuntimeException e) {
+            log.error("error while sending discord notification", e);
+        }
     }
 
     private boolean doCoursesHaveSameParameters(Course course1, Course course2) {
@@ -95,5 +111,9 @@ public class CourseService {
                 course1.getDayOfWeek().equals(course2.getDayOfWeek()) &&
                 course1.getEndsAt().equals(course2.getEndsAt()) &&
                 course1.getStartsAt().equals(course2.getStartsAt());
+    }
+
+    private void sendNotification(Schedule schedule) {
+        discordApiService.sendScheduleCoursesUpdateMessage(schedule);
     }
 }

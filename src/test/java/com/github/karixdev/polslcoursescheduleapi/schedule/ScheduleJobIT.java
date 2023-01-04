@@ -2,21 +2,19 @@ package com.github.karixdev.polslcoursescheduleapi.schedule;
 
 import com.github.karixdev.polslcoursescheduleapi.ContainersEnvironment;
 import com.github.karixdev.polslcoursescheduleapi.course.CourseRepository;
-import com.github.karixdev.polslcoursescheduleapi.schedule.payload.request.ScheduleRequest;
-import com.github.karixdev.polslcoursescheduleapi.security.UserPrincipal;
+import com.github.karixdev.polslcoursescheduleapi.discord.DiscordWebhook;
+import com.github.karixdev.polslcoursescheduleapi.discord.DiscordWebhookRepository;
 import com.github.karixdev.polslcoursescheduleapi.user.User;
 import com.github.karixdev.polslcoursescheduleapi.user.UserRole;
 import com.github.karixdev.polslcoursescheduleapi.user.UserService;
-import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
-import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
@@ -28,13 +26,16 @@ import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 @WireMockTest(httpPort = 8888)
 public class ScheduleJobIT extends ContainersEnvironment {
     @Autowired
-    ScheduleService scheduleService;
-
-    @Autowired
     UserService userService;
 
     @Autowired
     CourseRepository courseRepository;
+
+    @Autowired
+    ScheduleRepository scheduleRepository;
+
+    @Autowired
+    DiscordWebhookRepository discordWebhookRepository;
 
     @DynamicPropertySource
     static void overrideScheduleJobCron(DynamicPropertyRegistry dynamicPropertyRegistry) {
@@ -47,7 +48,7 @@ public class ScheduleJobIT extends ContainersEnvironment {
     }
 
     @Test
-    void shouldUpdateSchedulesCourses() {
+    void shouldUpdateSchedulesCoursesAndSendDiscordNotification() {
         User user = userService.createUser(
                 "email@email.com",
                 "password",
@@ -55,10 +56,20 @@ public class ScheduleJobIT extends ContainersEnvironment {
                 true
         );
 
-        scheduleService.add(
-                new ScheduleRequest(0, 101, 1, "schedule", 1),
-                new UserPrincipal(user)
-        );
+        Schedule schedule = scheduleRepository.save(Schedule.builder()
+                .name("schedule")
+                .addedBy(user)
+                .planPolslId(101)
+                .type(0)
+                .groupNumber(4)
+                .semester(1)
+                .build());
+
+        discordWebhookRepository.save(DiscordWebhook.builder()
+                .addedBy(user)
+                .url("http://localhost:8888/discord-api/123")
+                .schedules(Set.of(schedule))
+                .build());
 
         stubFor(get(urlPathEqualTo("/plan"))
                 .withQueryParam("id", equalTo("101"))
@@ -73,8 +84,12 @@ public class ScheduleJobIT extends ContainersEnvironment {
                         <div id="course_4" class="coursediv" mtp="1" resizable="0" zold="5" cwb="154" chb="56" cw="154" ch="56" style="width: 154px; height: 56px; top: 473px; left: 420px; border: 1px solid rgb(102, 102, 102); background-color: rgb(123, 247, 141); display: block; z-index: 5;">course_4</div>
                         """)));
 
-        await().atMost(5, TimeUnit.SECONDS).untilAsserted(() -> {
-            assertThat(courseRepository.findAll()).hasSize(4);
-        });
+        stubFor(get(urlPathEqualTo("/discord-api/123"))
+                .willReturn(noContent()));
+
+        await().atMost(5, TimeUnit.SECONDS)
+                .untilAsserted(() ->
+                        assertThat(courseRepository.findAll())
+                                .hasSize(4));
     }
 }
