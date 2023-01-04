@@ -62,6 +62,7 @@ public class DiscordWebhookService {
         return new DiscordWebhookResponse(discordWebhook);
     }
 
+    @Transactional
     public SuccessResponse delete(Long id, UserPrincipal userPrincipal) {
         DiscordWebhook discordWebhook = repository.findById(id)
                 .orElseThrow(() -> {
