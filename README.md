@@ -204,3 +204,36 @@ If provided `name` is unavailable:
 Code: `409`
 
 ---
+
+### DELETE /api/v1/schedule/{id}
+
+Deletes schedule with provided `id`.
+
+**Auth required**: YES
+
+**Permissions required**: ROLE_ADMIN
+
+**Path variables**:
+
+| Name | Type | Required |
+|------|------|----------|
+| `id` | Long | True     |
+
+**Success response**:
+
+Code: `201`
+
+```json
+{
+  "message": "success"
+}
+```
+
+**Error response**:
+
+(1)
+If schedule with provided `id` was not found:
+
+Code: `404`
+
+---
