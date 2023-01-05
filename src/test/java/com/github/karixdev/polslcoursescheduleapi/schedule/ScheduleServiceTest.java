@@ -171,7 +171,7 @@ public class ScheduleServiceTest {
                 .addedBy(user)
                 .build();
 
-        when(repository.findAll())
+        when(repository.findAllSchedules())
                 .thenReturn(List.of(schedule, otherSchedule));
 
         // When

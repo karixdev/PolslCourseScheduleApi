@@ -31,4 +31,12 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
             WHERE schedule.id = :id
             """)
     Optional<Schedule> findScheduleById(@Param("id") Long id);
+
+    @Query("""
+            SELECT schedule
+            FROM Schedule schedule
+            LEFT JOIN FETCH schedule.courses
+            LEFT JOIN FETCH schedule.discordWebhooks
+            """)
+    List<Schedule> findAllSchedules();
 }
