@@ -277,3 +277,73 @@ Code: `200`
 ```
 
 ---
+
+### GET /api/v1/schedule/{1}
+
+Gets schedule with provided `id` and all courses related to it. Courses are sorted according to the following rule: `day_of_week` ASC, then `starts_at` ASC
+
+**Auth required**: NO
+
+**Permissions required**: NONE
+
+**Path variables**:
+
+| Name | Type | Required |
+|------|------|----------|
+| `id` | Long | True     |
+
+**Success response**:
+
+Code: `200`
+
+```json
+{
+  "id": 1,
+  "semester": 1,
+  "name": "schedule-name",
+  "group_number": 1,
+  "courses": {
+    "MONDAY": [
+      {
+        "description": "Course 1",
+        "starts_at": "08:30:00",
+        "ends_at": "10:00:00",
+        "weeks": "EVERY"
+      },
+      {
+        "description": "Course 2",
+        "starts_at": "10:15:00",
+        "ends_at": "11:45:00",
+        "weeks": "EVERY"
+      }
+    ],
+    "TUESDAY": [
+      {
+        "description": "Course 3",
+        "starts_at": "08:30:00",
+        "ends_at": "10:00:00",
+        "weeks": "EVEN"
+      }
+    ],
+    "FRIDAY": [
+      {
+        "description": "Course 4",
+        "starts_at": "15:30:00",
+        "ends_at": "17:00:00",
+        "weeks": "EVERY"
+      }
+    ]
+  }
+}
+```
+
+**Error response**:
+
+(1)
+If schedule with provided `id` was not found:
+
+Code: `404`
+
+---
+
+---
