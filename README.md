@@ -221,7 +221,7 @@ Deletes schedule with provided `id`.
 
 **Success response**:
 
-Code: `201`
+Code: `200`
 
 ```json
 {
