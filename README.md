@@ -2,13 +2,23 @@
 
 ## 1. Project description
 
-The aim of the project was to build a publicly accessible course schedule REST API for Silesian University of Technology's full-time majors. This is a private project, not supported by the university. The motivation was precisely the lack of a publicly available REST API of the university's course schedule. The second factor was that the official schedule page works quite slowly - every time we request for another timetable half of the page is re-rendered and all front-end processing (assigning classes to HTML elements, etc.) is done on the server side, not on the client side.
+The aim of the project was to build a publicly accessible course schedule REST API for Silesian University of Technology's full-time majors. This is a private project, not supported by the university. The motivation was precisely the lack of a publicly available REST API of the university's course schedule. The second factor was that the official schedule page works quite slowly - every time we request for another schedule half of the page is re-rendered and all front-end processing (assigning classes to HTML elements, etc.) is done on the server side, not on the client side.
 
 The course schedule is cyclically updated, the default is every hour, this value can be changed in `application.yaml` under the `schedule-job.cron`.
 
 Since a large number of students create Discord servers related to their year of study, the project allows them to send messages about schedule updates via webhooks.
 
-## 2. Available endpoints
+## 2. Note
+
+To obtain schedule `plan_polsl_id` and `type` you need to go to plan.polsl.pl, find the schedule you are interested in right click on it and select "Inspect element". In the developer tools window you will see a link to this schedule, it should look similar to this example:  `"plan.polsl.pl/plan.php?type=0&id=39884"`, the parameters in this link correspond to the following:
+- `id` - `plan_polsl_id`
+- `type` - `type`
+
+For example: 
+- Inf 1/1's schedule has `id` equal to `39884`, and `type` equal to `0`
+- Inf 4/7's schedule has `id` equal to `343126158`, and `type` equal to `0`
+
+## 3. Available endpoints
 
 ### POST /api/v1/auth/register
 
