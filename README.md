@@ -346,4 +346,59 @@ Code: `404`
 
 ---
 
+### POST /api/v1/discord-webhook
+
+Creates discord webhook with provided data. After creating discord webhook then welcome is send via created webhook.
+
+**Auth required**: NO
+
+**Permissions required**: NONE
+
+**Request body**:
+
+| Name            | Type         | Constraints                                 |
+|-----------------|--------------|---------------------------------------------|
+| `url`           | String       | Must follow the discord webhook url format. |
+| `schedules_ids` | Set of longs | Must not be empty                           |
+
+**Success response**:
+
+Code: `201`
+
+```json
+{
+  "id": 1,
+  "url": "url",
+  "schedules": [
+    {
+      "id": 1,
+      "semester": 1,
+      "name": "schedule-1",
+      "group_number": 1
+    },
+    {
+      "id": 2,
+      "semester": 1,
+      "name": "schedule-2",
+      "group_number": 2
+    }
+  ],
+  "added_by": {
+    "email": "email@email.pl"
+  }
+}
+```
+
+**Error response**:
+
+(1)
+If provided data is not valid
+
+Code: `400`
+
+(2)
+If `url` is unavailable
+
+Code: `409`
+
 ---
