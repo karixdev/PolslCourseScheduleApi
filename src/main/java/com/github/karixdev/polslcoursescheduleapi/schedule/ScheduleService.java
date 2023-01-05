@@ -1,10 +1,14 @@
 package com.github.karixdev.polslcoursescheduleapi.schedule;
 
 import com.github.karixdev.polslcoursescheduleapi.course.CourseService;
+import com.github.karixdev.polslcoursescheduleapi.course.exception.EmptyCourseCellListException;
 import com.github.karixdev.polslcoursescheduleapi.course.payload.response.CourseResponse;
 import com.github.karixdev.polslcoursescheduleapi.planpolsl.PlanPolslService;
+import com.github.karixdev.polslcoursescheduleapi.planpolsl.exception.PlanPolslEmptyResponseException;
+import com.github.karixdev.polslcoursescheduleapi.planpolsl.exception.PlanPolslWebClientException;
 import com.github.karixdev.polslcoursescheduleapi.planpolsl.payload.PlanPolslResponse;
 import com.github.karixdev.polslcoursescheduleapi.schedule.exception.ScheduleNameNotAvailableException;
+import com.github.karixdev.polslcoursescheduleapi.schedule.exception.ScheduleNoStartTimeException;
 import com.github.karixdev.polslcoursescheduleapi.schedule.payload.request.ScheduleRequest;
 import com.github.karixdev.polslcoursescheduleapi.schedule.payload.response.ScheduleCollectionResponse;
 import com.github.karixdev.polslcoursescheduleapi.schedule.payload.response.ScheduleWithCoursesResponse;
@@ -14,6 +18,7 @@ import com.github.karixdev.polslcoursescheduleapi.shared.exception.ResourceNotFo
 import com.github.karixdev.polslcoursescheduleapi.shared.payload.response.SuccessResponse;
 import com.github.karixdev.polslcoursescheduleapi.user.User;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -22,6 +27,7 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ScheduleService {
     private final ScheduleRepository repository;
     private final PlanPolslService planPolslService;
@@ -63,14 +69,30 @@ public class ScheduleService {
         return new SuccessResponse();
     }
 
-    @Transactional
+
     public void updateSchedules() {
-        repository.findAll().forEach(schedule -> {
+        repository.findAllSchedules().forEach(this::updateSchedule);
+    }
+
+    @Transactional(dontRollbackOn = {
+            EmptyCourseCellListException.class,
+            PlanPolslWebClientException.class,
+            PlanPolslEmptyResponseException.class,
+            ScheduleNoStartTimeException.class
+    })
+    private void updateSchedule(Schedule schedule) {
+        try {
             PlanPolslResponse response =
                     planPolslService.getPlanPolslResponse(schedule);
 
             courseService.updateScheduleCourses(response, schedule);
-        });
+        } catch (EmptyCourseCellListException |
+                 PlanPolslWebClientException |
+                 PlanPolslEmptyResponseException |
+                 ScheduleNoStartTimeException e
+        ) {
+            log.error("error while updating schedule with id: %d".formatted(schedule.getId()), e);
+        }
     }
 
     public ScheduleCollectionResponse getAll() {

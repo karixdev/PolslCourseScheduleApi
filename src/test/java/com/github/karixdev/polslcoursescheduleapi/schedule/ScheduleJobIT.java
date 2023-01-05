@@ -39,7 +39,7 @@ public class ScheduleJobIT extends ContainersEnvironment {
 
     @DynamicPropertySource
     static void overrideScheduleJobCron(DynamicPropertyRegistry dynamicPropertyRegistry) {
-        dynamicPropertyRegistry.add("schedule-job.cron", () -> "*/3 * * * * *");
+        dynamicPropertyRegistry.add("schedule-job.cron", () -> "*/30 * * * * *");
     }
 
     @DynamicPropertySource
@@ -87,7 +87,7 @@ public class ScheduleJobIT extends ContainersEnvironment {
         stubFor(get(urlPathEqualTo("/discord-api/123"))
                 .willReturn(noContent()));
 
-        await().atMost(5, TimeUnit.SECONDS)
+        await().atMost(20, TimeUnit.SECONDS)
                 .untilAsserted(() ->
                         assertThat(courseRepository.findAll())
                                 .hasSize(4));

@@ -153,4 +153,33 @@ public class ScheduleRepositoryTest extends ContainersEnvironment {
         assertThat(result).isPresent();
         assertThat(result.get()).isEqualTo(schedule);
     }
+
+    @Test
+    void WhenFindAllSchedules_ThenReturnsCorrectList() {
+        em.persist(Schedule.builder()
+                .type(1)
+                .planPolslId(2)
+                .semester(1)
+                .name("schedule-1")
+                .groupNumber(2)
+                .addedBy(user)
+                .build());
+
+        em.persistAndFlush(Schedule.builder()
+                .type(1)
+                .planPolslId(2)
+                .semester(1)
+                .name("schedule-2")
+                .groupNumber(4)
+                .addedBy(user)
+                .build());
+
+        // When
+        List<Schedule> result = underTest.findAllSchedules();
+
+        // Then
+        assertThat(result).hasSize(2);
+
+        assertThat(result.get(0)).isNotEqualTo(result.get(1));
+    }
 }
