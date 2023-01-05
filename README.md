@@ -1,5 +1,26 @@
 # PolslCourseScheduleApi
 
+## Table of contents
+
+<!-- TOC -->
+* [PolslCourseScheduleApi](#polslcoursescheduleapi)
+  * [Table of contents](#table-of-contents)
+  * [1. Project description](#1-project-description)
+  * [2. Note](#2-note)
+  * [3. Available endpoints](#3-available-endpoints)
+    * [POST /api/v1/auth/register](#post-apiv1authregister)
+    * [POST /api/v1/auth/sign-in](#post-apiv1authsign-in)
+    * [POST /api/v1/email-verification/{token}](#post-apiv1email-verificationtoken)
+    * [POST /api/v1/email-verification/resend](#post-apiv1email-verificationresend)
+    * [POST /api/v1/schedule](#post-apiv1schedule)
+    * [DELETE /api/v1/schedule/{id}](#delete-apiv1scheduleid)
+    * [GET /api/v1/schedule](#get-apiv1schedule)
+    * [GET /api/v1/schedule/{1}](#get-apiv1schedule1)
+    * [POST /api/v1/discord-webhook](#post-apiv1discord-webhook)
+    * [DELETE /api/v1/discord-webhook/{id}](#delete-apiv1discord-webhookid)
+    * [PATCH /api/v1/discord-webhook/{1}](#patch-apiv1discord-webhook1)
+<!-- TOC -->
+
 ## 1. Project description
 
 The aim of the project was to build a publicly accessible course schedule REST API for Silesian University of Technology's full-time majors. This is a private project, not supported by the university. The motivation was precisely the lack of a publicly available REST API of the university's course schedule. The second factor was that the official schedule page works quite slowly - every time we request for another schedule half of the page is re-rendered and all front-end processing (assigning classes to HTML elements, etc.) is done on the server side, not on the client side.
