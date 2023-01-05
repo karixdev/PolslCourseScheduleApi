@@ -163,3 +163,44 @@ If user is already enabled or requested too many tokens in one hour:
 Code: `400`
 
 ---
+
+### POST /api/v1/schedule
+
+Creates schedule with provided data.
+
+**Auth required**: YES
+
+**Permissions required**: ROLE_ADMIN
+
+**Request body**:
+
+| Name            | Type    | Constraints                            |
+|-----------------|---------|----------------------------------------|
+| `type`          | Integer | Must follow the email format.          |
+| `plan_polsl_id` | Integer | Must be positive or zero and not null. |
+| `semester`      | Integer | Must be positive and not null.         |
+| `name`          | String  | Must not be blank.                     |
+| `group_number`  | Integer | Must be positive and not null.         |
+
+
+**Success response**:
+
+Code: `201`
+
+```json
+{
+  "id": 1,
+  "semester": 1,
+  "name": "schedule-name",
+  "group_number": 1
+}
+```
+
+**Error response**:
+
+(1)
+If provided `name` is unavailable:
+
+Code: `409`
+
+---
