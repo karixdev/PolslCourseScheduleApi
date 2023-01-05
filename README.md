@@ -350,7 +350,7 @@ Code: `404`
 
 Creates discord webhook with provided data. After creating discord webhook then welcome is send via created webhook.
 
-**Auth required**: NO
+**Auth required**: YES
 
 **Permissions required**: NONE
 
@@ -400,5 +400,38 @@ Code: `400`
 If `url` is unavailable
 
 Code: `409`
+
+---
+
+### DELETE /api/v1/discord-webhook/{id}
+
+Deletes webhook with provided `id`.
+
+**Auth required**: NO
+
+**Permissions required**: NONE
+
+**Path variables**:
+
+| Name | Type | Required |
+|------|------|----------|
+| `id` | Long | True     |
+
+**Success response**:
+
+Code: `200`
+
+```json
+{
+  "message": "success"
+}
+```
+
+**Error response**:
+
+(1)
+If webhook with provided `id` was not found
+
+Code: `404`
 
 ---
