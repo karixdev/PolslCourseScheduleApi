@@ -440,3 +440,69 @@ If webhook with provided `id` was not found
 Code: `404`
 
 ---
+
+### PATCH /api/v1/discord-webhook/{1}
+
+Updates discord webhook with provided `schedules_ids`. 
+
+**Auth required**: YES
+
+**Permissions required**: NONE
+
+**Request body**:
+
+| Name            | Type         | Constraints                                 |
+|-----------------|--------------|---------------------------------------------|
+| `schedules_ids` | Set of longs | Must not be empty                           |
+
+**Path variables**:
+
+| Name | Type | Required |
+|------|------|----------|
+| `id` | Long | True     |
+
+**Success response**:
+
+Code: `201`
+
+```json
+{
+  "id": 1,
+  "url": "url",
+  "schedules": [
+    {
+      "id": 1,
+      "semester": 1,
+      "name": "schedule-1",
+      "group_number": 1
+    }
+  ],
+  "added_by": {
+    "email": "email@email.pl"
+  }
+}
+```
+
+**Error response**:
+
+(1)
+If webhook with provided `id` was not found
+
+Code: `404`
+
+(2)
+If provided data is not valid
+
+Code: `400`
+
+(3)
+If `url` is unavailable
+
+Code: `409`
+
+(4)
+If could not find schedule with at least one provided schedule id
+
+Code: `404`
+
+---
