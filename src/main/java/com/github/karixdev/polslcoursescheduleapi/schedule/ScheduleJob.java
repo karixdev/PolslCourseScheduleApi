@@ -10,7 +10,6 @@ public class ScheduleJob {
     private final ScheduleService scheduleService;
 
     @Scheduled(cron = "${schedule-job.cron}")
-//    @Scheduled(fixedRate = 60000)
     private void scheduledUpdate() {
         scheduleService.updateSchedules();
     }
