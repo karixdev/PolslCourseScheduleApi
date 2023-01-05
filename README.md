@@ -237,3 +237,43 @@ If schedule with provided `id` was not found:
 Code: `404`
 
 ---
+
+### GET /api/v1/schedule
+
+Gets all courses and sorts them according to the following rule: `semesters` ASC, then `group_number` ASC
+
+**Auth required**: NO
+
+**Permissions required**: NONE
+
+**Success response**:
+
+Code: `200`
+
+```json
+{
+  "semesters": {
+    "1": [
+      {
+        "id": 1,
+        "name": "Inf 1/2",
+        "group_number": 1
+      },
+      {
+        "id": 2,
+        "name": "Inf 2/4",
+        "group_number": 2
+      }
+    ],
+    "3": [
+      {
+        "id": 3,
+        "name": "Inf 1/1",
+        "group_number": 1
+      }
+    ]
+  }
+}
+```
+
+---
