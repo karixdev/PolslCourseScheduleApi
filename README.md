@@ -401,6 +401,11 @@ If `url` is unavailable
 
 Code: `409`
 
+(3)
+If could not find schedule with at least one provided id
+
+Code: `404`
+
 ---
 
 ### DELETE /api/v1/discord-webhook/{id}
