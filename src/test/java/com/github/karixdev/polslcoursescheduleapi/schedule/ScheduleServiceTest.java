@@ -354,4 +354,46 @@ public class ScheduleServiceTest {
         // Then
         assertThat(result).isEqualTo(schedule);
     }
+
+    @Test
+    void GivenNotExistingScheduleId_WhenManualUpdate_ThenThrowsResourceNotFoundExceptionWithCorrectMessage() {
+        // Given
+        Long id = 1337L;
+
+        when(repository.findScheduleById(eq(id)))
+                .thenReturn(Optional.empty());
+
+        // When & Then
+        assertThatThrownBy(() -> underTest.manualUpdate(id))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("Schedule with provided id not found");
+    }
+
+    @Test
+    void GivenExistingSchedule_WhenManualUpdate_ThenThenCallsPlanPolslServiceAndCourseService() {
+        // Given
+        Long id = 2L;
+
+        Schedule otherSchedule = Schedule.builder()
+                .id(2L)
+                .type(0)
+                .planPolslId(11)
+                .semester(1)
+                .groupNumber(4)
+                .name("schedule-name")
+                .addedBy(user)
+                .build();
+
+        when(repository.findScheduleById(eq(id)))
+                .thenReturn(Optional.of(otherSchedule));
+
+        // When
+        underTest.manualUpdate(id);
+
+        // Then
+        verify(planPolslService).getPlanPolslResponse(eq(otherSchedule));
+        verify(planPolslService).getPlanPolslResponse(eq(otherSchedule));
+
+        verify(courseService).updateScheduleCourses(any(), eq(otherSchedule));
+    }
 }

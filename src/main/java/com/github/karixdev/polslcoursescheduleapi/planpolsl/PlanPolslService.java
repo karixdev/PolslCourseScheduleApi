@@ -7,11 +7,13 @@ import com.github.karixdev.polslcoursescheduleapi.schedule.Schedule;
 import lombok.RequiredArgsConstructor;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.nio.charset.Charset;
 import java.util.Optional;
 
 @Service
@@ -24,19 +26,19 @@ public class PlanPolslService {
     public PlanPolslResponse getPlanPolslResponse(Schedule schedule) {
         String uri = createUri(schedule);
 
-        Optional<String> resp = webClient.get().uri(uri)
+        Optional<ByteArrayResource> resp = webClient.get().uri(uri)
                 .retrieve()
-                .onStatus(HttpStatus::isError, clientResponse -> {
-                    throw new PlanPolslWebClientException();
-                })
-                .bodyToMono(String.class)
+                .bodyToMono(ByteArrayResource.class)
                 .blockOptional();
 
         if (resp.isEmpty()) {
             throw new PlanPolslEmptyResponseException();
         }
 
-        Document document = Jsoup.parse(resp.get());
+        String responseString =
+                new String(resp.get().getByteArray(), Charset.forName("ISO-8859-2"));
+
+        Document document = Jsoup.parse(responseString);
 
         return new PlanPolslResponse(
                 responseMapper.getTimeCells(document),

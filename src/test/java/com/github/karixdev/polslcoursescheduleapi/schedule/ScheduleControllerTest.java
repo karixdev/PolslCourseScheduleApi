@@ -31,8 +31,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -180,7 +179,7 @@ public class ScheduleControllerTest {
         doThrow(ResourceNotFoundException.class).when(service)
                 .getSchedulesWithCourses(eq(id));
 
-        mockMvc.perform(get("/api/v1/" + id)
+        mockMvc.perform(get("/api/v1/schedule/" + id)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
     }
@@ -257,5 +256,30 @@ public class ScheduleControllerTest {
                         jsonPath("$.courses.FRIDAY[0].weeks")
                                 .value("EVEN")
                 );
+    }
+
+    @Test
+    void GivenNotExistingScheduleId_WhenManualUpdate_ThenRespondsWithNotFoundStatus() throws Exception {
+        Long id = 1337L;
+
+        doThrow(ResourceNotFoundException.class).when(service)
+                .manualUpdate(eq(id));
+
+        mockMvc.perform(post("/api/v1/schedule/" + id)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void GivenExistingScheduleId_WhenManualUpdate_ThenRespondsNoContentStatus() throws Exception {
+        Long id = 1337L;
+
+        doNothing()
+                .when(service)
+                .manualUpdate(eq(id));
+
+        mockMvc.perform(post("/api/v1/schedule/" + id)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
     }
 }

@@ -19,6 +19,7 @@ import com.github.karixdev.polslcoursescheduleapi.shared.payload.response.Succes
 import com.github.karixdev.polslcoursescheduleapi.user.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -145,5 +146,20 @@ public class ScheduleService {
                 .orElseThrow(() -> {
                     throw new ResourceNotFoundException("Schedule with provided id not found");
                 });
+    }
+
+    public void manualUpdate(Long id) {
+        Schedule schedule = repository.findScheduleById(id)
+                .orElseThrow(() -> {
+                    throw new ResourceNotFoundException(
+                            "Schedule with provided id not found");
+                });
+
+        asyncManualUpdate(schedule);
+    }
+
+    @Async
+    private void asyncManualUpdate(Schedule schedule) {
+        updateSchedule(schedule);
     }
 }

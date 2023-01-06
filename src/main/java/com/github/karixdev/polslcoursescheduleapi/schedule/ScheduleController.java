@@ -61,4 +61,14 @@ public class ScheduleController {
                 HttpStatus.OK
         );
     }
+
+    @PostMapping("/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<Void> manualUpdate(
+            @PathVariable Long id
+    ) {
+        service.manualUpdate(id);
+
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -4,17 +4,20 @@ import com.github.karixdev.polslcoursescheduleapi.ContainersEnvironment;
 import com.github.karixdev.polslcoursescheduleapi.course.CourseRepository;
 import com.github.karixdev.polslcoursescheduleapi.discord.DiscordWebhook;
 import com.github.karixdev.polslcoursescheduleapi.discord.DiscordWebhookRepository;
-import com.github.karixdev.polslcoursescheduleapi.user.User;
+import com.github.karixdev.polslcoursescheduleapi.jwt.JwtService;
+import com.github.karixdev.polslcoursescheduleapi.security.UserPrincipal;
 import com.github.karixdev.polslcoursescheduleapi.user.UserRepository;
 import com.github.karixdev.polslcoursescheduleapi.user.UserRole;
 import com.github.karixdev.polslcoursescheduleapi.user.UserService;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
+import org.checkerframework.checker.units.qual.A;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -24,9 +27,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.testcontainers.shaded.org.awaitility.Awaitility.await;
 
+/*
+This class is only responsible for testing POST /api/v1/schedule/{id}
+ */
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @WireMockTest(httpPort = 8888)
-public class ScheduleJobIT extends ContainersEnvironment {
+public class ScheduleManualUpdateIT extends ContainersEnvironment {
+    @Autowired
+    WebTestClient webClient;
+
     @Autowired
     UserService userService;
 
@@ -37,15 +46,13 @@ public class ScheduleJobIT extends ContainersEnvironment {
     ScheduleRepository scheduleRepository;
 
     @Autowired
-    DiscordWebhookRepository discordWebhookRepository;
+    JwtService jwtService;
 
     @Autowired
     UserRepository userRepository;
 
-    @DynamicPropertySource
-    static void overrideScheduleJobCron(DynamicPropertyRegistry dynamicPropertyRegistry) {
-        dynamicPropertyRegistry.add("schedule-job.cron", () -> "*/50 * * * * *");
-    }
+    @Autowired
+    DiscordWebhookRepository discordWebhookRepository;
 
     @DynamicPropertySource
     static void overridePlanPolslBaseUrl(DynamicPropertyRegistry dynamicPropertyRegistry) {
@@ -61,17 +68,63 @@ public class ScheduleJobIT extends ContainersEnvironment {
     }
 
     @Test
-    void shouldUpdateSchedulesCoursesAndSendDiscordNotification() {
-        User user = userService.createUser(
-                "email@email.com",
-                "password",
-                UserRole.ROLE_ADMIN,
-                true
-        );
+    void shouldNotManuallyUpdateScheduleForUnauthorizedUser() {
+        UserPrincipal userPrincipal = new UserPrincipal(
+                userService.createUser(
+                        "email@email.com",
+                        "password",
+                        UserRole.ROLE_USER,
+                        true
+                ));
 
         Schedule schedule = scheduleRepository.save(Schedule.builder()
                 .name("schedule")
-                .addedBy(user)
+                .addedBy(userPrincipal.getUser())
+                .planPolslId(101)
+                .type(0)
+                .groupNumber(4)
+                .semester(1)
+                .build());
+
+        String token = jwtService.createToken(userPrincipal);
+
+        webClient.post().uri("/api/v1/schedule/" + schedule.getId())
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus().isForbidden();
+    }
+
+    @Test
+    void shouldManuallyUpdateNotExistingSchedule() {
+        UserPrincipal userPrincipal = new UserPrincipal(
+                userService.createUser(
+                        "email@email.com",
+                        "password",
+                        UserRole.ROLE_ADMIN,
+                        true
+                ));
+
+        String token = jwtService.createToken(userPrincipal);
+
+        webClient.post().uri("/api/v1/schedule/1337")
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void shouldManuallyUpdateSchedule() {
+        UserPrincipal userPrincipal = new UserPrincipal(
+                userService.createUser(
+                        "email@email.com",
+                        "password",
+                        UserRole.ROLE_ADMIN,
+                        true
+                ));
+
+        Schedule schedule = scheduleRepository.save(Schedule.builder()
+                .name("schedule")
+                .addedBy(userPrincipal.getUser())
                 .planPolslId(101)
                 .type(0)
                 .groupNumber(4)
@@ -79,7 +132,7 @@ public class ScheduleJobIT extends ContainersEnvironment {
                 .build());
 
         discordWebhookRepository.save(DiscordWebhook.builder()
-                .addedBy(user)
+                .addedBy(userPrincipal.getUser())
                 .url("http://localhost:8888/discord-api/123")
                 .schedules(Set.of(schedule))
                 .build());
@@ -100,7 +153,14 @@ public class ScheduleJobIT extends ContainersEnvironment {
         stubFor(get(urlPathEqualTo("/discord-api/123"))
                 .willReturn(noContent()));
 
-        await().atMost(40, TimeUnit.SECONDS)
+        String token = jwtService.createToken(userPrincipal);
+
+        webClient.post().uri("/api/v1/schedule/" + schedule.getId())
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus().isNoContent();
+
+        await().atMost(30, TimeUnit.SECONDS)
                 .untilAsserted(() ->
                         assertThat(courseRepository.findAll())
                                 .hasSize(4));
