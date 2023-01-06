@@ -416,7 +416,7 @@ Code: `404`
 
 ### POST /api/v1/discord-webhook
 
-Creates discord webhook with provided data. After creating discord webhook then welcome is send via created webhook.
+Creates discord webhook with provided data. After creating discord webhook then welcome is send via created webhook. `schedules_ids` is a set of schedules' ids, which if updated then the user will get a notification via Discord Webhook with the provided `url.`
 
 **Auth required**: YES
 
