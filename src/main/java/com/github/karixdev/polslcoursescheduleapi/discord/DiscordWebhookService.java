@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -126,5 +127,14 @@ public class DiscordWebhookService {
         return schedulesIds.stream()
                 .map(scheduleService::getById)
                 .collect(Collectors.toSet());
+    }
+
+    public List<DiscordWebhookResponse> getUserDiscordWebhooks(UserPrincipal userPrincipal) {
+        List<DiscordWebhook> userDiscordWebhooks =
+                repository.findByAddedBy(userPrincipal.getUser());
+
+        return userDiscordWebhooks.stream()
+                .map(DiscordWebhookResponse::new)
+                .toList();
     }
 }

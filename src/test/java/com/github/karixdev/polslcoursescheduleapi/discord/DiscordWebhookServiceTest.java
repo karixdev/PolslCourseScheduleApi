@@ -22,6 +22,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -447,5 +448,28 @@ public class DiscordWebhookServiceTest {
         assertThat(result.getSchedules()).isEqualTo(Set.of(
                 new ScheduleResponse(otherSchedule)
         ));
+    }
+
+    @Test
+    void GivenUserPrincipal_WhenGetUserDiscordWebhooks_ThenReturnsCorrectListOfDiscordWebhookResponse() {
+        // Given
+        UserPrincipal userPrincipal = new UserPrincipal(user);
+
+        when(repository.findByAddedBy(eq(userPrincipal.getUser())))
+                .thenReturn(List.of(
+                        DiscordWebhook.builder()
+                                .id(1L)
+                                .url("http://discord.com/api")
+                                .schedules(Set.of(schedule))
+                                .addedBy(user)
+                                .build()
+                ));
+
+        // When
+        List<DiscordWebhookResponse> result =
+                underTest.getUserDiscordWebhooks(userPrincipal);
+
+        // Then
+        assertThat(result).hasSize(1);
     }
 }

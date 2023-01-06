@@ -19,6 +19,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.util.List;
 import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -301,6 +302,56 @@ public class DiscordWebhookControllerTest {
                         jsonPath("$.schedules[0].semester").isNotEmpty(),
                         jsonPath("$.schedules[0].name").isNotEmpty(),
                         jsonPath("$.schedules[0].group_number").isNotEmpty()
+                );
+    }
+
+    @Test
+    void WhenGetUserDiscordWebHooks_ThenReturnsOkStatusAndCorrectBody() throws Exception {
+        User user = User.builder()
+                .id(1L)
+                .email("email@email.com")
+                .password("password")
+                .isEnabled(true)
+                .userRole(UserRole.ROLE_ADMIN)
+                .build();
+
+        DiscordWebhook discordWebhook = DiscordWebhook.builder()
+                .id(1L)
+                .url("url")
+                .schedules(Set.of(
+                        Schedule.builder()
+                                .id(1L)
+                                .type(0)
+                                .planPolslId(1)
+                                .semester(2)
+                                .groupNumber(3)
+                                .name("schedule-name-1")
+                                .addedBy(user)
+                                .build()
+                ))
+                .addedBy(user)
+                .build();
+
+        when(service.getUserDiscordWebhooks(any()))
+                .thenReturn(List.of(
+                        new DiscordWebhookResponse(discordWebhook)
+                ));
+
+        mockMvc.perform(get("/api/v1/discord-webhook"))
+                .andExpect(status().isOk())
+                .andExpectAll(
+                        jsonPath("$[0].id").value(1),
+
+                        jsonPath("$[0].url").value("url"),
+
+                        jsonPath("$[0].added_by").isNotEmpty(),
+                        jsonPath("$[0].added_by.email").value("email@email.com"),
+                        jsonPath("$[0].schedules").isNotEmpty(),
+
+                        jsonPath("$[0].schedules[0].id").isNotEmpty(),
+                        jsonPath("$[0].schedules[0].semester").isNotEmpty(),
+                        jsonPath("$[0].schedules[0].name").isNotEmpty(),
+                        jsonPath("$[0].schedules[0].group_number").isNotEmpty()
                 );
     }
 }

@@ -10,6 +10,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -69,5 +70,51 @@ public class DiscordWebhookRepositoryTest extends ContainersEnvironment {
         // Then
         assertThat(result).isPresent();
         assertThat(result.get()).isEqualTo(webhook);
+    }
+
+    @Test
+    void GivenUser_WhenFindByAddedBy_ThenReturnsCorrectList() {
+        // Given
+        User user = em.persist(User.builder()
+                .email("email@email.com")
+                .password("password")
+                .isEnabled(true)
+                .userRole(UserRole.ROLE_USER)
+                .build());
+
+        User otherUser = em.persist(User.builder()
+                .email("email-2@email.com")
+                .password("password")
+                .isEnabled(true)
+                .userRole(UserRole.ROLE_USER)
+                .build());
+
+        Schedule schedule = em.persist(Schedule.builder()
+                .type(1)
+                .planPolslId(2)
+                .semester(1)
+                .name("schedule-1")
+                .groupNumber(2)
+                .addedBy(user)
+                .build());
+
+        DiscordWebhook webhook = em.persist(DiscordWebhook.builder()
+                .url("http://url-1.com")
+                .schedules(Set.of(schedule))
+                .addedBy(user)
+                .build());
+
+        DiscordWebhook otherWebhook = em.persistAndFlush(DiscordWebhook.builder()
+                .url("http://url-2.com")
+                .schedules(Set.of(schedule))
+                .addedBy(otherUser)
+                .build());
+
+        // When
+        List<DiscordWebhook> result = underTest.findByAddedBy(user);
+
+        // Then
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getId()).isEqualTo(webhook.getId());
     }
 }

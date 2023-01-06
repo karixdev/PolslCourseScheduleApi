@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/discord-webhook")
@@ -50,6 +51,16 @@ public class DiscordWebhookController {
         return new ResponseEntity<>(
                 service.updateDiscordWebhookSchedules(
                         payload, id, userPrincipal),
+                HttpStatus.OK
+        );
+    }
+
+    @GetMapping
+    public ResponseEntity<List<DiscordWebhookResponse>> getUserDiscordWebHooks(
+            @CurrentUser UserPrincipal userPrincipal
+    ) {
+        return new ResponseEntity<>(
+                service.getUserDiscordWebhooks(userPrincipal),
                 HttpStatus.OK
         );
     }

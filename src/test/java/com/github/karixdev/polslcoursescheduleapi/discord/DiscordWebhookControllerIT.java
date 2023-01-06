@@ -23,10 +23,12 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @WireMockTest(httpPort = 8888)
@@ -528,5 +530,54 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
         assertThat(discordWebhookOptional).isPresent();
 
         assertThat(discordWebhookOptional.get().getSchedules()).hasSize(1);
+    }
+
+    @Test
+    void shouldRetrieveAllUserDiscordWebhooks() {
+        UserPrincipal userPrincipal = new UserPrincipal(
+                userService.createUser(
+                        "email@email.com",
+                        "password",
+                        UserRole.ROLE_USER,
+                        true
+                ));
+
+        Schedule schedule = scheduleRepository.save(Schedule.builder()
+                .type(0)
+                .planPolslId(1)
+                .semester(2)
+                .groupNumber(3)
+                .name("schedule-name")
+                .addedBy(userPrincipal.getUser())
+                .build());
+
+        DiscordWebhook discordWebhook = DiscordWebhook.builder()
+                        .url("http://discord.com/api")
+                        .addedBy(userPrincipal.getUser())
+                        .build();
+
+        discordWebhook.setSchedules(Set.of(schedule));
+
+        discordWebhook = discordWebhookRepository.save(discordWebhook);
+
+        String token = jwtService.createToken(userPrincipal);
+
+        webClient.get().uri("/api/v1/discord-webhook")
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$[0].id").isEqualTo(discordWebhook.getId())
+
+                .jsonPath("$[0].url").isEqualTo(discordWebhook.getUrl())
+
+                .jsonPath("$[0].added_by.email").isEqualTo(userPrincipal.getUser().getEmail())
+                .jsonPath("$[0].schedules").isNotEmpty()
+
+                .jsonPath("$[0].schedules[0].id").isEqualTo(schedule.getId())
+                .jsonPath("$[0].schedules[0].semester").isEqualTo(schedule.getSemester())
+                .jsonPath("$[0].schedules[0].name").isEqualTo(schedule.getName())
+                .jsonPath("$[0].schedules[0].group_number").isEqualTo(schedule.getGroupNumber());
     }
 }
