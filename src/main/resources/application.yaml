@@ -48,3 +48,6 @@ schedule-job:
 
 discord:
   webhook-base-url: https://discord.com/api/webhooks/
+
+fixtures:
+  load: true
