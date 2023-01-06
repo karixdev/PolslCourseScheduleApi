@@ -7,7 +7,8 @@
   * [1. Project description](#1-project-description)
   * [2. Note](#2-note)
   * [3. How to run it](#3-how-to-run-it)
-  * [4. Available endpoints](#4-available-endpoints)
+  * [4. Users and auth](#4-users-and-auth)
+  * [5. Available endpoints](#5-available-endpoints)
     * [POST /api/v1/auth/register](#post-apiv1authregister)
     * [POST /api/v1/auth/sign-in](#post-apiv1authsign-in)
     * [POST /api/v1/email-verification/{token}](#post-apiv1email-verificationtoken)
@@ -69,7 +70,15 @@ In this case you need run SpringBoot app manually from:
 
 Also in this case you can run tests, which are located in: `src/test/java`
 
-## 4. Available endpoints
+## 4. Users and auth
+
+At the start, there is an available user with the `ROLE_ADMIN`, and with the following credentials:
+- email: `admin@admin.com`
+- password: `admin123`
+
+To access secured routes you need to get your `JWT`. To do so after [signing in](#post-apiv1authsign-in) you'll receive `access_token`. And while trying to access secured add header `Authorization` with value `Beater JWT` (replace `JWT` with your `access_token`).
+
+## 5. Available endpoints
 
 ### POST /api/v1/auth/register
 
