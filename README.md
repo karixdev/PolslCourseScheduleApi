@@ -545,3 +545,43 @@ If could not find schedule with at least one provided schedule id
 Code: `404`
 
 ---
+
+### GET /api/v1/discord-webhook
+
+Retrieves user's Discord webhook.
+
+**Auth required**: YES
+
+**Permissions required**: NONE
+
+**Success response**:
+
+Code: `200`
+
+```json
+[
+  {
+    "id": 1,
+    "url": "url",
+    "schedules": [
+      {
+        "id": 1,
+        "semester": 1,
+        "name": "schedule-1",
+        "group_number": 1
+      },
+      {
+        "id": 2,
+        "semester": 1,
+        "name": "schedule-1",
+        "group_number": 2
+      }
+    ],
+    "added_by": {
+      "email": "email@email.pl"
+    }
+  }
+]
+```
+
+---
