@@ -4,10 +4,10 @@
 
 <!-- TOC -->
 * [PolslCourseScheduleApi](#polslcoursescheduleapi)
-  * [Table of contents](#table-of-contents)
   * [1. Project description](#1-project-description)
   * [2. Note](#2-note)
-  * [3. Available endpoints](#3-available-endpoints)
+  * [3. How to run it](#3-how-to-run-it)
+  * [4. Available endpoints](#4-available-endpoints)
     * [POST /api/v1/auth/register](#post-apiv1authregister)
     * [POST /api/v1/auth/sign-in](#post-apiv1authsign-in)
     * [POST /api/v1/email-verification/{token}](#post-apiv1email-verificationtoken)
@@ -19,6 +19,7 @@
     * [POST /api/v1/discord-webhook](#post-apiv1discord-webhook)
     * [DELETE /api/v1/discord-webhook/{id}](#delete-apiv1discord-webhookid)
     * [PATCH /api/v1/discord-webhook/{1}](#patch-apiv1discord-webhook1)
+    * [GET /api/v1/discord-webhook](#get-apiv1discord-webhook)
 <!-- TOC -->
 
 ## 1. Project description
@@ -39,7 +40,35 @@ For example:
 - Inf 1/1's schedule has `id` equal to `39884`, and `type` equal to `0`
 - Inf 4/7's schedule has `id` equal to `343126158`, and `type` equal to `0`
 
-## 3. Available endpoints
+## 3. How to run it
+
+(1) If you want to run all available containers - meaning:
+- SpringBoot app
+  - port: `8080`
+- MySQL 
+  - port: `3306`
+- MailCatcher: 
+  - port: `1025`
+  - port: `1080` - on this is available mail client 
+- phpMyAdmin
+  - port: `8081`
+
+```shell
+docker-compose -f docker-compose-all.yaml up -d
+```
+
+(2) If you want to run all containers except SpringBoot app:
+
+```shell
+docker-compose up -d
+```
+
+In this case you need run SpringBoot app manually from:
+`src/main/java/PolslCourseScheduleApiApplication.java`
+
+Also in this case you can run tests, which are located in: `src/test/java`
+
+## 4. Available endpoints
 
 ### POST /api/v1/auth/register
 
