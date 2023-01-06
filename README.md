@@ -451,7 +451,7 @@ Code: `404`
 
 Deletes webhook with provided `id`.
 
-**Auth required**: NO
+**Auth required**: YES
 
 **Permissions required**: NONE
 
@@ -502,7 +502,7 @@ Updates discord webhook with provided `schedules_ids`.
 
 **Success response**:
 
-Code: `201`
+Code: `200`
 
 ```json
 {
