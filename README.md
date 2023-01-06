@@ -15,6 +15,7 @@
     * [POST /api/v1/schedule](#post-apiv1schedule)
     * [DELETE /api/v1/schedule/{id}](#delete-apiv1scheduleid)
     * [GET /api/v1/schedule](#get-apiv1schedule)
+    * [POST /api/v1/schedule/{id}](#post-apiv1scheduleid)
     * [GET /api/v1/schedule/{1}](#get-apiv1schedule1)
     * [POST /api/v1/discord-webhook](#post-apiv1discord-webhook)
     * [DELETE /api/v1/discord-webhook/{id}](#delete-apiv1discord-webhookid)
@@ -343,6 +344,33 @@ Code: `200`
   }
 }
 ```
+
+---
+
+### POST /api/v1/schedule/{id}
+
+Schedule with `id` courses update. This is a manual update not dependent on cyclic updates.
+
+**Auth required**: YES
+
+**Permissions required**: ROLE_ADMIN
+
+**Path variables**:
+
+| Name | Type | Required |
+|------|------|----------|
+| `id` | Long | True     |
+
+**Success response**:
+
+Code: `204`
+
+**Error response**:
+
+(1)
+If schedule with provided `id` was not found:
+
+Code: `404`
 
 ---
 
