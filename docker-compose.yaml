@@ -11,8 +11,6 @@ services:
       MYSQL_DATABASE: polsl-course-schedule-api
     ports:
       - "3306:3306"
-    networks:
-      - database
 
   phpmyadmin:
     container_name: phpmyadmin
@@ -25,39 +23,10 @@ services:
       PMA_PASSWORD: root
     depends_on:
       - mysql
-    networks:
-      - database
 
   mail-catcher:
     container_name: mail-catcher
     image: schickling/mailcatcher
     ports:
-      - '1025:1025'
-      - '1080:1080'
-    networks:
-      - mail
-
-  app:
-    container_name: app
-    build:
-      dockerfile: ./Dockerfile
-    restart: on-failure
-    ports:
-      - "8080:8080"
-    depends_on:
-      - mysql
-      - mail-catcher
-    networks:
-      - database
-      - mail
-    environment:
-      SPRING_DATASOURCE_URL: "jdbc:mysql://mysql:3306/polsl-course-schedule-api"
-      SPRING_DATASOURCE_DRIVER_CLASS_NAME: "org.hibernate.dialect.MySQL8Dialect"
-      SPRING_DATASOURCE_USERNAME: "root"
-      SPRING_DATASOURCE_PASSWORD: "root"
-      SPRING_JPA_HIBERNATE_DDL_AUTO: "update"
-      SPRING_MAIL_HOST: "mail-catcher"
-
-networks:
-  database:
-  mail:
+      - "1025:1025"
+      - "1080:1080"
