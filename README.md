@@ -17,10 +17,10 @@
     * [DELETE /api/v1/schedule/{id}](#delete-apiv1scheduleid)
     * [GET /api/v1/schedule](#get-apiv1schedule)
     * [POST /api/v1/schedule/{id}](#post-apiv1scheduleid)
-    * [GET /api/v1/schedule/{1}](#get-apiv1schedule1)
+    * [GET /api/v1/schedule/{id}](#get-apiv1scheduleid)
     * [POST /api/v1/discord-webhook](#post-apiv1discord-webhook)
     * [DELETE /api/v1/discord-webhook/{id}](#delete-apiv1discord-webhookid)
-    * [PATCH /api/v1/discord-webhook/{1}](#patch-apiv1discord-webhook1)
+    * [PATCH /api/v1/discord-webhook/{id}](#patch-apiv1discord-webhookid)
     * [GET /api/v1/discord-webhook](#get-apiv1discord-webhook)
 <!-- TOC -->
 
@@ -383,7 +383,7 @@ Code: `404`
 
 ---
 
-### GET /api/v1/schedule/{1}
+### GET /api/v1/schedule/{id}
 
 Gets schedule with provided `id` and all courses related to it. Courses are sorted according to the following rule: `day_of_week` ASC, then `starts_at` ASC
 
@@ -546,7 +546,7 @@ Code: `404`
 
 ---
 
-### PATCH /api/v1/discord-webhook/{1}
+### PATCH /api/v1/discord-webhook/{id}
 
 Updates discord webhook with provided `schedules_ids`. 
 
