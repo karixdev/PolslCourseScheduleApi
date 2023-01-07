@@ -60,7 +60,7 @@ It will start following containers:
 - phpMyAdmin
   - port: `8081`
 
-To start the application, run the `main` method from: `src/main/java/PolslCourseScheduleApiApplication.java`
+To start the application, run the `main` method from: `PolslCourseScheduleApiApplication.java`
 
 ## 4. Initial data
 
