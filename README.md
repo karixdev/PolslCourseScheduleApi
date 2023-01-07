@@ -7,8 +7,9 @@
   * [1. Project description](#1-project-description)
   * [2. Note](#2-note)
   * [3. How to run it](#3-how-to-run-it)
-  * [4. Users and auth](#4-users-and-auth)
-  * [5. Available endpoints](#5-available-endpoints)
+  * [4. Initial data](#4-initial-data)
+  * [5. Auth](#5-auth)
+  * [6. Available endpoints](#6-available-endpoints)
     * [POST /api/v1/auth/register](#post-apiv1authregister)
     * [POST /api/v1/auth/sign-in](#post-apiv1authsign-in)
     * [POST /api/v1/email-verification/{token}](#post-apiv1email-verificationtoken)
@@ -28,7 +29,7 @@
 
 The aim of the project was to build a publicly accessible course schedule REST API for Silesian University of Technology's full-time majors. This is a private project, not supported by the university. The motivation was precisely the lack of a publicly available REST API of the university's course schedule. The second factor was that the official schedule page works quite slowly - every time we request for another schedule half of the page is re-rendered and all front-end processing (assigning classes to HTML elements, etc.) is done on the server side, not on the client side.
 
-The course schedules are cyclically updated - by default every hour, this value can be changed in `application.yaml` under the `schedule-job.cron`.
+The course schedules are cyclically updated - by default every hour, this value can be changed in `application.yaml` under the `schedule-job.cron`. But there is also an option to [manually update](#post-apiv1scheduleid) them 
 
 Since a large number of students create Discord servers related to their year of study, project allows users to be notified about updates in schedules via Discord Webhooks.
 
@@ -44,41 +45,42 @@ For example:
 
 ## 3. How to run it
 
-(1) If you want to run all available containers - meaning:
-- SpringBoot app
-  - port: `8080`
-- MySQL 
-  - port: `3306`
-- MailCatcher: 
-  - port: `1025`
-  - port: `1080` - on this is available mail client 
-- phpMyAdmin
-  - port: `8081`
-
-```shell
-docker-compose -f docker-compose-all.yaml up -d
-```
-
-(2) If you want to run all containers except SpringBoot app:
+Requirements: Java (JDK) `17`, Docker
 
 ```shell
 docker-compose up -d
 ```
 
-In this case you need run SpringBoot app manually from:
-`src/main/java/PolslCourseScheduleApiApplication.java`
+It will start following containers:
+- MySQL
+  - port: `3306`
+- MailCatcher:
+  - port: `1025`
+  - port: `1080` - on this port there is available mail client
+- phpMyAdmin
+  - port: `8081`
 
-Also in this case you can run tests, which are located in: `src/test/java`
+To start the application, run the `main` method from: `src/main/java/PolslCourseScheduleApiApplication.java`
 
-## 4. Users and auth
+## 4. Initial data
 
-At the start, there is an available user with the `ROLE_ADMIN`, and with the following credentials:
+There is an available default user with the `ROLE_ADMIN`, and credentials:
 - email: `admin@admin.com`
 - password: `admin123`
 
+Also, there are available two schedules with names:
+- `Inf I 1/2`
+- `Inf III 4/7`
+
+On start, these schedules do not have any courses - to update them, you can:
+- wait for cyclic update (by default every hour)
+- [manually update](#post-apiv1scheduleid) them
+
+## 5. Auth
+
 To access secured routes you need to get your `JWT`. To do so after [signing in](#post-apiv1authsign-in) you'll receive `access_token`. And while trying to access secured add header `Authorization` with value `Beater JWT` (replace `JWT` with your `access_token`).
 
-## 5. Available endpoints
+## 6. Available endpoints
 
 ### POST /api/v1/auth/register
 
