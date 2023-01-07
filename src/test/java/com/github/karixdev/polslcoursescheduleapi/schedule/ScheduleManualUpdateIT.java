@@ -150,7 +150,7 @@ public class ScheduleManualUpdateIT extends ContainersEnvironment {
                         <div id="course_4" class="coursediv" mtp="1" resizable="0" zold="5" cwb="154" chb="56" cw="154" ch="56" style="width: 154px; height: 56px; top: 473px; left: 420px; border: 1px solid rgb(102, 102, 102); background-color: rgb(123, 247, 141); display: block; z-index: 5;">course_4</div>
                         """)));
 
-        stubFor(get(urlPathEqualTo("/discord-api/123"))
+        stubFor(post(urlPathEqualTo("/discord-api/123"))
                 .willReturn(noContent()));
 
         String token = jwtService.createToken(userPrincipal);
