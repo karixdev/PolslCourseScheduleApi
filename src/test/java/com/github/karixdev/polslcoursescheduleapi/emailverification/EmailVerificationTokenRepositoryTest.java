@@ -1,5 +1,6 @@
 package com.github.karixdev.polslcoursescheduleapi.emailverification;
 
+import com.github.karixdev.polslcoursescheduleapi.ContainersEnvironment;
 import com.github.karixdev.polslcoursescheduleapi.user.User;
 import com.github.karixdev.polslcoursescheduleapi.user.UserRole;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-public class EmailVerificationTokenRepositoryTest {
+public class EmailVerificationTokenRepositoryTest extends ContainersEnvironment {
     @Autowired
     EmailVerificationTokenRepository underTest;
 
@@ -28,7 +29,7 @@ public class EmailVerificationTokenRepositoryTest {
         String token = "i-do-not-exist";
 
         User user = User.builder()
-                .email("email-1@email.pl")
+                .email("email-15@email.pl")
                 .password("secret-password")
                 .userRole(UserRole.ROLE_USER)
                 .isEnabled(Boolean.FALSE)
@@ -58,7 +59,7 @@ public class EmailVerificationTokenRepositoryTest {
         String token = "token";
 
         User user = User.builder()
-                .email("email-2@email.pl")
+                .email("email-12@email.pl")
                 .password("secret-password")
                 .userRole(UserRole.ROLE_USER)
                 .isEnabled(Boolean.FALSE)
