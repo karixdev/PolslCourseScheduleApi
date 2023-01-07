@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class UserFixtures implements CommandLineRunner {
+public class DataFixtures implements CommandLineRunner {
     private final UserService userService;
     private final FixturesProperties properties;
     private final ScheduleRepository scheduleRepository;

@@ -6,7 +6,6 @@ import com.github.karixdev.polslcoursescheduleapi.shared.exception.ResourceNotFo
 import com.github.karixdev.polslcoursescheduleapi.user.User;
 import com.github.karixdev.polslcoursescheduleapi.user.UserRole;
 import com.github.karixdev.polslcoursescheduleapi.user.UserService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -18,9 +17,9 @@ import java.util.Optional;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class UserFixturesTest {
+public class DataFixturesTest {
     @InjectMocks
-    UserFixtures underTest;
+    DataFixtures underTest;
 
     @Mock
     UserService userService;
