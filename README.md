@@ -360,7 +360,7 @@ Code: `200`
 
 ### POST /api/v1/schedule/{id}
 
-Schedule with `id` courses update. This is a manual update not dependent on cyclic updates.
+Updates schedule courses. This is a manual update not dependent on cyclic updates.
 
 **Auth required**: YES
 
@@ -455,7 +455,7 @@ Code: `404`
 
 ### POST /api/v1/discord-webhook
 
-Creates discord webhook with provided data. After creating discord webhook then welcome is send via created webhook. `schedules_ids` is a set of schedules' ids, which if updated then the user will get a notification via Discord Webhook with the provided `url.`
+Creates discord webhook with provided data. After creating discord webhook welcome is send via created webhook. `schedules_ids` is a set of schedules' ids, which if will get updated then the user will get a notification via Discord Webhook with the provided `url.`
 
 **Auth required**: YES
 
