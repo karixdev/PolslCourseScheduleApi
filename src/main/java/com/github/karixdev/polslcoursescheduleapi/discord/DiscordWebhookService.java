@@ -65,11 +65,7 @@ public class DiscordWebhookService {
 
     @Transactional
     public SuccessResponse delete(Long id, UserPrincipal userPrincipal) {
-        DiscordWebhook discordWebhook = repository.findById(id)
-                .orElseThrow(() -> {
-                    throw new ResourceNotFoundException(
-                            "Discord webhook with provided id not found");
-                });
+        DiscordWebhook discordWebhook = getById(id);
 
         User user = userPrincipal.getUser();
 
