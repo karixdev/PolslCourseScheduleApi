@@ -14,6 +14,7 @@ import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -41,68 +42,89 @@ public class CourseService {
             throw new EmptyCourseCellListException();
         }
 
-        List<Course> courses = response.getCourseCells().stream()
+        Set<Course> courses = response.getCourseCells().stream()
                 .map(courseCell -> mapper.mapCellToCourse(
                         courseCell,
                         startTimeHour,
                         schedule))
-                .toList();
+                .collect(Collectors.toSet());
 
         Set<Course> currentCourses = schedule.getCourses();
 
         Set<Course> coursesToDelete = new HashSet<>();
         Set<Course> coursesToSave = new HashSet<>();
 
-        // Delete changed courses and save new
-        for (Course course : courses) {
-            boolean isNew = true;
+        selectChangedCoursesAndNewCourses(
+                currentCourses,
+                courses,
+                coursesToSave,
+                coursesToDelete
+        );
 
-            for (Course currentCourse : currentCourses) {
-                if (course.getDescription().equals(currentCourse.getDescription()) &&
-                        !doCoursesHaveSameParameters(course, currentCourse) &&
-                        courses.stream().noneMatch(aCourse ->
-                                doCoursesHaveSameParameters(aCourse, currentCourse))
-                ) {
-                    coursesToDelete.add(currentCourse);
-                    break;
-                }
-
-                if (doCoursesHaveSameParameters(course, currentCourse)) {
-                    isNew = false;
-                }
-            }
-
-            if (isNew) {
-                coursesToSave.add(course);
-            }
-        }
-
-        // Delete old courses
-        for (Course currentCourse : currentCourses) {
-            boolean shouldBeDeleted = true;
-            for (Course course : courses) {
-                if (doCoursesHaveSameParameters(currentCourse, course)) {
-                    shouldBeDeleted = false;
-                    break;
-                }
-            }
-
-            if (shouldBeDeleted) {
-                coursesToDelete.add(currentCourse);
-            }
-        }
+        selectOutdatedCourses(
+                currentCourses,
+                courses,
+                coursesToDelete
+        );
 
         repository.deleteAll(coursesToDelete);
         repository.saveAll(coursesToSave);
 
         try {
             if (!coursesToSave.isEmpty() ||
-                !coursesToDelete.isEmpty()) {
+                    !coursesToDelete.isEmpty()) {
                 sendNotification(schedule);
             }
         } catch (RuntimeException e) {
             log.error("error while sending discord notification", e);
         }
+    }
+
+    private void selectOutdatedCourses(
+            Set<Course> currentCourses,
+            Set<Course> newCourses,
+            Set<Course> selected
+    ) {
+        currentCourses.stream()
+                .filter(currentCourse -> newCourses.stream()
+                        .noneMatch(newCourse ->
+                                doCoursesHaveSameParameters(
+                                        newCourse,
+                                        currentCourse)))
+                .forEach(selected::add);
+    }
+
+    private void selectChangedCoursesAndNewCourses(
+            Set<Course> currentCourses,
+            Set<Course> newCourses,
+            Set<Course> selectedNew,
+            Set<Course> selectedChanged
+    ) {
+        // Changed
+        for (Course newCourse : newCourses) {
+            for (Course currentCourse : currentCourses) {
+                if (hasCourseChanged(newCourse, currentCourse, newCourses)) {
+                    selectedChanged.add(currentCourse);
+                    break;
+                }
+            }
+        }
+
+        // New
+        newCourses.stream()
+                .filter(newCourse -> currentCourses.stream()
+                        .noneMatch(currentCourse ->
+                                doCoursesHaveSameParameters(
+                                        newCourse,
+                                        currentCourse)))
+                .forEach(selectedNew::add);
+    }
+
+    private boolean hasCourseChanged(Course newCourse, Course currentCourse, Set<Course> newCourses) {
+        return newCourse.getDescription().equals(currentCourse.getDescription()) &&
+                !doCoursesHaveSameParameters(newCourse, currentCourse) &&
+                newCourses.stream().noneMatch(aCourse ->
+                        doCoursesHaveSameParameters(aCourse, currentCourse));
     }
 
     private boolean doCoursesHaveSameParameters(Course course1, Course course2) {
