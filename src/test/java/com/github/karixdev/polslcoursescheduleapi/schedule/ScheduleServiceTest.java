@@ -135,7 +135,7 @@ public class ScheduleServiceTest {
         // Given
         Long id = 101L;
 
-        when(repository.findById(eq(id)))
+        when(repository.findScheduleById(eq(id)))
                 .thenReturn(Optional.empty());
 
         // When & Then
@@ -149,7 +149,7 @@ public class ScheduleServiceTest {
         // Given
         Long id = 1L;
 
-        when(repository.findById(eq(id)))
+        when(repository.findScheduleById(eq(id)))
                 .thenReturn(Optional.of(schedule));
 
         // When
@@ -331,7 +331,7 @@ public class ScheduleServiceTest {
         // Given
         Long id = 1337L;
 
-        when(repository.findById(eq(id)))
+        when(repository.findScheduleById(eq(id)))
                 .thenReturn(Optional.empty());
 
         // When & Then
@@ -345,7 +345,7 @@ public class ScheduleServiceTest {
         // Given
         Long id = schedule.getId();
 
-        when(repository.findById(eq(id)))
+        when(repository.findScheduleById(eq(id)))
                 .thenReturn(Optional.of(schedule));
 
         // When

@@ -60,10 +60,7 @@ public class ScheduleService {
 
     @Transactional
     public SuccessResponse delete(Long id) {
-        Schedule schedule = repository.findById(id)
-                .orElseThrow(() -> {
-                    throw new ResourceNotFoundException("Schedule with provided id not found");
-                });
+        Schedule schedule = getById(id);
 
         repository.delete(schedule);
 
@@ -113,11 +110,7 @@ public class ScheduleService {
     }
 
     public ScheduleWithCoursesResponse getSchedulesWithCourses(Long id) {
-        Schedule schedule = repository.findScheduleById(id)
-                .orElseThrow(() -> {
-                    throw new ResourceNotFoundException(
-                            "Schedule with provided id not found");
-                });
+        Schedule schedule = getById(id);
 
         Map<DayOfWeek, List<CourseResponse>> courses = new LinkedHashMap<>();
 
@@ -141,19 +134,14 @@ public class ScheduleService {
     }
 
     public Schedule getById(Long id) {
-        Optional<Schedule> optionalSchedule = repository.findById(id);
-        return optionalSchedule
+        return repository.findScheduleById(id)
                 .orElseThrow(() -> {
                     throw new ResourceNotFoundException("Schedule with provided id not found");
                 });
     }
 
     public void manualUpdate(Long id) {
-        Schedule schedule = repository.findScheduleById(id)
-                .orElseThrow(() -> {
-                    throw new ResourceNotFoundException(
-                            "Schedule with provided id not found");
-                });
+        Schedule schedule = getById(id);
 
         asyncManualUpdate(schedule);
     }
