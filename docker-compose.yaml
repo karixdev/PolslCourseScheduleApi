@@ -8,7 +8,7 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: polsl-course-schedule-api
+      MYSQL_DATABASE: schedule-service
     ports:
       - "3306:3306"
 
