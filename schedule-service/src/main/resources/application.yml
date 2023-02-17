@@ -6,9 +6,10 @@ spring:
     properties:
       hibernate:
         format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
 
   datasource:
-    url: jdbc:mysql://localhost:3306/schedule-service
+    url: jdbc:postgresql://localhost:5432/schedule-service
     username: root
     password: root
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    driver-class-name: org.postgresql.Driver
