@@ -1,7 +1,6 @@
-package com.github.karixdev.scheduleservice.exception;
+package com.github.karixdev.scheduleservice.schedule.exception;
 
-import org.springframework.core.MethodParameter;
-import org.springframework.web.bind.MethodArgumentNotValidException;
+import com.github.karixdev.scheduleservice.shared.exception.ValidationException;
 
 public class ScheduleNameUnavailableException extends ValidationException {
     public ScheduleNameUnavailableException(String name) {

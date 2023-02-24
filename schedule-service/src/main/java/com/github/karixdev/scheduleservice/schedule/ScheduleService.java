@@ -1,10 +1,8 @@
-package com.github.karixdev.scheduleservice.service;
+package com.github.karixdev.scheduleservice.schedule;
 
-import com.github.karixdev.scheduleservice.dto.ScheduleRequest;
-import com.github.karixdev.scheduleservice.dto.ScheduleResponse;
-import com.github.karixdev.scheduleservice.entity.Schedule;
-import com.github.karixdev.scheduleservice.exception.ScheduleNameUnavailableException;
-import com.github.karixdev.scheduleservice.repository.ScheduleRepository;
+import com.github.karixdev.scheduleservice.schedule.dto.ScheduleRequest;
+import com.github.karixdev.scheduleservice.schedule.dto.ScheduleResponse;
+import com.github.karixdev.scheduleservice.schedule.exception.ScheduleNameUnavailableException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

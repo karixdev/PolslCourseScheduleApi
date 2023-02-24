@@ -1,9 +1,8 @@
-package com.github.karixdev.scheduleservice.controller;
+package com.github.karixdev.scheduleservice.schedule;
 
 import com.github.karixdev.scheduleservice.ContainersEnvironment;
-import com.github.karixdev.scheduleservice.entity.Schedule;
-import com.github.karixdev.scheduleservice.repository.ScheduleRepository;
-import org.assertj.core.api.Assertions;
+import com.github.karixdev.scheduleservice.schedule.Schedule;
+import com.github.karixdev.scheduleservice.schedule.ScheduleRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

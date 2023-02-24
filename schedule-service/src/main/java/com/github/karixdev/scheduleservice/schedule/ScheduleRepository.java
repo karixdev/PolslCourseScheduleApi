@@ -1,6 +1,5 @@
-package com.github.karixdev.scheduleservice.repository;
+package com.github.karixdev.scheduleservice.schedule;
 
-import com.github.karixdev.scheduleservice.entity.Schedule;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

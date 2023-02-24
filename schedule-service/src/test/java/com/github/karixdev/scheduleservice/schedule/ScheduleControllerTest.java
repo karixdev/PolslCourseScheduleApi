@@ -1,8 +1,9 @@
-package com.github.karixdev.scheduleservice.controller;
+package com.github.karixdev.scheduleservice.schedule;
 
-import com.github.karixdev.scheduleservice.dto.ScheduleRequest;
-import com.github.karixdev.scheduleservice.exception.ScheduleNameUnavailableException;
-import com.github.karixdev.scheduleservice.service.ScheduleService;
+import com.github.karixdev.scheduleservice.schedule.ScheduleController;
+import com.github.karixdev.scheduleservice.schedule.dto.ScheduleRequest;
+import com.github.karixdev.scheduleservice.schedule.exception.ScheduleNameUnavailableException;
+import com.github.karixdev.scheduleservice.schedule.ScheduleService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;

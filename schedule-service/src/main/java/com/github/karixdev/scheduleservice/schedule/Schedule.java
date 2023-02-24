@@ -1,4 +1,4 @@
-package com.github.karixdev.scheduleservice.entity;
+package com.github.karixdev.scheduleservice.schedule;
 
 import jakarta.persistence.*;
 import lombok.*;

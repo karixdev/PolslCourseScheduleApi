@@ -1,4 +1,4 @@
-package com.github.karixdev.scheduleservice.util;
+package com.github.karixdev.scheduleservice.shared.util;
 
 public class NameCaseConverter {
     public static String camelToSnake(String str) {

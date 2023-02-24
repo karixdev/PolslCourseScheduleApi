@@ -1,6 +1,6 @@
-package com.github.karixdev.scheduleservice.util;
+package com.github.karixdev.scheduleservice.shared.util;
 
-import org.assertj.core.api.Assertions;
+import com.github.karixdev.scheduleservice.shared.util.NameCaseConverter;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

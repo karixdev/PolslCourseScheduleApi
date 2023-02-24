@@ -1,4 +1,4 @@
-package com.github.karixdev.scheduleservice.dto;
+package com.github.karixdev.scheduleservice.schedule.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

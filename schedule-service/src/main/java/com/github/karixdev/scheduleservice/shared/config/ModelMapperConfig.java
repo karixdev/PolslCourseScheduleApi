@@ -1,4 +1,4 @@
-package com.github.karixdev.scheduleservice.config;
+package com.github.karixdev.scheduleservice.shared.config;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;

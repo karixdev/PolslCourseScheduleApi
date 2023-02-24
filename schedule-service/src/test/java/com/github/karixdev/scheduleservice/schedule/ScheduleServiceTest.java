@@ -1,17 +1,16 @@
-package com.github.karixdev.scheduleservice.service;
+package com.github.karixdev.scheduleservice.schedule;
 
-import com.github.karixdev.scheduleservice.dto.ScheduleRequest;
-import com.github.karixdev.scheduleservice.dto.ScheduleResponse;
-import com.github.karixdev.scheduleservice.entity.Schedule;
-import com.github.karixdev.scheduleservice.exception.ScheduleNameUnavailableException;
-import com.github.karixdev.scheduleservice.repository.ScheduleRepository;
-import org.assertj.core.api.Assertions;
+import com.github.karixdev.scheduleservice.schedule.dto.ScheduleRequest;
+import com.github.karixdev.scheduleservice.schedule.dto.ScheduleResponse;
+import com.github.karixdev.scheduleservice.schedule.Schedule;
+import com.github.karixdev.scheduleservice.schedule.exception.ScheduleNameUnavailableException;
+import com.github.karixdev.scheduleservice.schedule.ScheduleRepository;
+import com.github.karixdev.scheduleservice.schedule.ScheduleService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 

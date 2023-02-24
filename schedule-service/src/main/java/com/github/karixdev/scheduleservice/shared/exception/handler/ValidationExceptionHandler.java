@@ -1,8 +1,8 @@
-package com.github.karixdev.scheduleservice.exception.handler;
+package com.github.karixdev.scheduleservice.shared.exception.handler;
 
-import com.github.karixdev.scheduleservice.dto.ValidationErrorResponse;
-import com.github.karixdev.scheduleservice.exception.ValidationException;
-import com.github.karixdev.scheduleservice.util.NameCaseConverter;
+import com.github.karixdev.scheduleservice.shared.dto.ValidationErrorResponse;
+import com.github.karixdev.scheduleservice.shared.exception.ValidationException;
+import com.github.karixdev.scheduleservice.shared.util.NameCaseConverter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;

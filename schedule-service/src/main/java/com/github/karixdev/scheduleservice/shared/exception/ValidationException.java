@@ -1,4 +1,4 @@
-package com.github.karixdev.scheduleservice.exception;
+package com.github.karixdev.scheduleservice.shared.exception;
 
 import lombok.Getter;
 import lombok.Setter;

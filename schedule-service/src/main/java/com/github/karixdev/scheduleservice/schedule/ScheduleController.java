@@ -1,8 +1,8 @@
-package com.github.karixdev.scheduleservice.controller;
+package com.github.karixdev.scheduleservice.schedule;
 
-import com.github.karixdev.scheduleservice.dto.ScheduleRequest;
-import com.github.karixdev.scheduleservice.dto.ScheduleResponse;
-import com.github.karixdev.scheduleservice.service.ScheduleService;
+import com.github.karixdev.scheduleservice.schedule.dto.ScheduleRequest;
+import com.github.karixdev.scheduleservice.schedule.dto.ScheduleResponse;
+import com.github.karixdev.scheduleservice.schedule.ScheduleService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
