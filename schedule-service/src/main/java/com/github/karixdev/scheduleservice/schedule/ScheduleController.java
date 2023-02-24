@@ -56,4 +56,13 @@ public class ScheduleController {
                 HttpStatus.OK
         );
     }
+
+    @DeleteMapping("/{id}")
+    ResponseEntity<ScheduleResponse> delete(
+            @PathVariable(name = "id") UUID id
+    ) {
+        service.delete(id);
+
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }

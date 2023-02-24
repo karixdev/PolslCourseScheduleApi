@@ -100,4 +100,10 @@ public class ScheduleService {
                 schedule.getGroupNumber()
         );
     }
+
+    public void delete(UUID id) {
+        Schedule schedule = findByIdOrElseThrow(id);
+
+        repository.delete(schedule);
+    }
 }

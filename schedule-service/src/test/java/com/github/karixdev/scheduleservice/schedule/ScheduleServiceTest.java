@@ -240,4 +240,36 @@ public class ScheduleServiceTest {
         assertThat(result.groupNumber())
                 .isEqualTo(scheduleRequest.groupNumber());
     }
+
+    @Test
+    void GivenNotExistingScheduleId_WhenDelete_ThenThrowsResourceNotFoundExceptionWithProperMessage() {
+        // Given
+        UUID id = UUID.randomUUID();
+
+        when(repository.findById(eq(id)))
+                .thenReturn(Optional.empty());
+
+        // When & Then
+        assertThatThrownBy(() -> underTest.delete(id))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage(String.format(
+                        "Schedule with id %s not found",
+                        id
+                ));
+    }
+
+    @Test
+    void GivenExistingScheduleId_WhenDelete_ThenDeletesSchedule() {
+        // Given
+        UUID id = schedule.getId();
+
+        when(repository.findById(eq(id)))
+                .thenReturn(Optional.of(schedule));
+
+        // When
+        underTest.delete(id);
+
+        // Then
+        verify(repository).delete(eq(schedule));
+    }
 }

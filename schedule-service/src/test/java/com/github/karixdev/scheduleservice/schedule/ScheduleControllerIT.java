@@ -276,4 +276,34 @@ public class ScheduleControllerIT extends ContainersEnvironment {
                 .jsonPath("$.name").isEqualTo("schedule3")
                 .jsonPath("$.group_number").isEqualTo(7);
     }
+
+    @Test
+    void shouldNotDeleteNotExistingSchedule() {
+        scheduleRepository.save(Schedule.builder()
+                .type(1)
+                .planPolslId(1999)
+                .semester(1)
+                .name("schedule2")
+                .groupNumber(1)
+                .build());
+
+        webClient.delete().uri("/api/v2/schedules/" + UUID.randomUUID())
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void shouldDeleteSchedule() {
+        Schedule schedule = scheduleRepository.save(Schedule.builder()
+                .type(1)
+                .planPolslId(1999)
+                .semester(1)
+                .name("schedule2")
+                .groupNumber(1)
+                .build());
+
+        webClient.delete().uri("/api/v2/schedules/" + schedule.getId())
+                .exchange()
+                .expectStatus().isNoContent();
+    }
 }
