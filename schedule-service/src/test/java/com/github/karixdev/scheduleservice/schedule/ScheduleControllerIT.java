@@ -1,8 +1,6 @@
 package com.github.karixdev.scheduleservice.schedule;
 
 import com.github.karixdev.scheduleservice.ContainersEnvironment;
-import com.github.karixdev.scheduleservice.schedule.Schedule;
-import com.github.karixdev.scheduleservice.schedule.ScheduleRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -146,7 +144,13 @@ public class ScheduleControllerIT extends ContainersEnvironment {
 
         webClient.get().uri("/api/v2/schedules/" + id)
                 .exchange()
-                .expectStatus().isNotFound();
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo(
+                        String.format(
+                                "Schedule with id %s not found",
+                                id
+                        ));
     }
 
     @Test

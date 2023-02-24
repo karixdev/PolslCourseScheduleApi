@@ -1,9 +1,8 @@
 package com.github.karixdev.scheduleservice.schedule;
 
-import com.github.karixdev.scheduleservice.schedule.ScheduleController;
 import com.github.karixdev.scheduleservice.schedule.dto.ScheduleRequest;
 import com.github.karixdev.scheduleservice.schedule.exception.ScheduleNameUnavailableException;
-import com.github.karixdev.scheduleservice.schedule.ScheduleService;
+import com.github.karixdev.scheduleservice.shared.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -12,8 +11,11 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.util.UUID;
+
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -82,6 +84,25 @@ public class ScheduleControllerTest {
                 .andExpectAll(
                         jsonPath("$.constraints.name").value(exception.getMessage()),
                         jsonPath("$.message").value("Validation Failed")
+                );
+    }
+
+    @Test
+    void GivenNotExistingScheduleId_WhenFindById_ThenRespondsWithNotFoundAndProperBody() throws Exception {
+        // Given
+        UUID id = UUID.randomUUID();
+
+        RuntimeException exception = new ResourceNotFoundException("Exception message");
+
+        when(service.findById(eq(id)))
+                .thenThrow(exception);
+
+        // When & Then
+        mockMvc.perform(get("/api/v2/schedules/" + id))
+                .andExpect(status().isNotFound())
+                .andExpectAll(
+                        jsonPath("$.status").value(404),
+                        jsonPath("$.message").value("Exception message")
                 );
     }
 }
