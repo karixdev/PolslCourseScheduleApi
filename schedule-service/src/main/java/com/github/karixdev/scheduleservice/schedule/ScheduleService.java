@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -71,5 +72,32 @@ public class ScheduleService {
                                     id)
                     );
                 });
+    }
+
+    @Transactional
+    public ScheduleResponse update(UUID id, ScheduleRequest scheduleRequest) {
+        Schedule schedule = findByIdOrElseThrow(id);
+
+        Optional<Schedule> scheduleWithName = repository.findByName(scheduleRequest.name());
+
+        if (scheduleWithName.isPresent() && !scheduleWithName.get().equals(schedule)) {
+            throw new ScheduleNameUnavailableException(
+                    scheduleRequest.name());
+        }
+
+        schedule.setName(scheduleRequest.name());
+        schedule.setType(scheduleRequest.type());
+        schedule.setPlanPolslId(scheduleRequest.planPolslId());
+        schedule.setSemester(scheduleRequest.semester());
+        schedule.setGroupNumber(scheduleRequest.groupNumber());
+
+        repository.save(schedule);
+
+        return new ScheduleResponse(
+                schedule.getId(),
+                schedule.getSemester(),
+                schedule.getName(),
+                schedule.getGroupNumber()
+        );
     }
 }

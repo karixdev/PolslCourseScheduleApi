@@ -180,4 +180,100 @@ public class ScheduleControllerIT extends ContainersEnvironment {
                 .jsonPath("$.name").isEqualTo("schedule1")
                 .jsonPath("$.group_number").isEqualTo(2);
     }
+
+    @Test
+    void shouldNotUpdateNotExistingSchedule() {
+        UUID id = UUID.randomUUID();
+
+        String payload = """
+                {
+                    "type": 1,
+                    "plan_polsl_id": 1999,
+                    "semester": 2,
+                    "name": "schedule-name",
+                    "group_number": 1
+                }
+                """;
+
+        webClient.put().uri("/api/v2/schedules/" + id)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(payload)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void shouldNotUpdateScheduleWhileTryingToAssignUnavailableName() {
+        Schedule schedule = scheduleRepository.save(Schedule.builder()
+                .type(1)
+                .planPolslId(2000)
+                .semester(1)
+                .name("schedule1")
+                .groupNumber(2)
+                .build());
+
+        scheduleRepository.save(Schedule.builder()
+                .type(1)
+                .planPolslId(1999)
+                .semester(1)
+                .name("schedule2")
+                .groupNumber(1)
+                .build());
+
+        String payload = """
+                {
+                    "type": 1,
+                    "plan_polsl_id": 1999,
+                    "semester": 2,
+                    "name": "schedule2",
+                    "group_number": 1
+                }
+                """;
+
+        webClient.put().uri("/api/v2/schedules/" + schedule.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(payload)
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
+
+    @Test
+    void shouldUpdateSchedule() {
+        Schedule schedule = scheduleRepository.save(Schedule.builder()
+                .type(1)
+                .planPolslId(2000)
+                .semester(1)
+                .name("schedule1")
+                .groupNumber(2)
+                .build());
+
+        scheduleRepository.save(Schedule.builder()
+                .type(1)
+                .planPolslId(1999)
+                .semester(1)
+                .name("schedule2")
+                .groupNumber(1)
+                .build());
+
+        String payload = """
+                {
+                    "type": 2,
+                    "plan_polsl_id": 1999,
+                    "semester": 5,
+                    "name": "schedule3",
+                    "group_number": 7
+                }
+                """;
+
+        webClient.put().uri("/api/v2/schedules/" + schedule.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(payload)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.id").isEqualTo(schedule.getId().toString())
+                .jsonPath("$.semester").isEqualTo(5)
+                .jsonPath("$.name").isEqualTo("schedule3")
+                .jsonPath("$.group_number").isEqualTo(7);
+    }
 }

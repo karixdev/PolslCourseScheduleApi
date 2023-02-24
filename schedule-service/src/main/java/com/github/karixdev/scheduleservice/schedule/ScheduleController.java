@@ -45,4 +45,15 @@ public class ScheduleController {
                 HttpStatus.OK
         );
     }
+
+    @PutMapping("/{id}")
+    ResponseEntity<ScheduleResponse> update(
+            @PathVariable(name = "id") UUID id,
+            @Valid @RequestBody ScheduleRequest scheduleRequest
+    ) {
+        return new ResponseEntity<>(
+                service.update(id, scheduleRequest),
+                HttpStatus.OK
+        );
+    }
 }

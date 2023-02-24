@@ -17,6 +17,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -140,5 +141,103 @@ public class ScheduleServiceTest {
         assertThat(result.name()).isEqualTo(schedule.getName());
         assertThat(result.id()).isEqualTo(schedule.getId());
         assertThat(result.semester()).isEqualTo(schedule.getSemester());
+    }
+
+    @Test
+    void GivenNotExistingScheduleId_WhenUpdate_ThenThrowsResourceNotFoundExceptionWithProperMessage() {
+        // Given
+        UUID id = UUID.randomUUID();
+        ScheduleRequest scheduleRequest = new ScheduleRequest(
+                1,
+                1999,
+                1,
+                "schedule-name",
+                1
+        );
+
+        when(repository.findById(eq(id)))
+                .thenReturn(Optional.empty());
+
+        // When & Then
+        assertThatThrownBy(() -> underTest.update(id, scheduleRequest))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage(String.format(
+                        "Schedule with id %s not found",
+                        id
+                ));
+    }
+
+    @Test
+    void GivenScheduleRequestWithUnavailableName_WhenUpdate_ThenThrowsScheduleNameUnavailableExceptionWithProperMessage() {
+        // Given
+        UUID id = UUID.randomUUID();
+        ScheduleRequest scheduleRequest = new ScheduleRequest(
+                1,
+                1999,
+                1,
+                "schedule-name",
+                1
+        );
+
+        when(repository.findById(eq(id)))
+                .thenReturn(Optional.of(schedule));
+
+        when(repository.findByName(eq(scheduleRequest.name())))
+                .thenReturn(Optional.of(Schedule.builder()
+                        .id(UUID.randomUUID())
+                        .type(0)
+                        .planPolslId(101)
+                        .semester(2)
+                        .groupNumber(3)
+                        .name("schedule-name")
+                        .build()));
+
+        // When & Then
+        assertThatThrownBy(() -> underTest.update(id, scheduleRequest))
+                .isInstanceOf(ScheduleNameUnavailableException.class)
+                .hasMessage("name schedule-name is unavailable");
+    }
+
+    @Test
+    void GivenValidIdAndScheduleRequest_WhenUpdate_ThenUpdatesAndReturnsProperScheduleResponse() {
+        // Given
+        UUID id = UUID.randomUUID();
+        ScheduleRequest scheduleRequest = new ScheduleRequest(
+                9,
+                1410,
+                7,
+                "schedule-name",
+                8
+        );
+
+        when(repository.findById(eq(id)))
+                .thenReturn(Optional.of(schedule));
+
+        when(repository.findByName(eq(scheduleRequest.name())))
+                .thenReturn(Optional.of(schedule));
+
+        // When
+        ScheduleResponse result = underTest.update(id, scheduleRequest);
+
+        // Then
+        verify(repository).save(eq(schedule));
+
+        assertThat(schedule.getName())
+                .isEqualTo(scheduleRequest.name());
+        assertThat(schedule.getType())
+                .isEqualTo(scheduleRequest.type());
+        assertThat(schedule.getPlanPolslId())
+                .isEqualTo(scheduleRequest.planPolslId());
+        assertThat(schedule.getSemester())
+                .isEqualTo(scheduleRequest.semester());
+        assertThat(schedule.getGroupNumber())
+                .isEqualTo(scheduleRequest.groupNumber());
+
+        assertThat(result.name())
+                .isEqualTo(scheduleRequest.name());
+        assertThat(result.semester())
+                .isEqualTo(scheduleRequest.semester());
+        assertThat(result.groupNumber())
+                .isEqualTo(scheduleRequest.groupNumber());
     }
 }
