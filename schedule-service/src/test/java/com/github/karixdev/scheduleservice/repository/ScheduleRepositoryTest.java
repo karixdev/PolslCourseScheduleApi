@@ -8,6 +8,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -22,7 +23,7 @@ public class ScheduleRepositoryTest extends ContainersEnvironment {
     TestEntityManager em;
 
     @Test
-    public void GivenNotExistingScheduleName_WhenFindByName_ThenReturnsEmptyOptional() {
+    void GivenNotExistingScheduleName_WhenFindByName_ThenReturnsEmptyOptional() {
         // Given
         String name = "schedule-name";
 
@@ -44,7 +45,7 @@ public class ScheduleRepositoryTest extends ContainersEnvironment {
     }
 
     @Test
-    public void GivenExistingScheduleName_WhenFindByName_ThenReturnsOptionalWithProperEntity() {
+    void GivenExistingScheduleName_WhenFindByName_ThenReturnsOptionalWithProperEntity() {
         // Given
         String name = "schedule-name";
 
@@ -74,5 +75,49 @@ public class ScheduleRepositoryTest extends ContainersEnvironment {
         // Then
         assertThat(result).isPresent();
         assertThat(result.get()).isEqualTo(schedule);
+    }
+
+    @Test
+    void WhenFindAllOrderBySemesterAndGroupNumberAsc_ThenReturnsListWithCorrectOrder() {
+        Schedule schedule1 = Schedule.builder()
+                .type(0)
+                .planPolslId(1111)
+                .semester(1)
+                .name("schedule1")
+                .groupNumber(2)
+                .build();
+
+        em.persist(schedule1);
+
+        Schedule schedule2 = Schedule.builder()
+                .type(0)
+                .planPolslId(1999)
+                .semester(1)
+                .name("schedule2")
+                .groupNumber(1)
+                .build();
+
+        em.persist(schedule2);
+
+        Schedule schedule3 = Schedule.builder()
+                .type(0)
+                .planPolslId(1222)
+                .semester(3)
+                .name("schedule3")
+                .groupNumber(1)
+                .build();
+
+        em.persistAndFlush(schedule3);
+
+        // When
+        List<Schedule> result =
+                underTest.findAllOrderBySemesterAndGroupNumberAsc();
+
+        // Then
+        assertThat(result).hasSize(3);
+
+        assertThat(result.get(0)).isEqualTo(schedule2);
+        assertThat(result.get(1)).isEqualTo(schedule1);
+        assertThat(result.get(2)).isEqualTo(schedule3);
     }
 }

@@ -100,4 +100,43 @@ public class ScheduleControllerIT extends ContainersEnvironment {
         assertThat(schedule.getGroupNumber())
                 .isEqualTo(1);
     }
+
+    @Test
+    void shouldGetAllCourses() {
+        scheduleRepository.saveAll(List.of(
+                Schedule.builder()
+                        .type(1)
+                        .planPolslId(2000)
+                        .semester(1)
+                        .name("schedule1")
+                        .groupNumber(2)
+                        .build(),
+                Schedule.builder()
+                        .type(1)
+                        .planPolslId(1999)
+                        .semester(1)
+                        .name("schedule2")
+                        .groupNumber(1)
+                        .build(),
+                Schedule.builder()
+                        .type(1)
+                        .planPolslId(1000)
+                        .semester(2)
+                        .name("schedule3")
+                        .groupNumber(1)
+                        .build()
+        ));
+
+        webClient.get().uri("/api/v2/schedules")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.*").isArray()
+                .jsonPath("$[0].semester").isEqualTo(1)
+                .jsonPath("$[0].group_number").isEqualTo(1)
+                .jsonPath("$[1].semester").isEqualTo(1)
+                .jsonPath("$[1].group_number").isEqualTo(2)
+                .jsonPath("$[2].semester").isEqualTo(2)
+                .jsonPath("$[2].group_number").isEqualTo(1);
+    }
 }

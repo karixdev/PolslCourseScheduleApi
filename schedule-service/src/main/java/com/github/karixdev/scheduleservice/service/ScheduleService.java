@@ -9,6 +9,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class ScheduleService {
@@ -35,5 +37,17 @@ public class ScheduleService {
                 schedule.getName(),
                 schedule.getGroupNumber()
         );
+    }
+
+    public List<ScheduleResponse> findAll() {
+        return repository.findAllOrderBySemesterAndGroupNumberAsc()
+                .stream()
+                .map(schedule -> new ScheduleResponse(
+                        schedule.getId(),
+                        schedule.getSemester(),
+                        schedule.getName(),
+                        schedule.getGroupNumber()
+                ))
+                .toList();
     }
 }
