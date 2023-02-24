@@ -30,18 +30,31 @@ public class ScheduleControllerTest {
 
     ObjectMapper mapper = new ObjectMapper();
 
-    @Test
-    void GivenInvalidScheduleRequest_WhenCreate_ThenRespondsWithBadRequestAndProperBody() throws Exception {
-        // Given
-        ScheduleRequest scheduleRequest = new ScheduleRequest(
+    ScheduleRequest invalidScheduleRequest;
+    ScheduleRequest validScheduleRequest;
+
+    @BeforeEach
+    void setUp() {
+        invalidScheduleRequest = new ScheduleRequest(
                 -1,
                 0,
                 0,
                 "",
                 0
         );
+        validScheduleRequest = new ScheduleRequest(
+                1,
+                1,
+                1,
+                "unavailable",
+                1
+        );
+    }
 
-        String content = mapper.writeValueAsString(scheduleRequest);
+    @Test
+    void GivenInvalidScheduleRequest_WhenCreate_ThenRespondsWithBadRequestAndProperBody() throws Exception {
+        // Given
+        String content = mapper.writeValueAsString(invalidScheduleRequest);
 
         // When & Then
         mockMvc.perform(post("/api/v2/schedules")
@@ -61,19 +74,10 @@ public class ScheduleControllerTest {
     @Test
     void GivenUnavailableName_WhenCreate_ThenRespondsWithBadRequestAndProperBody() throws Exception {
         // Given
-        ScheduleRequest scheduleRequest = new ScheduleRequest(
-                1,
-                1,
-                1,
-                "unavailable",
-                1
-        );
-
-        String content = mapper.writeValueAsString(scheduleRequest);
-
+        String content = mapper.writeValueAsString(validScheduleRequest);
         RuntimeException exception = new ScheduleNameUnavailableException("unavailable");
 
-        when(service.create(eq(scheduleRequest)))
+        when(service.create(eq(validScheduleRequest)))
                 .thenThrow(exception);
 
         // When & Then
@@ -109,17 +113,8 @@ public class ScheduleControllerTest {
     @Test
     void GivenInvalidScheduleRequest_WhenUpdate_ThenRespondsWithBadRequestAndProperBody() throws Exception {
         // Given
-        ScheduleRequest scheduleRequest = new ScheduleRequest(
-                -1,
-                0,
-                0,
-                "",
-                0
-        );
-
         UUID id = UUID.randomUUID();
-
-        String content = mapper.writeValueAsString(scheduleRequest);
+        String content = mapper.writeValueAsString(invalidScheduleRequest);
 
         // When & Then
         mockMvc.perform(put("/api/v2/schedules/" + id)
@@ -139,21 +134,12 @@ public class ScheduleControllerTest {
     @Test
     void GivenUnavailableName_WhenUpdate_ThenRespondsWithBadRequestAndProperBody() throws Exception {
         // Given
-        ScheduleRequest scheduleRequest = new ScheduleRequest(
-                1,
-                1,
-                1,
-                "unavailable",
-                1
-        );
-
         UUID id = UUID.randomUUID();
-
-        String content = mapper.writeValueAsString(scheduleRequest);
+        String content = mapper.writeValueAsString(validScheduleRequest);
 
         RuntimeException exception = new ScheduleNameUnavailableException("unavailable");
 
-        when(service.update(eq(id), eq(scheduleRequest)))
+        when(service.update(eq(id), eq(validScheduleRequest)))
                 .thenThrow(exception);
 
         // When & Then
