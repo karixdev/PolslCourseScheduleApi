@@ -1,11 +1,16 @@
 package com.github.karixdev.scheduleservice.exception;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.core.MethodParameter;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
-@ResponseStatus(HttpStatus.BAD_REQUEST)
-public class ScheduleNameUnavailableException extends RuntimeException {
+public class ScheduleNameUnavailableException extends ValidationException {
     public ScheduleNameUnavailableException(String name) {
-        super(String.format("Schedule name %s is unavailable", name));
+        super(
+                "name",
+                String.format(
+                        "name %s is unavailable",
+                        name
+                )
+        );
     }
 }
