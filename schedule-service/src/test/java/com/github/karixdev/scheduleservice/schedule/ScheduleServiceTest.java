@@ -58,7 +58,7 @@ public class ScheduleServiceTest {
         // When & Then
         assertThatThrownBy(() -> underTest.create(scheduleRequest))
                 .isInstanceOf(ScheduleNameUnavailableException.class)
-                .hasMessage(String.format("Schedule name schedule is unavailable"));
+                .hasMessage("name schedule is unavailable");
     }
 
     @Test
