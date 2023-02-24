@@ -2,17 +2,14 @@ package com.github.karixdev.scheduleservice.schedule;
 
 import com.github.karixdev.scheduleservice.schedule.dto.ScheduleRequest;
 import com.github.karixdev.scheduleservice.schedule.dto.ScheduleResponse;
-import com.github.karixdev.scheduleservice.schedule.Schedule;
 import com.github.karixdev.scheduleservice.schedule.exception.ScheduleNameUnavailableException;
-import com.github.karixdev.scheduleservice.schedule.ScheduleRepository;
-import com.github.karixdev.scheduleservice.schedule.ScheduleService;
+import com.github.karixdev.scheduleservice.shared.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.modelmapper.ModelMapper;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -20,7 +17,6 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -30,9 +26,6 @@ public class ScheduleServiceTest {
 
     @Mock
     ScheduleRepository repository;
-
-    @Mock
-    ModelMapper mapper;
 
     Schedule schedule;
 
@@ -112,5 +105,40 @@ public class ScheduleServiceTest {
                 .isEqualTo(scheduleRequest.groupNumber());
         assertThat(result.id())
                 .isEqualTo(savedSchedule.getId());
+    }
+
+    @Test
+    void GivenNotExistingScheduleId_WhenFindById_ThenThrowsResourceNotFoundWithProperMessage() {
+        // Given
+        UUID id = UUID.randomUUID();
+
+        when(repository.findById(eq(id)))
+                .thenReturn(Optional.empty());
+
+        // When & Then
+        assertThatThrownBy(() -> underTest.findById(id))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage(String.format(
+                        "Schedule with id %s not found",
+                        id
+                ));
+    }
+
+    @Test
+    void GivenExistingScheduleId_WhenFindById_ThenReturnsProperScheduleResponse() {
+        // Given
+        UUID id = schedule.getId();
+
+        when(repository.findById(eq(id)))
+                .thenReturn(Optional.of(schedule));
+
+        // When
+        ScheduleResponse result = underTest.findById(id);
+
+        // Then
+        assertThat(result.groupNumber()).isEqualTo(schedule.getGroupNumber());
+        assertThat(result.name()).isEqualTo(schedule.getName());
+        assertThat(result.id()).isEqualTo(schedule.getId());
+        assertThat(result.semester()).isEqualTo(schedule.getSemester());
     }
 }

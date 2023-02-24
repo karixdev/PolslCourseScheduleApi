@@ -3,11 +3,13 @@ package com.github.karixdev.scheduleservice.schedule;
 import com.github.karixdev.scheduleservice.schedule.dto.ScheduleRequest;
 import com.github.karixdev.scheduleservice.schedule.dto.ScheduleResponse;
 import com.github.karixdev.scheduleservice.schedule.exception.ScheduleNameUnavailableException;
+import com.github.karixdev.scheduleservice.shared.exception.ResourceNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -47,5 +49,27 @@ public class ScheduleService {
                         schedule.getGroupNumber()
                 ))
                 .toList();
+    }
+
+    public ScheduleResponse findById(UUID id) {
+        Schedule schedule = findByIdOrElseThrow(id);
+
+        return new ScheduleResponse(
+                schedule.getId(),
+                schedule.getSemester(),
+                schedule.getName(),
+                schedule.getGroupNumber()
+        );
+    }
+
+    private Schedule findByIdOrElseThrow(UUID id) {
+        return repository.findById(id)
+                .orElseThrow(() -> {
+                    throw new ResourceNotFoundException(
+                            String.format(
+                                    "Schedule with id %s not found",
+                                    id)
+                    );
+                });
     }
 }

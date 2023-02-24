@@ -11,6 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
@@ -137,5 +138,42 @@ public class ScheduleControllerIT extends ContainersEnvironment {
                 .jsonPath("$[1].group_number").isEqualTo(2)
                 .jsonPath("$[2].semester").isEqualTo(2)
                 .jsonPath("$[2].group_number").isEqualTo(1);
+    }
+
+    @Test
+    void shouldNotFindScheduleById() {
+        String id = UUID.randomUUID().toString();
+
+        webClient.get().uri("/api/v2/schedules/" + id)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void shouldFindScheduleById() {
+        Schedule schedule = scheduleRepository.save(Schedule.builder()
+                .type(1)
+                .planPolslId(2000)
+                .semester(1)
+                .name("schedule1")
+                .groupNumber(2)
+                .build());
+
+        scheduleRepository.save(Schedule.builder()
+                .type(1)
+                .planPolslId(1999)
+                .semester(1)
+                .name("schedule2")
+                .groupNumber(1)
+                .build());
+
+        webClient.get().uri("/api/v2/schedules/" + schedule.getId().toString())
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.id").isEqualTo(schedule.getId().toString())
+                .jsonPath("$.semester").isEqualTo(1)
+                .jsonPath("$.name").isEqualTo("schedule1")
+                .jsonPath("$.group_number").isEqualTo(2);
     }
 }

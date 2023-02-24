@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v2/schedules")
@@ -31,6 +32,16 @@ public class ScheduleController {
     ResponseEntity<List<ScheduleResponse>> findAll() {
         return new ResponseEntity<>(
                 service.findAll(),
+                HttpStatus.OK
+        );
+    }
+
+    @GetMapping("/{id}")
+    ResponseEntity<ScheduleResponse> findById(
+            @PathVariable(name = "id") UUID id
+    ) {
+        return new ResponseEntity<>(
+                service.findById(id),
                 HttpStatus.OK
         );
     }
