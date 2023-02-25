@@ -1,9 +1,12 @@
 package com.github.karixdev.scheduleservice.schedule;
 
+import com.github.karixdev.scheduleservice.course.Course;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.LinkedHashSet;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
 @Builder
@@ -53,6 +56,13 @@ public class Schedule {
             nullable = false
     )
     private Integer groupNumber;
+
+    @OneToMany(
+            mappedBy = "schedule",
+            orphanRemoval = true
+    )
+    @Builder.Default
+    private Set<Course> courses = new LinkedHashSet<>();
 
     @Override
     public boolean equals(Object o) {
