@@ -43,4 +43,23 @@ public class HtmlElementService {
 
         return map;
     }
+
+    public int getSizeAttr(Element element, String attrName) {
+        try {
+            return Integer.parseInt(element.attr(attrName));
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
+
+    public int getCssSizeProperty(Map<String, String> styles, String propertyName) {
+        if (styles.get(propertyName) == null) {
+            return 0;
+        }
+
+        return Integer.parseInt(
+                styles.get(propertyName)
+                        .split("px")[0]
+        );
+    }
 }

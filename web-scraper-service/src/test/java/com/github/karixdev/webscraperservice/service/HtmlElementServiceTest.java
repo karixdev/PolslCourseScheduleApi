@@ -48,4 +48,58 @@ public class HtmlElementServiceTest {
         assertThat(result).isEqualTo(stylesMap);
     }
 
+    @Test
+    void GivenNotExistingAttributeName_WhenGetSizeAttr_ThenReturnsZero() {
+        // Given
+        Element el = new Element("div");
+        String attrName = "cw";
+
+        // When
+        int result = underTest.getSizeAttr(el, attrName);
+
+        // Then
+        assertThat(result).isEqualTo(0);
+    }
+
+    @Test
+    void GivenExistingPropertyName_WhenGetSizeAttr_ThenReturnsCorrectValue() {
+        // Given
+        Element el = new Element("div");
+        String attrName = "cw";
+        el.attr(attrName, String.valueOf(10));
+
+        // When
+        int result = underTest.getSizeAttr(el, attrName);
+
+        // Then
+        assertThat(result).isEqualTo(10);
+    }
+
+    @Test
+    void GivenNotExistingPropertyName_WhenGetCssSizeProperty_ThenReturnsZero() {
+        // Given
+        Map<String, String> styles = Map.of();
+        String propertyName = "width";
+
+        // When
+        int result = underTest.getCssSizeProperty(styles, propertyName);
+
+        // Then
+        assertThat(result).isEqualTo(0);
+    }
+
+    @Test
+    void GivenExistingPropertyName_WhenGetCssSizeProperty_ThenReturnsCorrectValue() {
+        // Given
+        Map<String, String> styles = Map.of(
+                "width", "10px"
+        );
+        String propertyName = "width";
+
+        // When
+        int result = underTest.getCssSizeProperty(styles, propertyName);
+
+        // Then
+        assertThat(result).isEqualTo(10);
+    }
 }
