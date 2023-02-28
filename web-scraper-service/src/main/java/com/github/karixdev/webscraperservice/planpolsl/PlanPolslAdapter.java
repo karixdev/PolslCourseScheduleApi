@@ -1,8 +1,9 @@
-package com.github.karixdev.webscraperservice.service;
+package com.github.karixdev.webscraperservice.planpolsl;
 
-import com.github.karixdev.webscraperservice.dto.CourseCell;
-import com.github.karixdev.webscraperservice.dto.TimeCell;
-import com.github.karixdev.webscraperservice.properties.PlanPolslAdapterProperties;
+import com.github.karixdev.webscraperservice.planpolsl.domain.CourseCell;
+import com.github.karixdev.webscraperservice.planpolsl.domain.TimeCell;
+import com.github.karixdev.webscraperservice.planpolsl.properties.PlanPolslAdapterProperties;
+import com.github.karixdev.webscraperservice.shared.service.HtmlElementService;
 import lombok.RequiredArgsConstructor;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;

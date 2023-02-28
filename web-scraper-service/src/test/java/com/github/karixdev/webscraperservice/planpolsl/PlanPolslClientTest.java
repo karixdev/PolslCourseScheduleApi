@@ -1,10 +1,12 @@
-package com.github.karixdev.webscraperservice.service;
+package com.github.karixdev.webscraperservice.planpolsl;
 
-import com.github.karixdev.webscraperservice.dto.CourseCell;
-import com.github.karixdev.webscraperservice.dto.PlanPolslResponse;
-import com.github.karixdev.webscraperservice.dto.TimeCell;
-import com.github.karixdev.webscraperservice.exception.PlanPolslUnavailableException;
-import com.github.karixdev.webscraperservice.properties.PlanPolslClientProperties;
+import com.github.karixdev.webscraperservice.planpolsl.domain.CourseCell;
+import com.github.karixdev.webscraperservice.planpolsl.domain.PlanPolslResponse;
+import com.github.karixdev.webscraperservice.planpolsl.domain.TimeCell;
+import com.github.karixdev.webscraperservice.planpolsl.exception.PlanPolslUnavailableException;
+import com.github.karixdev.webscraperservice.planpolsl.PlanPolslAdapter;
+import com.github.karixdev.webscraperservice.planpolsl.PlanPolslClient;
+import com.github.karixdev.webscraperservice.planpolsl.properties.PlanPolslClientProperties;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

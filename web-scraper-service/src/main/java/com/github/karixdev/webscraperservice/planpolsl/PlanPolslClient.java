@@ -1,8 +1,8 @@
-package com.github.karixdev.webscraperservice.service;
+package com.github.karixdev.webscraperservice.planpolsl;
 
-import com.github.karixdev.webscraperservice.dto.PlanPolslResponse;
-import com.github.karixdev.webscraperservice.properties.PlanPolslClientProperties;
-import com.github.karixdev.webscraperservice.exception.PlanPolslUnavailableException;
+import com.github.karixdev.webscraperservice.planpolsl.domain.PlanPolslResponse;
+import com.github.karixdev.webscraperservice.planpolsl.properties.PlanPolslClientProperties;
+import com.github.karixdev.webscraperservice.planpolsl.exception.PlanPolslUnavailableException;
 import lombok.RequiredArgsConstructor;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;

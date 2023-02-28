@@ -1,5 +1,6 @@
-package com.github.karixdev.webscraperservice.service;
+package com.github.karixdev.webscraperservice.shared.service;
 
+import com.github.karixdev.webscraperservice.shared.service.HtmlElementService;
 import org.jsoup.nodes.Element;
 import org.junit.jupiter.api.Test;
 

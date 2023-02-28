@@ -1,4 +1,4 @@
-package com.github.karixdev.webscraperservice.service;
+package com.github.karixdev.webscraperservice.shared.service;
 
 import org.jsoup.nodes.Element;
 import org.springframework.stereotype.Service;

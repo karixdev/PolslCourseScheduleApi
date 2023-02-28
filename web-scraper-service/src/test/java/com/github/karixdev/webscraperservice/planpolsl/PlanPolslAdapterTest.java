@@ -1,7 +1,9 @@
-package com.github.karixdev.webscraperservice.service;
+package com.github.karixdev.webscraperservice.planpolsl;
 
-import com.github.karixdev.webscraperservice.dto.CourseCell;
-import com.github.karixdev.webscraperservice.dto.TimeCell;
+import com.github.karixdev.webscraperservice.planpolsl.domain.CourseCell;
+import com.github.karixdev.webscraperservice.planpolsl.domain.TimeCell;
+import com.github.karixdev.webscraperservice.planpolsl.PlanPolslAdapter;
+import com.github.karixdev.webscraperservice.shared.service.HtmlElementService;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.junit.jupiter.api.Test;

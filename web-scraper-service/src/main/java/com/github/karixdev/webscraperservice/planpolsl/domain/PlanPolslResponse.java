@@ -1,4 +1,4 @@
-package com.github.karixdev.webscraperservice.dto;
+package com.github.karixdev.webscraperservice.planpolsl.domain;
 
 import java.util.Set;
 

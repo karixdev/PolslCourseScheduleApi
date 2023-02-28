@@ -1,4 +1,4 @@
-package com.github.karixdev.webscraperservice.properties;
+package com.github.karixdev.webscraperservice.planpolsl.properties;
 
 public class PlanPolslAdapterProperties {
     public static final String TIME_CELL_CLASS = "CD";
