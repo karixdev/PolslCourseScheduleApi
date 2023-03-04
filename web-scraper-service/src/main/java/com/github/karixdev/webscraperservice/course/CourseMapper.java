@@ -1,6 +1,7 @@
 package com.github.karixdev.webscraperservice.course;
 
 import com.github.karixdev.webscraperservice.course.domain.Course;
+import com.github.karixdev.webscraperservice.course.domain.CourseType;
 import com.github.karixdev.webscraperservice.course.exception.NoScheduleStartTimeException;
 import com.github.karixdev.webscraperservice.course.properties.CourseMapperProperties;
 import com.github.karixdev.webscraperservice.planpolsl.domain.CourseCell;
@@ -45,9 +46,12 @@ public class CourseMapper {
                 true
         );
 
+        CourseType courseType = getCourseType(courseCell.text());
+
         return new Course(
                 startsAt,
-                endsAt
+                endsAt,
+                courseType
         );
     }
 
@@ -68,5 +72,22 @@ public class CourseMapper {
         int minutes = (int) ((totalTime - hours) * 60);
 
         return LocalTime.of(hours, minutes);
+    }
+
+    private CourseType getCourseType(String text) {
+        String[] linesSplit = text.split("\n");
+        String[] firstLineSplit = linesSplit[0].split(",");
+
+        if (firstLineSplit.length == 1) {
+            return CourseType.INFO;
+        }
+
+        return switch (firstLineSplit[1].trim()) {
+            case "ćw" -> CourseType.PRACTICAL;
+            case "lab" -> CourseType.LAB;
+            case "proj" -> CourseType.PROJECT;
+            case "wyk" -> CourseType.LECTURE;
+            default -> CourseType.INFO;
+        };
     }
 }

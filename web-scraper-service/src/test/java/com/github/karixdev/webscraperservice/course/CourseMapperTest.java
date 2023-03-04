@@ -1,14 +1,19 @@
 package com.github.karixdev.webscraperservice.course;
 
 import com.github.karixdev.webscraperservice.course.domain.Course;
+import com.github.karixdev.webscraperservice.course.domain.CourseType;
 import com.github.karixdev.webscraperservice.course.exception.NoScheduleStartTimeException;
 import com.github.karixdev.webscraperservice.planpolsl.domain.CourseCell;
 import com.github.karixdev.webscraperservice.planpolsl.domain.PlanPolslResponse;
 import com.github.karixdev.webscraperservice.planpolsl.domain.TimeCell;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.time.LocalTime;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -51,14 +56,55 @@ public class CourseMapperTest {
         Set<Course> expected = Set.of(
                 new Course(
                         LocalTime.of(8, 30),
-                        LocalTime.of(11, 45)
+                        LocalTime.of(11, 45),
+                        CourseType.INFO
                 ),
                 new Course(
                         LocalTime.of(12, 0),
-                        LocalTime.of(13, 30)
+                        LocalTime.of(13, 30),
+                        CourseType.INFO
                 )
         );
 
         assertThat(result).isEqualTo(expected);
+    }
+
+    @ParameterizedTest
+    @MethodSource("courseTypesInputParameters")
+    void GivenPlanPolslWithDifferentCourseTypes_WhenMap_ThenReturnsValidSetOfCourses(String name, CourseType expectedType) {
+        // Given
+        PlanPolslResponse planPolslResponse = new PlanPolslResponse(
+                Set.of(
+                        new TimeCell("08:00-09:00"),
+                        new TimeCell("09:00-10:00")
+                ),
+                Set.of(
+                        new CourseCell(259, 254, 135, 154, name)
+                )
+        );
+
+        // When
+        Set<Course> courses = underTest.map(planPolslResponse);
+
+        // Then
+        Set<Course> expected = Set.of(
+                new Course(
+                        LocalTime.of(8, 30),
+                        LocalTime.of(11, 45),
+                        expectedType
+                )
+        );
+
+        assertThat(courses).isEqualTo(expected);
+    }
+
+    private static Stream<Arguments> courseTypesInputParameters() {
+        return Stream.of(
+                Arguments.of("course, wyk", CourseType.LECTURE),
+                Arguments.of("course, lab", CourseType.LAB),
+                Arguments.of("course, proj", CourseType.PROJECT),
+                Arguments.of("course, ćw", CourseType.PRACTICAL),
+                Arguments.of("course", CourseType.INFO)
+        );
     }
 }
