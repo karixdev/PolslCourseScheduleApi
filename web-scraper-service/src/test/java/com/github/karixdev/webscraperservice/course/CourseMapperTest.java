@@ -57,11 +57,13 @@ public class CourseMapperTest {
                 new Course(
                         LocalTime.of(8, 30),
                         LocalTime.of(11, 45),
+                        "course 1",
                         CourseType.INFO
                 ),
                 new Course(
                         LocalTime.of(12, 0),
                         LocalTime.of(13, 30),
+                        "course 2",
                         CourseType.INFO
                 )
         );
@@ -91,6 +93,7 @@ public class CourseMapperTest {
                 new Course(
                         LocalTime.of(8, 30),
                         LocalTime.of(11, 45),
+                        "course",
                         expectedType
                 )
         );

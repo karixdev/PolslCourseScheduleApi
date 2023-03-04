@@ -47,10 +47,12 @@ public class CourseMapper {
         );
 
         CourseType courseType = getCourseType(courseCell.text());
+        String name = getName(courseCell.text());
 
         return new Course(
                 startsAt,
                 endsAt,
+                name,
                 courseType
         );
     }
@@ -75,8 +77,7 @@ public class CourseMapper {
     }
 
     private CourseType getCourseType(String text) {
-        String[] linesSplit = text.split("\n");
-        String[] firstLineSplit = linesSplit[0].split(",");
+        String[] firstLineSplit = getFirstLineSplit(text);
 
         if (firstLineSplit.length == 1) {
             return CourseType.INFO;
@@ -89,5 +90,15 @@ public class CourseMapper {
             case "wyk" -> CourseType.LECTURE;
             default -> CourseType.INFO;
         };
+    }
+
+    private String getName(String text) {
+        return getFirstLineSplit(text)[0].trim();
+    }
+
+    private String[] getFirstLineSplit(String text) {
+        String[] linesSplit = text.split("\n");
+
+        return linesSplit[0].split(",");
     }
 }
