@@ -36,7 +36,7 @@ public class CourseMapperTest {
     }
 
     @Test
-    void GivenValidPlanPolsl_WhenMap_ThenReturnsValidSetOfCourses() {
+    void GivenValidPlanPolslResponse_WhenMap_ThenReturnsValidSetOfCourses() {
         // Given
         PlanPolslResponse planPolslResponse = new PlanPolslResponse(
                 Set.of(
@@ -71,7 +71,7 @@ public class CourseMapperTest {
 
     @ParameterizedTest
     @MethodSource("courseTypesInputParameters")
-    void GivenPlanPolslWithDifferentCourseTypes_WhenMap_ThenReturnsValidSetOfCourses(String name, CourseType expectedType) {
+    void GivenPlanPolslResponseWithDifferentCourseTypes_WhenMap_ThenReturnsValidSetOfCourses(String name, CourseType expectedType) {
         // Given
         PlanPolslResponse planPolslResponse = new PlanPolslResponse(
                 Set.of(
