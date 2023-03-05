@@ -1,14 +1,18 @@
 package com.github.karixdev.webscraperservice.planpolsl;
 
 import com.github.karixdev.webscraperservice.planpolsl.domain.CourseCell;
+import com.github.karixdev.webscraperservice.planpolsl.domain.Link;
 import com.github.karixdev.webscraperservice.planpolsl.domain.TimeCell;
 import com.github.karixdev.webscraperservice.planpolsl.properties.PlanPolslAdapterProperties;
 import com.github.karixdev.webscraperservice.shared.service.HtmlElementService;
 import lombok.RequiredArgsConstructor;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
+import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -57,7 +61,17 @@ public class PlanPolslAdapter {
         int ch = htmlElementService.getSizeAttr(element, "ch");
         int cw = htmlElementService.getSizeAttr(element, "cw");
 
-        return new CourseCell(top, left, ch, cw, element.wholeText().trim());
+        Set<Link> links = getLinks(element);
+        String text = getText(element);
+
+        return new CourseCell(
+                top,
+                left,
+                ch,
+                cw,
+                text,
+                links
+        );
     }
 
     private boolean isValidCourseCell(CourseCell courseCell) {
@@ -66,5 +80,22 @@ public class PlanPolslAdapter {
                 courseCell.left() > 0 &&
                 courseCell.ch() > 0 &&
                 courseCell.cw() > 0;
+    }
+
+    private Set<Link> getLinks(Element element) {
+        return element.getElementsByTag("a")
+                .stream()
+                .map(el -> new Link(
+                        el.text(),
+                        el.attr("href"))
+                )
+                .collect(Collectors.toSet());
+    }
+
+    private String getText(Element element) {
+        element.getElementsByTag("a")
+                .forEach(Node::remove);
+
+        return element.wholeText().trim();
     }
 }

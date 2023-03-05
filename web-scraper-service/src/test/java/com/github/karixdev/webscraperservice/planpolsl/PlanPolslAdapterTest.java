@@ -1,8 +1,8 @@
 package com.github.karixdev.webscraperservice.planpolsl;
 
 import com.github.karixdev.webscraperservice.planpolsl.domain.CourseCell;
+import com.github.karixdev.webscraperservice.planpolsl.domain.Link;
 import com.github.karixdev.webscraperservice.planpolsl.domain.TimeCell;
-import com.github.karixdev.webscraperservice.planpolsl.PlanPolslAdapter;
 import com.github.karixdev.webscraperservice.shared.service.HtmlElementService;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -166,6 +166,8 @@ public class PlanPolslAdapterTest {
         Document document = Jsoup.parse("""
                 <div class="coursediv" styles="left: 40px; top: 30px;" cw="20" ch="10">
                     This is course div
+                    <a href="https://site.com">Site</a>
+                    <a href="https://other-site.com">Other site</a>
                 </div>
                 """);
 
@@ -192,13 +194,23 @@ public class PlanPolslAdapterTest {
         Set<CourseCell> result = underTest.getCourseCells(document);
 
         // Then
+        Link expectedLink1 = new Link(
+                "Site",
+                "https://site.com"
+        );
+        Link expectedLink2 = new Link(
+                "Other site",
+                "https://other-site.com"
+        );
+
         assertThat(result).isEqualTo(Set.of(
                 new CourseCell(
                         30,
                         40,
                         10,
                         20,
-                        "This is course div"
+                        "This is course div",
+                        Set.of(expectedLink1, expectedLink2)
                 )
         ));
     }
