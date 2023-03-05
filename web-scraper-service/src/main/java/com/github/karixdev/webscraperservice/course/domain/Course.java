@@ -4,5 +4,7 @@ import java.time.LocalTime;
 
 public record Course(
         LocalTime startsAt,
-        LocalTime endsAt
+        LocalTime endsAt,
+        String name,
+        CourseType courseType
 ) {}
