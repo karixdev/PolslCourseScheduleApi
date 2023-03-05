@@ -5,6 +5,7 @@ import com.github.karixdev.webscraperservice.course.domain.CourseType;
 import com.github.karixdev.webscraperservice.course.exception.NoScheduleStartTimeException;
 import com.github.karixdev.webscraperservice.course.properties.CourseMapperProperties;
 import com.github.karixdev.webscraperservice.planpolsl.domain.CourseCell;
+import com.github.karixdev.webscraperservice.planpolsl.domain.Link;
 import com.github.karixdev.webscraperservice.planpolsl.domain.PlanPolslResponse;
 import com.github.karixdev.webscraperservice.planpolsl.domain.TimeCell;
 import org.springframework.stereotype.Service;
@@ -49,11 +50,14 @@ public class CourseMapper {
         CourseType courseType = getCourseType(courseCell.text());
         String name = getName(courseCell.text());
 
+        Set<String> teachers = getTeachers(courseCell.links());
+
         return new Course(
                 startsAt,
                 endsAt,
                 name,
-                courseType
+                courseType,
+                teachers
         );
     }
 
@@ -100,5 +104,31 @@ public class CourseMapper {
         String[] linesSplit = text.split("\n");
 
         return linesSplit[0].split(",");
+    }
+
+    private Set<String> getTeachers(Set<Link> links) {
+        return links.stream()
+                .filter(link -> getTypeFromUrl(link.href()).equals("10"))
+                .map(Link::text)
+                .collect(Collectors.toSet());
+    }
+
+    private String getTypeFromUrl(String href) {
+        String str = href.substring(9);
+
+        int typeIdx = str.indexOf("type");
+
+        if (typeIdx == -1) {
+            return "";
+        }
+
+        String substr = str.substring(typeIdx);
+
+        if (substr.contains("&")) {
+            int typeEndIdx = substr.indexOf("&");
+            substr = substr.substring(typeIdx, typeEndIdx);
+        }
+
+        return substr.split("=")[1];
     }
 }
