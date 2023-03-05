@@ -12,6 +12,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -50,25 +51,14 @@ public class CourseMapperTest {
                                 254,
                                 135,
                                 154,
-                                "course 1",
-                                Set.of(
-                                        new Link("dr. Big-head",
-                                                "plan.php?type=10&id=100"),
-                                        new Link("dr. Bigger-head",
-                                                "plan.php?type=10&id=123")
-                                )
+                                "course 1"
                         ),
                         new CourseCell(
                                 417,
                                 254,
                                 56,
                                 154,
-                                "course 2",
-                                Set.of(
-                                        new Link(
-                                                "room 2",
-                                                "plan.php?id=100")
-                                )
+                                "course 2"
                         )
                 )
         );
@@ -83,13 +73,15 @@ public class CourseMapperTest {
                         LocalTime.of(11, 45),
                         "course 1",
                         CourseType.INFO,
-                        Set.of("dr. Big-head", "dr. Bigger-head")
+                        DayOfWeek.TUESDAY
+
                 ),
                 new Course(
                         LocalTime.of(12, 0),
                         LocalTime.of(13, 30),
                         "course 2",
-                        CourseType.INFO
+                        CourseType.INFO,
+                        DayOfWeek.TUESDAY
                 )
         );
 
@@ -119,7 +111,39 @@ public class CourseMapperTest {
                         LocalTime.of(8, 30),
                         LocalTime.of(11, 45),
                         "course",
-                        expectedType
+                        expectedType,
+                        DayOfWeek.TUESDAY
+                )
+        );
+
+        assertThat(courses).isEqualTo(expected);
+    }
+
+    @ParameterizedTest
+    @MethodSource("courseDayOfWeekLeftValues")
+    void GivenPlanPolslResponseWithDifferentCourseLeftValues_WhenMap_ThenReturnsValidSetOfCourses(int left, DayOfWeek expectedDay) {
+        // Given
+        PlanPolslResponse planPolslResponse = new PlanPolslResponse(
+                Set.of(
+                        new TimeCell("08:00-09:00"),
+                        new TimeCell("09:00-10:00")
+                ),
+                Set.of(
+                        new CourseCell(259, left, 135, 154, "course")
+                )
+        );
+
+        // When
+        Set<Course> courses = underTest.map(planPolslResponse);
+
+        // Then
+        Set<Course> expected = Set.of(
+                new Course(
+                        LocalTime.of(8, 30),
+                        LocalTime.of(11, 45),
+                        "course",
+                        CourseType.INFO,
+                        expectedDay
                 )
         );
 
@@ -133,6 +157,16 @@ public class CourseMapperTest {
                 Arguments.of("course, proj", CourseType.PROJECT),
                 Arguments.of("course, ćw", CourseType.PRACTICAL),
                 Arguments.of("course", CourseType.INFO)
+        );
+    }
+
+    private static Stream<Arguments> courseDayOfWeekLeftValues() {
+        return Stream.of(
+                Arguments.of(88, DayOfWeek.MONDAY),
+                Arguments.of(254, DayOfWeek.TUESDAY),
+                Arguments.of(420, DayOfWeek.WEDNESDAY),
+                Arguments.of(586, DayOfWeek.THURSDAY),
+                Arguments.of(752, DayOfWeek.FRIDAY)
         );
     }
 }

@@ -10,7 +10,9 @@ import com.github.karixdev.webscraperservice.planpolsl.domain.PlanPolslResponse;
 import com.github.karixdev.webscraperservice.planpolsl.domain.TimeCell;
 import org.springframework.stereotype.Service;
 
+import java.time.DayOfWeek;
 import java.time.LocalTime;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -50,6 +52,8 @@ public class CourseMapper {
         CourseType courseType = getCourseType(courseCell.text());
         String name = getName(courseCell.text());
 
+        DayOfWeek dayOfWeek = getDayOfWeek(courseCell.left());
+
         Set<String> teachers = getTeachers(courseCell.links());
 
         return new Course(
@@ -57,7 +61,8 @@ public class CourseMapper {
                 endsAt,
                 name,
                 courseType,
-                teachers
+                teachers,
+                dayOfWeek
         );
     }
 
@@ -130,5 +135,15 @@ public class CourseMapper {
         }
 
         return substr.split("=")[1];
+    }
+
+    private DayOfWeek getDayOfWeek(int left) {
+        Map<Integer, DayOfWeek> leftValueMap = CourseMapperProperties.DAY_OF_WEEK_MAP;
+
+        return leftValueMap.keySet().stream()
+                .filter(key -> left == key + CourseMapperProperties.WEEK_CELL_HALF_OF_WIDTH || left == key)
+                .findFirst()
+                .map(leftValueMap::get)
+                .orElseThrow();
     }
 }
