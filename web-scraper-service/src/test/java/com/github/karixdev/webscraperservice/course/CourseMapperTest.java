@@ -88,6 +88,48 @@ public class CourseMapperTest {
         assertThat(result).isEqualTo(expected);
     }
 
+    @Test
+    void GivenPlanPolslResponseWithCourseLinks_WhenMap_ThenReturnsValidSetOfCourses() {
+        // Given
+        PlanPolslResponse planPolslResponse = new PlanPolslResponse(
+                Set.of(
+                        new TimeCell("08:00-09:00")
+                ),
+                Set.of(
+                        new CourseCell(
+                                259,
+                                254,
+                                135,
+                                154,
+                                "course",
+                                Set.of(
+                                        new Link("teacher", "plan.php?id=10&type=10"),
+                                        new Link("other link", "plan.php?id=10&type=20"),
+                                        new Link("other link 2", "plan.php?id=10")
+
+                                )
+                        )
+                )
+        );
+
+        // When
+        Set<Course> courses = underTest.map(planPolslResponse);
+
+        // Then
+        Set<Course> expected = Set.of(
+                new Course(
+                        LocalTime.of(8, 30),
+                        LocalTime.of(11, 45),
+                        "course",
+                        CourseType.INFO,
+                        Set.of("teacher"),
+                        DayOfWeek.TUESDAY
+                )
+        );
+
+        assertThat(courses).isEqualTo(expected);
+    }
+
     @ParameterizedTest
     @MethodSource("courseTypesInputParameters")
     void GivenPlanPolslResponseWithDifferentCourseTypes_WhenMap_ThenReturnsValidSetOfCourses(String name, CourseType expectedType) {
