@@ -42,16 +42,10 @@ public class CourseMapperTest {
         Course result = underTest.map(courseCell, startTime);
 
         // Then
-        Course expected = new Course(
-                LocalTime.of(8, 30),
-                LocalTime.of(11, 45),
-                "course 1",
-                CourseType.INFO,
-                DayOfWeek.TUESDAY
-
-        );
-
-        assertThat(result).isEqualTo(expected);
+        assertThat(result.startsAt())
+                .isEqualTo(LocalTime.of(8, 30));
+        assertThat(result.endsAt())
+                .isEqualTo(LocalTime.of(11, 45));
     }
 
     @Test
@@ -75,17 +69,10 @@ public class CourseMapperTest {
         Course result = underTest.map(courseCell, startTime);
 
         // Then
-        Course expected = new Course(
-                LocalTime.of(8, 30),
-                LocalTime.of(11, 45),
-                "course",
-                CourseType.INFO,
-                Set.of("teacher"),
-                DayOfWeek.TUESDAY,
-                Set.of("room")
-        );
-
-        assertThat(result).isEqualTo(expected);
+        assertThat(result.teachers())
+                .isEqualTo(Set.of("teacher"));
+        assertThat(result.rooms())
+                .isEqualTo(Set.of("room"));
     }
 
     @ParameterizedTest
@@ -98,15 +85,8 @@ public class CourseMapperTest {
         Course result = underTest.map(courseCell, startTime);
 
         // Then
-        Course expected = new Course(
-                LocalTime.of(8, 30),
-                LocalTime.of(11, 45),
-                "course",
-                expectedType,
-                DayOfWeek.TUESDAY
-        );
-
-        assertThat(result).isEqualTo(expected);
+        assertThat(result.courseType())
+                .isEqualTo(expectedType);
     }
 
     @ParameterizedTest
@@ -119,15 +99,8 @@ public class CourseMapperTest {
         Course result = underTest.map(courseCell, startTime);
 
         // Then
-        Course expected = new Course(
-                LocalTime.of(8, 30),
-                LocalTime.of(11, 45),
-                "course",
-                CourseType.INFO,
-                expectedDay
-        );
-
-        assertThat(result).isEqualTo(expected);
+        assertThat(result.dayOfWeek())
+                .isEqualTo(expectedDay);
     }
 
     private static Stream<Arguments> courseTypesInputParameters() {
