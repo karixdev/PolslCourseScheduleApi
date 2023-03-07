@@ -104,7 +104,7 @@ public class CourseMapperTest {
                                 "course",
                                 Set.of(
                                         new Link("teacher", "plan.php?id=10&type=10"),
-                                        new Link("other link", "plan.php?id=10&type=20"),
+                                        new Link("room", "plan.php?id=10&type=20"),
                                         new Link("other link 2", "plan.php?id=10")
 
                                 )
@@ -123,7 +123,8 @@ public class CourseMapperTest {
                         "course",
                         CourseType.INFO,
                         Set.of("teacher"),
-                        DayOfWeek.TUESDAY
+                        DayOfWeek.TUESDAY,
+                        Set.of("room")
                 )
         );
 

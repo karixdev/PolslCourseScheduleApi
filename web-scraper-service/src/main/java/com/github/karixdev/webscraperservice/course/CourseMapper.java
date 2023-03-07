@@ -55,6 +55,7 @@ public class CourseMapper {
         DayOfWeek dayOfWeek = getDayOfWeek(courseCell.left());
 
         Set<String> teachers = getTeachers(courseCell.links());
+        Set<String> rooms = getRooms(courseCell.links());
 
         return new Course(
                 startsAt,
@@ -62,7 +63,8 @@ public class CourseMapper {
                 name,
                 courseType,
                 teachers,
-                dayOfWeek
+                dayOfWeek,
+                rooms
         );
     }
 
@@ -145,5 +147,12 @@ public class CourseMapper {
                 .findFirst()
                 .map(leftValueMap::get)
                 .orElseThrow();
+    }
+
+    private Set<String> getRooms(Set<Link> links) {
+        return links.stream()
+                .filter(link -> getTypeFromUrl(link.href()).equals("20"))
+                .map(Link::text)
+                .collect(Collectors.toSet());
     }
 }
