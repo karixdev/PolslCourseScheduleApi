@@ -2,11 +2,9 @@ package com.github.karixdev.webscraperservice.course;
 
 import com.github.karixdev.webscraperservice.course.domain.Course;
 import com.github.karixdev.webscraperservice.course.domain.CourseType;
-import com.github.karixdev.webscraperservice.course.exception.NoScheduleStartTimeException;
 import com.github.karixdev.webscraperservice.planpolsl.domain.CourseCell;
 import com.github.karixdev.webscraperservice.planpolsl.domain.Link;
-import com.github.karixdev.webscraperservice.planpolsl.domain.PlanPolslResponse;
-import com.github.karixdev.webscraperservice.planpolsl.domain.TimeCell;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -18,71 +16,39 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class CourseMapperTest {
     CourseMapper underTest = new CourseMapper();
 
-    @Test
-    void GivenPlanPolslResponseWithEmptyTimeCellsSet_WhenMap_ThenThrowsNoScheduleStartTimeException() {
-        // Given
-        PlanPolslResponse planPolslResponse = new PlanPolslResponse(
-                Set.of(),
-                Set.of()
-        );
+    LocalTime startTime;
 
-        // When & Then
-        assertThatThrownBy(() -> underTest.map(planPolslResponse))
-                .isInstanceOf(NoScheduleStartTimeException.class)
-                .hasMessage("Could not find schedule start time");
+    @BeforeEach
+    void setUp() {
+        startTime = LocalTime.of(8, 0);
     }
 
     @Test
     void GivenValidPlanPolslResponse_WhenMap_ThenReturnsValidSetOfCourses() {
         // Given
-        PlanPolslResponse planPolslResponse = new PlanPolslResponse(
-                Set.of(
-                        new TimeCell("08:00-09:00"),
-                        new TimeCell("09:00-10:00")
-                ),
-                Set.of(
-                        new CourseCell(
-                                259,
-                                254,
-                                135,
-                                154,
-                                "course 1"
-                        ),
-                        new CourseCell(
-                                417,
-                                254,
-                                56,
-                                154,
-                                "course 2"
-                        )
-                )
+        CourseCell courseCell = new CourseCell(
+                259,
+                254,
+                135,
+                154,
+                "course 1"
         );
 
         // When
-        Set<Course> result = underTest.map(planPolslResponse);
+        Course result = underTest.map(courseCell, startTime);
 
         // Then
-        Set<Course> expected = Set.of(
-                new Course(
-                        LocalTime.of(8, 30),
-                        LocalTime.of(11, 45),
-                        "course 1",
-                        CourseType.INFO,
-                        DayOfWeek.TUESDAY
+        Course expected = new Course(
+                LocalTime.of(8, 30),
+                LocalTime.of(11, 45),
+                "course 1",
+                CourseType.INFO,
+                DayOfWeek.TUESDAY
 
-                ),
-                new Course(
-                        LocalTime.of(12, 0),
-                        LocalTime.of(13, 30),
-                        "course 2",
-                        CourseType.INFO,
-                        DayOfWeek.TUESDAY
-                )
         );
 
         assertThat(result).isEqualTo(expected);
@@ -91,106 +57,77 @@ public class CourseMapperTest {
     @Test
     void GivenPlanPolslResponseWithCourseLinks_WhenMap_ThenReturnsValidSetOfCourses() {
         // Given
-        PlanPolslResponse planPolslResponse = new PlanPolslResponse(
+        CourseCell courseCell = new CourseCell(
+                259,
+                254,
+                135,
+                154,
+                "course",
                 Set.of(
-                        new TimeCell("08:00-09:00")
-                ),
-                Set.of(
-                        new CourseCell(
-                                259,
-                                254,
-                                135,
-                                154,
-                                "course",
-                                Set.of(
-                                        new Link("teacher", "plan.php?id=10&type=10"),
-                                        new Link("room", "plan.php?id=10&type=20"),
-                                        new Link("other link 2", "plan.php?id=10")
+                        new Link("teacher", "plan.php?id=10&type=10"),
+                        new Link("room", "plan.php?id=10&type=20"),
+                        new Link("other link 2", "plan.php?id=10")
 
-                                )
-                        )
                 )
         );
 
         // When
-        Set<Course> courses = underTest.map(planPolslResponse);
+        Course result = underTest.map(courseCell, startTime);
 
         // Then
-        Set<Course> expected = Set.of(
-                new Course(
-                        LocalTime.of(8, 30),
-                        LocalTime.of(11, 45),
-                        "course",
-                        CourseType.INFO,
-                        Set.of("teacher"),
-                        DayOfWeek.TUESDAY,
-                        Set.of("room")
-                )
+        Course expected = new Course(
+                LocalTime.of(8, 30),
+                LocalTime.of(11, 45),
+                "course",
+                CourseType.INFO,
+                Set.of("teacher"),
+                DayOfWeek.TUESDAY,
+                Set.of("room")
         );
 
-        assertThat(courses).isEqualTo(expected);
+        assertThat(result).isEqualTo(expected);
     }
 
     @ParameterizedTest
     @MethodSource("courseTypesInputParameters")
     void GivenPlanPolslResponseWithDifferentCourseTypes_WhenMap_ThenReturnsValidSetOfCourses(String name, CourseType expectedType) {
         // Given
-        PlanPolslResponse planPolslResponse = new PlanPolslResponse(
-                Set.of(
-                        new TimeCell("08:00-09:00"),
-                        new TimeCell("09:00-10:00")
-                ),
-                Set.of(
-                        new CourseCell(259, 254, 135, 154, name)
-                )
-        );
+        CourseCell courseCell = new CourseCell(259, 254, 135, 154, name);
 
         // When
-        Set<Course> courses = underTest.map(planPolslResponse);
+        Course result = underTest.map(courseCell, startTime);
 
         // Then
-        Set<Course> expected = Set.of(
-                new Course(
-                        LocalTime.of(8, 30),
-                        LocalTime.of(11, 45),
-                        "course",
-                        expectedType,
-                        DayOfWeek.TUESDAY
-                )
+        Course expected = new Course(
+                LocalTime.of(8, 30),
+                LocalTime.of(11, 45),
+                "course",
+                expectedType,
+                DayOfWeek.TUESDAY
         );
 
-        assertThat(courses).isEqualTo(expected);
+        assertThat(result).isEqualTo(expected);
     }
 
     @ParameterizedTest
     @MethodSource("courseDayOfWeekLeftValues")
     void GivenPlanPolslResponseWithDifferentCourseLeftValues_WhenMap_ThenReturnsValidSetOfCourses(int left, DayOfWeek expectedDay) {
         // Given
-        PlanPolslResponse planPolslResponse = new PlanPolslResponse(
-                Set.of(
-                        new TimeCell("08:00-09:00"),
-                        new TimeCell("09:00-10:00")
-                ),
-                Set.of(
-                        new CourseCell(259, left, 135, 154, "course")
-                )
-        );
+        CourseCell courseCell = new CourseCell(259, left, 135, 154, "course");
 
         // When
-        Set<Course> courses = underTest.map(planPolslResponse);
+        Course result = underTest.map(courseCell, startTime);
 
         // Then
-        Set<Course> expected = Set.of(
-                new Course(
-                        LocalTime.of(8, 30),
-                        LocalTime.of(11, 45),
-                        "course",
-                        CourseType.INFO,
-                        expectedDay
-                )
+        Course expected = new Course(
+                LocalTime.of(8, 30),
+                LocalTime.of(11, 45),
+                "course",
+                CourseType.INFO,
+                expectedDay
         );
 
-        assertThat(courses).isEqualTo(expected);
+        assertThat(result).isEqualTo(expected);
     }
 
     private static Stream<Arguments> courseTypesInputParameters() {

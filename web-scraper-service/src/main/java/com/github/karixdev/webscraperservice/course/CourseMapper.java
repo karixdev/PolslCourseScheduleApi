@@ -2,12 +2,9 @@ package com.github.karixdev.webscraperservice.course;
 
 import com.github.karixdev.webscraperservice.course.domain.Course;
 import com.github.karixdev.webscraperservice.course.domain.CourseType;
-import com.github.karixdev.webscraperservice.course.exception.NoScheduleStartTimeException;
 import com.github.karixdev.webscraperservice.course.properties.CourseMapperProperties;
 import com.github.karixdev.webscraperservice.planpolsl.domain.CourseCell;
 import com.github.karixdev.webscraperservice.planpolsl.domain.Link;
-import com.github.karixdev.webscraperservice.planpolsl.domain.PlanPolslResponse;
-import com.github.karixdev.webscraperservice.planpolsl.domain.TimeCell;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
@@ -18,25 +15,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class CourseMapper {
-    public Set<Course> map(PlanPolslResponse planPolslResponse) {
-        LocalTime scheduleStartTime = getScheduleStartTime(planPolslResponse.timeCells());
-
-        return planPolslResponse.courseCells().stream()
-                .map(cell -> mapCellToCourse(cell, scheduleStartTime))
-                .collect(Collectors.toSet());
-    }
-
-    private LocalTime getScheduleStartTime(Set<TimeCell> timeCells) {
-        return timeCells.stream()
-                .map(timeCell -> LocalTime.parse(timeCell.text().split("-")[0]))
-                .min(LocalTime::compareTo)
-                .orElseThrow(() -> {
-                    throw new NoScheduleStartTimeException();
-                });
-    }
-
-    private Course mapCellToCourse(CourseCell courseCell, LocalTime scheduleStartTime) {
-        int scheduleStartTimeHour = scheduleStartTime.getHour();
+    public Course map(CourseCell courseCell, LocalTime startTime) {
+        int scheduleStartTimeHour = startTime.getHour();
 
         LocalTime startsAt = getTime(
                 courseCell.top(),
