@@ -19,7 +19,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class PlanPolslClient {
     private final WebClient webClient;
-    private final PlanPolslAdapter adapter;
+    private final PlanPolslResponseMapper mapper;
 
     public PlanPolslResponse getSchedule(int planPolslId, int type, int wd) {
         String uri = buildUri(planPolslId, type, wd);
@@ -47,10 +47,7 @@ public class PlanPolslClient {
 
         Document document = Jsoup.parse(responseStr);
 
-        return new PlanPolslResponse(
-                adapter.getTimeCells(document),
-                adapter.getCourseCells(document)
-        );
+        return mapper.map(document);
     }
 
     private String buildUri(int planPolslId, int type, int wd) {

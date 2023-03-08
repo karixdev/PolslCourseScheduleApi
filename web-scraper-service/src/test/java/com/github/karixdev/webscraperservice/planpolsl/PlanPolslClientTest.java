@@ -4,8 +4,6 @@ import com.github.karixdev.webscraperservice.planpolsl.domain.CourseCell;
 import com.github.karixdev.webscraperservice.planpolsl.domain.PlanPolslResponse;
 import com.github.karixdev.webscraperservice.planpolsl.domain.TimeCell;
 import com.github.karixdev.webscraperservice.planpolsl.exception.PlanPolslUnavailableException;
-import com.github.karixdev.webscraperservice.planpolsl.PlanPolslAdapter;
-import com.github.karixdev.webscraperservice.planpolsl.PlanPolslClient;
 import com.github.karixdev.webscraperservice.planpolsl.properties.PlanPolslClientProperties;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,7 +23,7 @@ import static org.mockito.Mockito.when;
 public class PlanPolslClientTest {
     PlanPolslClient underTest;
 
-    PlanPolslAdapter planPolslAdapter;
+    PlanPolslResponseMapper planPolslAdapter;
 
     @BeforeEach
     void setUp() {
@@ -33,7 +31,7 @@ public class PlanPolslClientTest {
                 .baseUrl("http://localhost:8888/")
                 .build();
 
-        planPolslAdapter = mock(PlanPolslAdapter.class);
+        planPolslAdapter = mock(PlanPolslResponseMapper.class);
 
         underTest = new PlanPolslClient(
                 webClient,
@@ -124,11 +122,11 @@ public class PlanPolslClientTest {
                 "This is course div"
         );
 
-        when(planPolslAdapter.getTimeCells(any()))
-                .thenReturn(Set.of(timeCell));
-
-        when(planPolslAdapter.getCourseCells(any()))
-                .thenReturn(Set.of(courseCell));
+        when(planPolslAdapter.map(any()))
+                .thenReturn(new PlanPolslResponse(
+                        Set.of(timeCell),
+                        Set.of(courseCell)
+                ));
 
         // When
         PlanPolslResponse result = underTest.getSchedule(

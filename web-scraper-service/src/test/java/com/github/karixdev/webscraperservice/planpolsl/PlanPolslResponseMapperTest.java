@@ -2,6 +2,7 @@ package com.github.karixdev.webscraperservice.planpolsl;
 
 import com.github.karixdev.webscraperservice.planpolsl.domain.CourseCell;
 import com.github.karixdev.webscraperservice.planpolsl.domain.Link;
+import com.github.karixdev.webscraperservice.planpolsl.domain.PlanPolslResponse;
 import com.github.karixdev.webscraperservice.planpolsl.domain.TimeCell;
 import com.github.karixdev.webscraperservice.shared.service.HtmlElementService;
 import org.jsoup.Jsoup;
@@ -21,59 +22,59 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class PlanPolslAdapterTest {
+public class PlanPolslResponseMapperTest {
     @InjectMocks
-    PlanPolslAdapter underTest;
+    PlanPolslResponseMapper underTest;
 
     @Mock
     HtmlElementService htmlElementService;
 
     @Test
-    void GivenDocumentWithTimeCellContainingTooShortText_WhenGetTimeCells_ThenReturnsEmptyList() {
+    void GivenDocumentWithTimeCellContainingTooShortText_WhenMap_ThenReturnsPlanPolslResponseWithEmptyTimeCellsSet() {
         // Given
         Document document = Jsoup.parse("""
                 <div class="cd">abcd</div>
                 """);
 
         // When
-        Set<TimeCell> result = underTest.getTimeCells(document);
+        PlanPolslResponse result = underTest.map(document);
 
         // Then
-        assertThat(result).isEmpty();
+        assertThat(result.timeCells()).isEmpty();
     }
 
     @Test
-    void GivenDocumentWithTimeCellContainingTextNotMatchingRegex_WhenGetTimeCells_ThenReturnsEmptyList() {
+    void GivenDocumentWithTimeCellContainingTextNotMatchingRegex_WhenMap_ThenReturnsPlanPolslResponseWithEmptyTimeCellsSet() {
         // Given
         Document document = Jsoup.parse("""
                 <div class="cd">ab:cd-ef:gh</div>
                 """);
 
         // When
-        Set<TimeCell> result = underTest.getTimeCells(document);
+        PlanPolslResponse result = underTest.map(document);
 
         // Then
-        assertThat(result).isEmpty();
+        assertThat(result.timeCells()).isEmpty();
     }
 
     @Test
-    void GivenDocumentWithValidTimeCell_WhenGetTimeCells_ThenReturnsProperList() {
+    void GivenDocumentWithValidTimeCell_WhenMap_ThenReturnsThenReturnsPlanPolslResponseWithProperTimeCellsSet() {
         // Given
         Document document = Jsoup.parse("""
                 <div class="cd">07:00-08:00</div>
                 """);
 
         // When
-        Set<TimeCell> result = underTest.getTimeCells(document);
+        PlanPolslResponse result = underTest.map(document);
 
         // Then
-        assertThat(result).isEqualTo(Set.of(
+        assertThat(result.timeCells()).isEqualTo(Set.of(
                 new TimeCell("07:00-08:00")
         ));
     }
 
     @Test
-    void GivenDocumentWithCourseCellWithInvalidStyles_WhenGetCourseCells_ThenReturnsEmptyList() {
+    void GivenDocumentWithCourseCellWithInvalidStyles_WhenMap_ThenReturnsPlanPolslResponseWithEmptyCourseCellsSet() {
         // Given
         Document document = Jsoup.parse("""
                 <div class="coursediv" cw="10" ch="10">
@@ -91,14 +92,14 @@ public class PlanPolslAdapterTest {
                 .thenReturn(0);
 
         // When
-        Set<CourseCell> result = underTest.getCourseCells(document);
+        PlanPolslResponse result = underTest.map(document);
 
         // Then
-        assertThat(result).isEmpty();
+        assertThat(result.courseCells()).isEmpty();
     }
 
     @Test
-    void GivenDocumentWithCourseCellWithInvalidCwAndChAttrs_WhenGetCourseCells_ThenReturnsEmptyList() {
+    void GivenDocumentWithCourseCellWithInvalidCwAndChAttrs_WhenMap__ThenReturnsPlanPolslResponseWithEmptyCourseCellsSet() {
         // Given
         Document document = Jsoup.parse("""
                 <div class="coursediv" styles="left: 10px; top: 10px;">
@@ -119,14 +120,14 @@ public class PlanPolslAdapterTest {
                 .thenReturn(10);
 
         // When
-        Set<CourseCell> result = underTest.getCourseCells(document);
+        PlanPolslResponse result = underTest.map(document);
 
         // Then
-        assertThat(result).isEmpty();
+        assertThat(result.courseCells()).isEmpty();
     }
 
     @Test
-    void GivenDocumentWithCourseCellWithEmptyText_WhenGetCourseCells_ThenReturnsEmptyList() {
+    void GivenDocumentWithCourseCellWithEmptyText_WhenMap__ThenReturnsPlanPolslResponseWithEmptyCourseCellsSet() {
         // Given
         Document document = Jsoup.parse("""
                 <div class="coursediv" styles="left: 40px; top: 30px;" cw="20" ch="10">
@@ -154,14 +155,14 @@ public class PlanPolslAdapterTest {
                 .thenReturn(40);
 
         // When
-        Set<CourseCell> result = underTest.getCourseCells(document);
+        PlanPolslResponse result = underTest.map(document);
 
         // Then
-        assertThat(result).isEmpty();
+        assertThat(result.courseCells()).isEmpty();
     }
 
     @Test
-    void GivenDocumentWithValidCourseCell_WhenGetCourseCells_ThenReturnsProperList() {
+    void GivenDocumentWithValidCourseCell_WhenMap__ThenReturnsPlanPolslResponseWithProperCourseCellsSet() {
         // Given
         Document document = Jsoup.parse("""
                 <div class="coursediv" styles="left: 40px; top: 30px;" cw="20" ch="10">
@@ -191,7 +192,7 @@ public class PlanPolslAdapterTest {
                 .thenReturn(40);
 
         // When
-        Set<CourseCell> result = underTest.getCourseCells(document);
+        PlanPolslResponse result = underTest.map(document);
 
         // Then
         Link expectedLink1 = new Link(
@@ -203,7 +204,7 @@ public class PlanPolslAdapterTest {
                 "https://other-site.com"
         );
 
-        assertThat(result).isEqualTo(Set.of(
+        assertThat(result.courseCells()).isEqualTo(Set.of(
                 new CourseCell(
                         30,
                         40,

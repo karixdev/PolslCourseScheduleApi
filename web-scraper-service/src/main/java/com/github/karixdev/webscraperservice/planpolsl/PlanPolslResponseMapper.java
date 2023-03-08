@@ -2,6 +2,7 @@ package com.github.karixdev.webscraperservice.planpolsl;
 
 import com.github.karixdev.webscraperservice.planpolsl.domain.CourseCell;
 import com.github.karixdev.webscraperservice.planpolsl.domain.Link;
+import com.github.karixdev.webscraperservice.planpolsl.domain.PlanPolslResponse;
 import com.github.karixdev.webscraperservice.planpolsl.domain.TimeCell;
 import com.github.karixdev.webscraperservice.planpolsl.properties.PlanPolslAdapterProperties;
 import com.github.karixdev.webscraperservice.shared.service.HtmlElementService;
@@ -9,10 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
-import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -20,9 +19,17 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class PlanPolslAdapter {
+public class PlanPolslResponseMapper {
     private final HtmlElementService htmlElementService;
-    public Set<TimeCell> getTimeCells(Document document) {
+
+    public PlanPolslResponse map(Document document) {
+        Set<TimeCell> timeCells = getTimeCells(document);
+        Set<CourseCell> courseCells = getCourseCells(document);
+
+        return new PlanPolslResponse(timeCells, courseCells);
+    }
+
+    private Set<TimeCell> getTimeCells(Document document) {
         return document.getElementsByClass(PlanPolslAdapterProperties.TIME_CELL_CLASS)
                 .stream()
                 .map(element -> new TimeCell(element.text()))
@@ -44,7 +51,7 @@ public class PlanPolslAdapter {
         return pattern.matcher(text).matches();
     }
 
-    public Set<CourseCell> getCourseCells(Document document) {
+    private Set<CourseCell> getCourseCells(Document document) {
         return document.getElementsByClass(PlanPolslAdapterProperties.COURSE_CELL_CLASS)
                 .stream()
                 .map(this::getCourseCell)
