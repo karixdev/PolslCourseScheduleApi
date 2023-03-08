@@ -107,7 +107,8 @@ public class CourseMapper {
     }
 
     private String getTypeFromUrl(String href) {
-        String str = href.substring(9);
+        int len = CourseMapperProperties.COURSE_LINKS_PREFIX.length();
+        String str = href.substring(len + 1);
 
         int typeIdx = str.indexOf("type");
 
@@ -156,7 +157,7 @@ public class CourseMapper {
     }
 
     private String getAdditionalInfo(String text) {
-        int idx = text.indexOf("występowanie");
+        int idx = text.indexOf(CourseMapperProperties.COURSE_ADDITIONAL_INFO_PREFIX);
 
         if (idx == -1) {
             return null;

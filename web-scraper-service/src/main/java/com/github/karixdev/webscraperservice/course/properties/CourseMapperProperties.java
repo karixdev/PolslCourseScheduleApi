@@ -17,4 +17,6 @@ public class CourseMapperProperties {
             752, DayOfWeek.FRIDAY,
             918, DayOfWeek.SATURDAY
     );
+    public static final String COURSE_LINKS_PREFIX = "plan.php";
+    public static final String COURSE_ADDITIONAL_INFO_PREFIX = "występowanie";
 }
