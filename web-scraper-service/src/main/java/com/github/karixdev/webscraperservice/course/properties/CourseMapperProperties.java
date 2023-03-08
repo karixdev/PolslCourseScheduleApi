@@ -19,4 +19,6 @@ public class CourseMapperProperties {
     );
     public static final String COURSE_LINKS_PREFIX = "plan.php";
     public static final String COURSE_ADDITIONAL_INFO_PREFIX = "występowanie";
+    public static final String COURSE_LINK_TEACHER_TYPE = "10";
+    public static final String COURSE_LINK_ROOM_TYPE = "20";
 }

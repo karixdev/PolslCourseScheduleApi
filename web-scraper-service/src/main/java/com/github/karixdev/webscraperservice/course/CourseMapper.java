@@ -101,7 +101,9 @@ public class CourseMapper {
 
     private Set<String> getTeachers(Set<Link> links) {
         return links.stream()
-                .filter(link -> getTypeFromUrl(link.href()).equals("10"))
+                .filter(link -> getTypeFromUrl(link.href())
+                        .equals(CourseMapperProperties.COURSE_LINK_TEACHER_TYPE)
+                )
                 .map(Link::text)
                 .collect(Collectors.toSet());
     }
@@ -138,7 +140,9 @@ public class CourseMapper {
 
     private Set<String> getRooms(Set<Link> links) {
         return links.stream()
-                .filter(link -> getTypeFromUrl(link.href()).equals("20"))
+                .filter(link -> getTypeFromUrl(link.href())
+                        .equals(CourseMapperProperties.COURSE_LINK_ROOM_TYPE)
+                )
                 .map(Link::text)
                 .collect(Collectors.toSet());
     }
