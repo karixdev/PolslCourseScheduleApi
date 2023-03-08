@@ -39,6 +39,8 @@ public class CourseMapper {
         Set<String> teachers = getTeachers(courseCell.links());
         Set<String> rooms = getRooms(courseCell.links());
 
+        String additionalInfo = getAdditionalInfo(courseCell.text());
+
         return new Course(
                 startsAt,
                 endsAt,
@@ -47,7 +49,8 @@ public class CourseMapper {
                 teachers,
                 dayOfWeek,
                 weeks,
-                rooms
+                rooms,
+                additionalInfo
         );
     }
 
@@ -150,5 +153,15 @@ public class CourseMapper {
                 .anyMatch(entry -> entry.getKey().equals(left) && entry.getValue().equals(dayOfWeek));
 
         return isOdd ? Weeks.ODD : Weeks.EVEN;
+    }
+
+    private String getAdditionalInfo(String text) {
+        int idx = text.indexOf("występowanie");
+
+        if (idx == -1) {
+            return null;
+        }
+
+        return text.substring(idx).trim();
     }
 }

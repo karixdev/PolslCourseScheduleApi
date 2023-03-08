@@ -118,6 +118,28 @@ public class CourseMapperTest {
                 .isEqualTo(expectedWeeks);
     }
 
+    @Test
+    void GivenCourseCellWithAdditionalInfo_WhenMap_ThenReturnsCourseWithProperAdditionalInfo() {
+        // Given
+        CourseCell courseCell = new CourseCell(
+                259,
+                254,
+                135,
+                154,
+                """
+                        course 1, ćw\n
+                        występowanie: 1.03
+                        """
+                );
+
+        // When
+        Course result = underTest.map(courseCell, startTime);
+
+        // Then
+        assertThat(result.additionalInfo())
+                .isEqualTo("występowanie: 1.03");
+    }
+
     private static Stream<Arguments> courseTypesInputParameters() {
         return Stream.of(
                 Arguments.of("course, wyk", CourseType.LECTURE),
