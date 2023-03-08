@@ -50,7 +50,7 @@ public class CourseMapperTest {
     }
 
     @Test
-    void GivenPlanPolslResponseWithCourseLinks_WhenMap_ThenReturnsValidSetOfCourses() {
+    void GivenCourseCellWithLinks_WhenMap_ThenReturnsValidCourse() {
         // Given
         CourseCell courseCell = new CourseCell(
                 259,
@@ -78,7 +78,7 @@ public class CourseMapperTest {
 
     @ParameterizedTest
     @MethodSource("courseTypesInputParameters")
-    void GivenPlanPolslResponseWithDifferentCourseTypes_WhenMap_ThenReturnsValidSetOfCourses(String name, CourseType expectedType) {
+    void GivenCourseCellWithNameContainingType_WhenMap_ThenReturnsCoursesWithValidCourseType(String name, CourseType expectedType) {
         // Given
         CourseCell courseCell = new CourseCell(259, 254, 135, 154, name);
 
@@ -92,7 +92,7 @@ public class CourseMapperTest {
 
     @ParameterizedTest
     @MethodSource("courseDayOfWeekLeftValues")
-    void GivenPlanPolslResponseWithDifferentCourseLeftValues_WhenMap_ThenReturnsValidSetOfCourses(int left, DayOfWeek expectedDay) {
+    void GivenCourseWithDifferentCourseLeftValues_WhenMap_ThenReturnsCourseWithProperDayOfWeek(int left, DayOfWeek expectedDay) {
         // Given
         CourseCell courseCell = new CourseCell(259, left, 135, 154, "course");
 
@@ -106,7 +106,7 @@ public class CourseMapperTest {
 
     @ParameterizedTest
     @MethodSource("courseWeeksLeftAndCwValues")
-    void GivenCoursesWithDifferentLeftAndCwValues_WhenMap_ThenReturnsCourseWithCorrectWeeks(int left, int cw, Weeks expectedWeeks) {
+    void GivenCourseWithDifferentLeftAndCwValues_WhenMap_ThenReturnsCourseWithCorrectWeeks(int left, int cw, Weeks expectedWeeks) {
         // Given
         CourseCell courseCell = new CourseCell(259, left, 135, cw, "course");
 
