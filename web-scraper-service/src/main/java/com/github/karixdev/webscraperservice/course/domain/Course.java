@@ -12,6 +12,7 @@ public record Course(
         CourseType courseType,
         Set<String> teachers,
         DayOfWeek dayOfWeek,
+        Weeks weeks,
         Set<String> rooms
 ) {
     public Course(
@@ -19,7 +20,8 @@ public record Course(
             LocalTime endsAt,
             String name,
             CourseType courseType,
-            DayOfWeek dayOfWeek
+            DayOfWeek dayOfWeek,
+            Weeks weeks
     ) {
         this(
                 startsAt,
@@ -28,6 +30,7 @@ public record Course(
                 courseType,
                 new HashSet<>(),
                 dayOfWeek,
+                weeks,
                 new HashSet<>()
         );
     }

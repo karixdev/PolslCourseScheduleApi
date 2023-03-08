@@ -2,6 +2,7 @@ package com.github.karixdev.webscraperservice.course;
 
 import com.github.karixdev.webscraperservice.course.domain.Course;
 import com.github.karixdev.webscraperservice.course.domain.CourseType;
+import com.github.karixdev.webscraperservice.course.domain.Weeks;
 import com.github.karixdev.webscraperservice.planpolsl.domain.CourseCell;
 import com.github.karixdev.webscraperservice.planpolsl.domain.Link;
 import org.junit.jupiter.api.BeforeEach;
@@ -103,6 +104,20 @@ public class CourseMapperTest {
                 .isEqualTo(expectedDay);
     }
 
+    @ParameterizedTest
+    @MethodSource("courseWeeksLeftAndCwValues")
+    void GivenCoursesWithDifferentLeftAndCwValues_WhenMap_ThenReturnsCourseWithCorrectWeeks(int left, int cw, Weeks expectedWeeks) {
+        // Given
+        CourseCell courseCell = new CourseCell(259, left, 135, cw, "course");
+
+        // When
+        Course result = underTest.map(courseCell, startTime);
+
+        // Then
+        assertThat(result.weeks())
+                .isEqualTo(expectedWeeks);
+    }
+
     private static Stream<Arguments> courseTypesInputParameters() {
         return Stream.of(
                 Arguments.of("course, wyk", CourseType.LECTURE),
@@ -120,6 +135,32 @@ public class CourseMapperTest {
                 Arguments.of(420, DayOfWeek.WEDNESDAY),
                 Arguments.of(586, DayOfWeek.THURSDAY),
                 Arguments.of(752, DayOfWeek.FRIDAY)
+        );
+    }
+
+    private static Stream<Arguments> courseWeeksLeftAndCwValues() {
+        return Stream.of(
+                // monday
+                Arguments.of(88, 71, Weeks.ODD),
+                Arguments.of(171, 71, Weeks.EVEN),
+                // tuesday
+                Arguments.of(254, 71, Weeks.ODD),
+                Arguments.of(337, 71, Weeks.EVEN),
+                // wednesday
+                Arguments.of(420, 71, Weeks.ODD),
+                Arguments.of(503, 71, Weeks.EVEN),
+                // thursday
+                Arguments.of(586, 71, Weeks.ODD),
+                Arguments.of(669, 71, Weeks.EVEN),
+                // friday
+                Arguments.of(752, 71, Weeks.ODD),
+                Arguments.of(835, 71, Weeks.EVEN),
+
+                Arguments.of(88, 154, Weeks.EVERY),
+                Arguments.of(254, 154, Weeks.EVERY),
+                Arguments.of(420, 154, Weeks.EVERY),
+                Arguments.of(586, 154, Weeks.EVERY),
+                Arguments.of(752, 154, Weeks.EVERY)
         );
     }
 }
