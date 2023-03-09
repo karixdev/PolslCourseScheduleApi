@@ -128,7 +128,8 @@ public class CourseMapperTest {
                 154,
                 """
                         course 1, ćw\n
-                        występowanie: 1.03
+                        występowanie:\n
+                        1.03
                         """
                 );
 

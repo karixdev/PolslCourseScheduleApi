@@ -167,6 +167,8 @@ public class CourseMapper {
             return null;
         }
 
-        return text.substring(idx).trim();
+        return text.substring(idx).trim()
+                .replaceAll("\n", " ")
+                .replaceAll(" +", " ");
     }
 }
