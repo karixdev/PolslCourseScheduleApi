@@ -3,7 +3,6 @@ package com.github.karixdev.webscraperservice.course;
 import com.github.karixdev.webscraperservice.course.domain.Course;
 import com.github.karixdev.webscraperservice.course.domain.CourseType;
 import com.github.karixdev.webscraperservice.course.domain.Weeks;
-import com.github.karixdev.webscraperservice.course.exception.CourseMappingException;
 import com.github.karixdev.webscraperservice.course.properties.CourseMapperProperties;
 import com.github.karixdev.webscraperservice.planpolsl.domain.CourseCell;
 import com.github.karixdev.webscraperservice.planpolsl.domain.Link;
@@ -11,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
