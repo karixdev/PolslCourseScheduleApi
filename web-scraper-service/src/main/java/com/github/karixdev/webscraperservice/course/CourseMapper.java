@@ -3,6 +3,7 @@ package com.github.karixdev.webscraperservice.course;
 import com.github.karixdev.webscraperservice.course.domain.Course;
 import com.github.karixdev.webscraperservice.course.domain.CourseType;
 import com.github.karixdev.webscraperservice.course.domain.Weeks;
+import com.github.karixdev.webscraperservice.course.exception.CourseMappingException;
 import com.github.karixdev.webscraperservice.course.properties.CourseMapperProperties;
 import com.github.karixdev.webscraperservice.planpolsl.domain.CourseCell;
 import com.github.karixdev.webscraperservice.planpolsl.domain.Link;
@@ -129,13 +130,11 @@ public class CourseMapper {
     }
 
     private DayOfWeek getDayOfWeek(int left) {
-        Map<Integer, DayOfWeek> leftValueMap = CourseMapperProperties.DAY_OF_WEEK_MAP;
+        if (CourseMapperProperties.DAY_OF_WEEK_MAP.containsKey(left)) {
+            return CourseMapperProperties.DAY_OF_WEEK_MAP.get(left);
+        }
 
-        return leftValueMap.keySet().stream()
-                .filter(key -> left == key + CourseMapperProperties.WEEK_CELL_HALF_OF_WIDTH || left == key)
-                .findFirst()
-                .map(leftValueMap::get)
-                .orElseThrow();
+        return CourseMapperProperties.DAY_OF_WEEK_MAP.get(left - CourseMapperProperties.WEEK_CELL_HALF_OF_WIDTH);
     }
 
     private Set<String> getRooms(Set<Link> links) {
