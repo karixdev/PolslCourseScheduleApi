@@ -1,1 +1,8 @@
 plan-polsl-url: https://plan.polsl.pl/
+
+spring:
+  rabbitmq:
+    password: password
+    username: user
+    host: localhost
+    port: 5672

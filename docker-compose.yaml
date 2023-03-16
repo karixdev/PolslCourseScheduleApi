@@ -10,3 +10,13 @@ services:
       POSTGRES_PASSWORD: root
     ports:
       - '5432:5432'
+  
+  rabbitmq:
+    container_name: 'rabbitmq'
+    image: rabbitmq:3.11.7-management-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: user
+      RABBITMQ_DEFAULT_PASS: password
+    ports:
+      - '5672:5672'
+      - '15672:15672'
