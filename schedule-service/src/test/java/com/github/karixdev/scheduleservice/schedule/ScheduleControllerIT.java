@@ -35,6 +35,7 @@ public class ScheduleControllerIT extends ContainersEnvironment {
                 .semester(1)
                 .name("schedule-name")
                 .groupNumber(1)
+                .wd(0)
                 .build());
 
         String payload = """
@@ -43,7 +44,8 @@ public class ScheduleControllerIT extends ContainersEnvironment {
                     "plan_polsl_id": 1999,
                     "semester": 2,
                     "name": "schedule-name",
-                    "group_number": 1
+                    "group_number": 1,
+                    "wd": 0
                 }
                 """;
 
@@ -65,7 +67,8 @@ public class ScheduleControllerIT extends ContainersEnvironment {
                     "plan_polsl_id": 1999,
                     "semester": 2,
                     "name": "available-name",
-                    "group_number": 1
+                    "group_number": 1,
+                    "wd": 0
                 }
                 """;
 
@@ -108,6 +111,7 @@ public class ScheduleControllerIT extends ContainersEnvironment {
                         .semester(1)
                         .name("schedule1")
                         .groupNumber(2)
+                        .wd(1)
                         .build(),
                 Schedule.builder()
                         .type(1)
@@ -115,6 +119,7 @@ public class ScheduleControllerIT extends ContainersEnvironment {
                         .semester(1)
                         .name("schedule2")
                         .groupNumber(1)
+                        .wd(4)
                         .build(),
                 Schedule.builder()
                         .type(1)
@@ -122,6 +127,7 @@ public class ScheduleControllerIT extends ContainersEnvironment {
                         .semester(2)
                         .name("schedule3")
                         .groupNumber(1)
+                        .wd(0)
                         .build()
         ));
 
@@ -161,6 +167,7 @@ public class ScheduleControllerIT extends ContainersEnvironment {
                 .semester(1)
                 .name("schedule1")
                 .groupNumber(2)
+                .wd(2)
                 .build());
 
         scheduleRepository.save(Schedule.builder()
@@ -169,6 +176,7 @@ public class ScheduleControllerIT extends ContainersEnvironment {
                 .semester(1)
                 .name("schedule2")
                 .groupNumber(1)
+                .wd(0)
                 .build());
 
         webClient.get().uri("/api/v2/schedules/" + schedule.getId().toString())
@@ -191,7 +199,8 @@ public class ScheduleControllerIT extends ContainersEnvironment {
                     "plan_polsl_id": 1999,
                     "semester": 2,
                     "name": "schedule-name",
-                    "group_number": 1
+                    "group_number": 1,
+                    "wd": 0
                 }
                 """;
 
@@ -210,6 +219,7 @@ public class ScheduleControllerIT extends ContainersEnvironment {
                 .semester(1)
                 .name("schedule1")
                 .groupNumber(2)
+                .wd(4)
                 .build());
 
         scheduleRepository.save(Schedule.builder()
@@ -218,6 +228,7 @@ public class ScheduleControllerIT extends ContainersEnvironment {
                 .semester(1)
                 .name("schedule2")
                 .groupNumber(1)
+                .wd(0)
                 .build());
 
         String payload = """
@@ -245,6 +256,7 @@ public class ScheduleControllerIT extends ContainersEnvironment {
                 .semester(1)
                 .name("schedule1")
                 .groupNumber(2)
+                .wd(0)
                 .build());
 
         scheduleRepository.save(Schedule.builder()
@@ -253,6 +265,7 @@ public class ScheduleControllerIT extends ContainersEnvironment {
                 .semester(1)
                 .name("schedule2")
                 .groupNumber(1)
+                .wd(0)
                 .build());
 
         String payload = """
@@ -261,7 +274,8 @@ public class ScheduleControllerIT extends ContainersEnvironment {
                     "plan_polsl_id": 1999,
                     "semester": 5,
                     "name": "schedule3",
-                    "group_number": 7
+                    "group_number": 7,
+                    "wd": 0
                 }
                 """;
 
@@ -285,6 +299,7 @@ public class ScheduleControllerIT extends ContainersEnvironment {
                 .semester(1)
                 .name("schedule2")
                 .groupNumber(1)
+                .wd(2)
                 .build());
 
         webClient.delete().uri("/api/v2/schedules/" + UUID.randomUUID())
@@ -300,6 +315,7 @@ public class ScheduleControllerIT extends ContainersEnvironment {
                 .semester(1)
                 .name("schedule2")
                 .groupNumber(1)
+                .wd(2)
                 .build());
 
         webClient.delete().uri("/api/v2/schedules/" + schedule.getId())

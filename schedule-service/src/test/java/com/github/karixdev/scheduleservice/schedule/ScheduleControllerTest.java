@@ -40,14 +40,16 @@ public class ScheduleControllerTest {
                 0,
                 0,
                 "",
-                0
+                0,
+                -1
         );
         validScheduleRequest = new ScheduleRequest(
                 1,
                 1,
                 1,
                 "unavailable",
-                1
+                1,
+                0
         );
     }
 

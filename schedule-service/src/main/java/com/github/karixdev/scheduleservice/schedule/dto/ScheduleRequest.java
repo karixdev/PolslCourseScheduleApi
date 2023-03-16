@@ -25,5 +25,10 @@ public record ScheduleRequest(
         @JsonProperty("group_number")
         @NotNull
         @Positive
-        Integer groupNumber
+        Integer groupNumber,
+
+        @JsonProperty("wd")
+        @NotNull
+        @PositiveOrZero
+        Integer wd
 ) {}

@@ -50,7 +50,8 @@ public class ScheduleServiceTest {
                 1999,
                 1,
                 "schedule",
-                1
+                1,
+                0
         );
 
         when(repository.findByName(eq("schedule")))
@@ -70,7 +71,8 @@ public class ScheduleServiceTest {
                 1999,
                 1,
                 "available",
-                1
+                1,
+                4
         );
 
         when(repository.findByName(eq("available")))
@@ -83,6 +85,7 @@ public class ScheduleServiceTest {
                 .semester(1)
                 .groupNumber(1)
                 .name("available")
+                .wd(4)
                 .build();
 
         when(repository.save(eq(Schedule.builder()
@@ -91,6 +94,7 @@ public class ScheduleServiceTest {
                 .semester(1)
                 .groupNumber(1)
                 .name("available")
+                .wd(4)
                 .build())))
                 .thenReturn(savedSchedule);
 
@@ -152,7 +156,8 @@ public class ScheduleServiceTest {
                 1999,
                 1,
                 "schedule-name",
-                1
+                1,
+                0
         );
 
         when(repository.findById(eq(id)))
@@ -176,7 +181,8 @@ public class ScheduleServiceTest {
                 1999,
                 1,
                 "schedule-name",
-                1
+                1,
+                0
         );
 
         when(repository.findById(eq(id)))
@@ -207,7 +213,8 @@ public class ScheduleServiceTest {
                 1410,
                 7,
                 "schedule-name",
-                8
+                8,
+                0
         );
 
         when(repository.findById(eq(id)))

@@ -57,6 +57,12 @@ public class Schedule {
     )
     private Integer groupNumber;
 
+    @Column(
+            name = "wd",
+            nullable = false
+    )
+    private Integer wd;
+
     @OneToMany(
             mappedBy = "schedule",
             orphanRemoval = true
@@ -74,11 +80,12 @@ public class Schedule {
                 Objects.equals(planPolslId, schedule.planPolslId) &&
                 Objects.equals(semester, schedule.semester) &&
                 Objects.equals(name, schedule.name) &&
-                Objects.equals(groupNumber, schedule.groupNumber);
+                Objects.equals(groupNumber, schedule.groupNumber) &&
+                Objects.equals(wd, schedule.wd);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, type, planPolslId, semester, name, groupNumber);
+        return Objects.hash(id, type, planPolslId, semester, name, groupNumber, wd);
     }
 }

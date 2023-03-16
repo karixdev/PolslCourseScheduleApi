@@ -30,6 +30,7 @@ public class ScheduleService {
                 .semester(scheduleRequest.semester())
                 .name(scheduleRequest.name())
                 .groupNumber(scheduleRequest.groupNumber())
+                .wd(scheduleRequest.wd())
                 .build());
 
         return new ScheduleResponse(
@@ -90,6 +91,7 @@ public class ScheduleService {
         schedule.setPlanPolslId(scheduleRequest.planPolslId());
         schedule.setSemester(scheduleRequest.semester());
         schedule.setGroupNumber(scheduleRequest.groupNumber());
+        schedule.setWd(scheduleRequest.wd());
 
         repository.save(schedule);
 

@@ -34,6 +34,7 @@ public class ScheduleRepositoryTest extends ContainersEnvironment {
                 .semester(1)
                 .name("other-schedule")
                 .groupNumber(1)
+                .wd(0)
                 .build();
 
         em.persistAndFlush(schedule);
@@ -56,6 +57,7 @@ public class ScheduleRepositoryTest extends ContainersEnvironment {
                 .semester(1)
                 .name(name)
                 .groupNumber(1)
+                .wd(4)
                 .build();
 
         em.persist(schedule);
@@ -66,6 +68,7 @@ public class ScheduleRepositoryTest extends ContainersEnvironment {
                 .semester(1)
                 .name("other-schedule")
                 .groupNumber(1)
+                .wd(0)
                 .build();
 
         em.persistAndFlush(otherSchedule);
@@ -86,6 +89,7 @@ public class ScheduleRepositoryTest extends ContainersEnvironment {
                 .semester(1)
                 .name("schedule1")
                 .groupNumber(2)
+                .wd(0)
                 .build();
 
         em.persist(schedule1);
@@ -96,6 +100,7 @@ public class ScheduleRepositoryTest extends ContainersEnvironment {
                 .semester(1)
                 .name("schedule2")
                 .groupNumber(1)
+                .wd(0)
                 .build();
 
         em.persist(schedule2);
@@ -106,6 +111,7 @@ public class ScheduleRepositoryTest extends ContainersEnvironment {
                 .semester(3)
                 .name("schedule3")
                 .groupNumber(1)
+                .wd(0)
                 .build();
 
         em.persistAndFlush(schedule3);
