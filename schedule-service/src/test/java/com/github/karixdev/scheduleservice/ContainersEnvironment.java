@@ -5,6 +5,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.containers.RabbitMQContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 @Testcontainers
@@ -17,27 +18,49 @@ public class ContainersEnvironment {
                     .withDatabaseName("schedule-service-test")
                     .withReuse(true);
 
+    static final RabbitMQContainer rabbitMQContainer =
+            new RabbitMQContainer("rabbitmq:3.11.7-management-alpine")
+                    .withUser("user", "password")
+                    .withReuse(true);
+
     @BeforeAll
     static void beforeAll() {
         postgreSQLContainer.start();
+        rabbitMQContainer.start();
     }
 
     @DynamicPropertySource
-    static void overrideDatabaseConnectionProperties(DynamicPropertyRegistry dynamicPropertyRegistry) {
-        dynamicPropertyRegistry.add(
+    static void overrideDatabaseConnectionProperties(DynamicPropertyRegistry registry) {
+        registry.add(
                 "spring.datasource.url",
                 postgreSQLContainer::getJdbcUrl);
 
-        dynamicPropertyRegistry.add(
+        registry.add(
                 "spring.datasource.username",
                 postgreSQLContainer::getUsername);
 
-        dynamicPropertyRegistry.add(
+        registry.add(
                 "spring.datasource.password",
                 postgreSQLContainer::getPassword);
 
-        dynamicPropertyRegistry.add(
+        registry.add(
                 "spring.datasource.driver-class-name",
                 postgreSQLContainer::getDriverClassName);
+
+        registry.add(
+                "spring.rabbitmq.host",
+                rabbitMQContainer::getHost);
+
+        registry.add(
+                "spring.rabbitmq.port",
+                rabbitMQContainer::getAmqpPort);
+
+        registry.add(
+                "spring.rabbitmq.password",
+                rabbitMQContainer::getAdminPassword);
+
+        registry.add(
+                "spring.rabbitmq.username",
+                rabbitMQContainer::getAdminUsername);
     }
 }

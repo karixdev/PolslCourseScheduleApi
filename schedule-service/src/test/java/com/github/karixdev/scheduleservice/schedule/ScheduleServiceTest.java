@@ -16,9 +16,9 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ScheduleServiceTest {
@@ -27,6 +27,9 @@ public class ScheduleServiceTest {
 
     @Mock
     ScheduleRepository repository;
+
+    @Mock
+    ScheduleProducer producer;
 
     Schedule schedule;
 
@@ -61,6 +64,8 @@ public class ScheduleServiceTest {
         assertThatThrownBy(() -> underTest.create(scheduleRequest))
                 .isInstanceOf(ScheduleNameUnavailableException.class)
                 .hasMessage("name schedule is unavailable");
+
+        verify(producer, never()).sendScheduleUpdateRequest(any());
     }
 
     @Test
@@ -110,6 +115,8 @@ public class ScheduleServiceTest {
                 .isEqualTo(scheduleRequest.groupNumber());
         assertThat(result.id())
                 .isEqualTo(savedSchedule.getId());
+
+        verify(producer).sendScheduleUpdateRequest(eq(savedSchedule));
     }
 
     @Test
@@ -170,6 +177,8 @@ public class ScheduleServiceTest {
                         "Schedule with id %s not found",
                         id
                 ));
+
+        verify(producer, never()).sendScheduleUpdateRequest(any());
     }
 
     @Test
@@ -202,6 +211,8 @@ public class ScheduleServiceTest {
         assertThatThrownBy(() -> underTest.update(id, scheduleRequest))
                 .isInstanceOf(ScheduleNameUnavailableException.class)
                 .hasMessage("name schedule-name is unavailable");
+
+        verify(producer, never()).sendScheduleUpdateRequest(any());
     }
 
     @Test
@@ -246,6 +257,8 @@ public class ScheduleServiceTest {
                 .isEqualTo(scheduleRequest.semester());
         assertThat(result.groupNumber())
                 .isEqualTo(scheduleRequest.groupNumber());
+
+        verify(producer).sendScheduleUpdateRequest(eq(schedule));
     }
 
     @Test

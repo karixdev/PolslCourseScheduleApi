@@ -16,6 +16,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ScheduleService {
     private final ScheduleRepository repository;
+    private final ScheduleProducer producer;
 
     @Transactional
     public ScheduleResponse create(ScheduleRequest scheduleRequest) {
@@ -32,6 +33,8 @@ public class ScheduleService {
                 .groupNumber(scheduleRequest.groupNumber())
                 .wd(scheduleRequest.wd())
                 .build());
+
+        producer.sendScheduleUpdateRequest(schedule);
 
         return new ScheduleResponse(
                 schedule.getId(),
@@ -94,6 +97,8 @@ public class ScheduleService {
         schedule.setWd(scheduleRequest.wd());
 
         repository.save(schedule);
+
+        producer.sendScheduleUpdateRequest(schedule);
 
         return new ScheduleResponse(
                 schedule.getId(),
