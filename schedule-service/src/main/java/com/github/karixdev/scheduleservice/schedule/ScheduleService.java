@@ -113,4 +113,10 @@ public class ScheduleService {
 
         repository.delete(schedule);
     }
+
+    public void requestScheduleCoursesUpdate(UUID id) {
+        Schedule schedule = findByIdOrElseThrow(id);
+
+        producer.sendScheduleUpdateRequest(schedule);
+    }
 }

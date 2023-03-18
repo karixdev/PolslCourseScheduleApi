@@ -292,4 +292,36 @@ public class ScheduleServiceTest {
         // Then
         verify(repository).delete(eq(schedule));
     }
+
+    @Test
+    void GivenNotExistingScheduleId_WhenRequestScheduleCoursesUpdate_ThenThrowsResourceNotFoundExceptionWithProperMessage() {
+        // Given
+        UUID id = UUID.randomUUID();
+
+        when(repository.findById(eq(id)))
+                .thenReturn(Optional.empty());
+
+        // When & Then
+        assertThatThrownBy(() -> underTest.requestScheduleCoursesUpdate(id))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage(String.format(
+                        "Schedule with id %s not found",
+                        id
+                ));
+    }
+
+    @Test
+    void GivenExistingScheduleId_WhenRequestScheduleCoursesUpdate_ThenSendsMessageToMQ() {
+        // Given
+        UUID id = UUID.randomUUID();
+
+        when(repository.findById(eq(id)))
+                .thenReturn(Optional.of(schedule));
+
+        // When
+        underTest.requestScheduleCoursesUpdate(id);
+
+        // Then
+        verify(producer).sendScheduleUpdateRequest(schedule);
+    }
 }

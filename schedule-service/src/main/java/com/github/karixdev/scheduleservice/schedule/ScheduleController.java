@@ -65,4 +65,13 @@ public class ScheduleController {
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+    @PostMapping("/{id}/courses/update")
+    public ResponseEntity<Void> requestScheduleCoursesUpdate(
+            @PathVariable(name = "id") UUID id
+    ) {
+        service.requestScheduleCoursesUpdate(id);
+
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }

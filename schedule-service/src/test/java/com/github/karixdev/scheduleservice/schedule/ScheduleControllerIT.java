@@ -374,6 +374,50 @@ public class ScheduleControllerIT extends ContainersEnvironment {
                 .expectStatus().isNoContent();
     }
 
+    @Test
+    void shouldNotRequestScheduleCoursesUpdateForNotExistingSchedule() {
+        scheduleRepository.save(Schedule.builder()
+                .type(1)
+                .planPolslId(1999)
+                .semester(1)
+                .name("schedule2")
+                .groupNumber(1)
+                .wd(2)
+                .build());
+
+        webClient.post().uri("/api/v2/schedules/" + UUID.randomUUID() + "/courses/update")
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void shouldRequestScheduleCourses() {
+        Schedule schedule = scheduleRepository.save(Schedule.builder()
+                .type(1)
+                .planPolslId(1999)
+                .semester(1)
+                .name("schedule2")
+                .groupNumber(1)
+                .wd(2)
+                .build());
+
+        webClient.post().uri("/api/v2/schedules/" + schedule.getId() + "/courses/update")
+                .exchange()
+                .expectStatus().isNoContent();
+
+        var expectedMsg = new ScheduleUpdateRequestMessage(
+                schedule.getId(),
+                schedule.getType(),
+                schedule.getPlanPolslId(),
+                schedule.getWd()
+        );
+
+        await().atMost(30, TimeUnit.SECONDS)
+                .untilAsserted(() -> assertThat(getScheduleUpdateRequestMessage())
+                        .isEqualTo(expectedMsg)
+                );
+    }
+
     private ScheduleUpdateRequestMessage getScheduleUpdateRequestMessage() {
         var typeReference = new ParameterizedTypeReference<ScheduleUpdateRequestMessage>() {
             @Override
