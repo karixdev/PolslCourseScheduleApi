@@ -27,7 +27,7 @@ public class Course {
     @Setter(AccessLevel.NONE)
     private UUID id;
 
-    @ManyToOne(cascade = CascadeType.ALL, optional = false)
+    @ManyToOne(optional = false)
     @JoinColumn(
             name = "schedule_id",
             nullable = false
@@ -62,7 +62,8 @@ public class Course {
     @Column(
             name = "additional_info"
     )
-    private String additionalInfo;
+    @Builder.Default
+    private String additionalInfo = "";
 
     @Column(
             name = "day_of_week",

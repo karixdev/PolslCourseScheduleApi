@@ -65,7 +65,8 @@ public class Schedule {
 
     @OneToMany(
             mappedBy = "schedule",
-            orphanRemoval = true
+            orphanRemoval = true,
+            cascade = CascadeType.ALL
     )
     @Builder.Default
     private Set<Course> courses = new LinkedHashSet<>();

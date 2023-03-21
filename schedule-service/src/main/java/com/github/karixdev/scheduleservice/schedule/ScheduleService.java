@@ -57,7 +57,7 @@ public class ScheduleService {
     }
 
     public ScheduleResponse findById(UUID id) {
-        Schedule schedule = findByIdOrElseThrow(id);
+        Schedule schedule = findByIdOrElseThrow(id, false);
 
         return new ScheduleResponse(
                 schedule.getId(),
@@ -67,20 +67,27 @@ public class ScheduleService {
         );
     }
 
-    private Schedule findByIdOrElseThrow(UUID id) {
-        return repository.findById(id)
-                .orElseThrow(() -> {
-                    throw new ResourceNotFoundException(
-                            String.format(
-                                    "Schedule with id %s not found",
-                                    id)
-                    );
-                });
+    public Schedule findByIdOrElseThrow(UUID id, boolean eagerLoad) {
+        Optional<Schedule> optionalSchedule;
+
+        if (eagerLoad) {
+            optionalSchedule = repository.findByIdWithCourses(id);
+        } else {
+            optionalSchedule = repository.findById(id);
+        }
+
+        return optionalSchedule.orElseThrow(() -> {
+            throw new ResourceNotFoundException(
+                    String.format(
+                            "Schedule with id %s not found",
+                            id)
+            );
+        });
     }
 
     @Transactional
     public ScheduleResponse update(UUID id, ScheduleRequest scheduleRequest) {
-        Schedule schedule = findByIdOrElseThrow(id);
+        Schedule schedule = findByIdOrElseThrow(id, false);
 
         Optional<Schedule> scheduleWithName = repository.findByName(scheduleRequest.name());
 
@@ -109,13 +116,13 @@ public class ScheduleService {
     }
 
     public void delete(UUID id) {
-        Schedule schedule = findByIdOrElseThrow(id);
+        Schedule schedule = findByIdOrElseThrow(id, false);
 
         repository.delete(schedule);
     }
 
     public void requestScheduleCoursesUpdate(UUID id) {
-        Schedule schedule = findByIdOrElseThrow(id);
+        Schedule schedule = findByIdOrElseThrow(id, false);
 
         producer.sendScheduleUpdateRequest(schedule);
     }
