@@ -1,6 +1,6 @@
 package com.github.karixdev.webscraperservice.course;
 
-import com.github.karixdev.webscraperservice.course.exception.NoScheduleStartTimeException;
+import com.github.karixdev.webscraperservice.schedule.exception.NoScheduleStartTimeException;
 import com.github.karixdev.webscraperservice.planpolsl.domain.TimeCell;
 import org.springframework.stereotype.Service;
 

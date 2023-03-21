@@ -1,4 +1,4 @@
-package com.github.karixdev.webscraperservice.course.exception;
+package com.github.karixdev.webscraperservice.schedule.exception;
 
 public class NoScheduleStartTimeException extends RuntimeException {
     public NoScheduleStartTimeException() {
