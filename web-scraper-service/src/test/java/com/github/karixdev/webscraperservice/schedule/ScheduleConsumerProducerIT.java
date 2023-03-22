@@ -4,7 +4,7 @@ package com.github.karixdev.webscraperservice.schedule;
 import com.github.karixdev.webscraperservice.ContainersEnvironment;
 import com.github.karixdev.webscraperservice.course.domain.Course;
 import com.github.karixdev.webscraperservice.course.domain.CourseType;
-import com.github.karixdev.webscraperservice.course.domain.Weeks;
+import com.github.karixdev.webscraperservice.course.domain.WeekType;
 import com.github.karixdev.webscraperservice.schedule.message.ScheduleUpdateRequestMessage;
 import com.github.karixdev.webscraperservice.schedule.message.ScheduleUpdateResponseMessage;
 import com.github.tomakehurst.wiremock.WireMockServer;
@@ -110,7 +110,7 @@ public class ScheduleConsumerProducerIT extends ContainersEnvironment {
                                 CourseType.LAB,
                                 "dr. Adam",
                                 DayOfWeek.TUESDAY,
-                                Weeks.EVERY,
+                                WeekType.EVERY,
                                 "314MS",
                                 null
                         )

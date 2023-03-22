@@ -1,6 +1,6 @@
 package com.github.karixdev.webscraperservice.course.domain;
 
-public enum Weeks {
+public enum WeekType {
     EVEN,
     ODD,
     EVERY

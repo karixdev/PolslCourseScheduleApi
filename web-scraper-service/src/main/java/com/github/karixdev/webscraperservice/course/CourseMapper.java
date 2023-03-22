@@ -2,7 +2,7 @@ package com.github.karixdev.webscraperservice.course;
 
 import com.github.karixdev.webscraperservice.course.domain.Course;
 import com.github.karixdev.webscraperservice.course.domain.CourseType;
-import com.github.karixdev.webscraperservice.course.domain.Weeks;
+import com.github.karixdev.webscraperservice.course.domain.WeekType;
 import com.github.karixdev.webscraperservice.course.properties.CourseMapperProperties;
 import com.github.karixdev.webscraperservice.planpolsl.domain.CourseCell;
 import com.github.karixdev.webscraperservice.planpolsl.domain.Link;
@@ -33,7 +33,7 @@ public class CourseMapper {
         String name = getName(courseCell.text());
 
         DayOfWeek dayOfWeek = getDayOfWeek(courseCell.left());
-        Weeks weeks = getWeeks(courseCell.left(), courseCell.cw(), dayOfWeek);
+        WeekType weeks = getWeekType(courseCell.left(), courseCell.cw(), dayOfWeek);
 
         String teachers = getTeachers(courseCell.links());
         String rooms = getRooms(courseCell.links());
@@ -140,9 +140,9 @@ public class CourseMapper {
         );
     }
 
-    private Weeks getWeeks(int left, int cw, DayOfWeek dayOfWeek) {
+    private WeekType getWeekType(int left, int cw, DayOfWeek dayOfWeek) {
         if (cw == CourseMapperProperties.EVERY_WEEK_CW_VALUE) {
-            return Weeks.EVERY;
+            return WeekType.EVERY;
         }
 
         boolean isOdd = CourseMapperProperties.DAY_OF_WEEK_MAP
@@ -150,7 +150,7 @@ public class CourseMapper {
                 .stream()
                 .anyMatch(entry -> entry.getKey().equals(left) && entry.getValue().equals(dayOfWeek));
 
-        return isOdd ? Weeks.ODD : Weeks.EVEN;
+        return isOdd ? WeekType.ODD : WeekType.EVEN;
     }
 
     private String getAdditionalInfo(String text) {
