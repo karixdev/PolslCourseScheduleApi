@@ -59,8 +59,10 @@ public class CourseMapperTest {
                 154,
                 "course",
                 Set.of(
-                        new Link("teacher", "plan.php?id=10&type=10"),
-                        new Link("room", "plan.php?id=10&type=20"),
+                        new Link("teacher 1", "plan.php?id=10&type=10"),
+                        new Link("teacher 2", "plan.php?id=10&type=10"),
+                        new Link("room 1", "plan.php?id=10&type=20"),
+                        new Link("room 2", "plan.php?id=10&type=20"),
                         new Link("other link 2", "plan.php?id=10")
 
                 )
@@ -71,9 +73,9 @@ public class CourseMapperTest {
 
         // Then
         assertThat(result.teachers())
-                .isEqualTo(Set.of("teacher"));
-        assertThat(result.rooms())
-                .isEqualTo(Set.of("room"));
+                .isIn("teacher 1, teacher 2", "teacher 2, teacher 1");
+        assertThat(result.classrooms())
+                .isIn("room 1, room 2", "teacher 2, teacher 1");
     }
 
     @ParameterizedTest

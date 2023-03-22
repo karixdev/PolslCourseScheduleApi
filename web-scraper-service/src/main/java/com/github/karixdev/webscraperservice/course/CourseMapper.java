@@ -35,8 +35,8 @@ public class CourseMapper {
         DayOfWeek dayOfWeek = getDayOfWeek(courseCell.left());
         Weeks weeks = getWeeks(courseCell.left(), courseCell.cw(), dayOfWeek);
 
-        Set<String> teachers = getTeachers(courseCell.links());
-        Set<String> rooms = getRooms(courseCell.links());
+        String teachers = getTeachers(courseCell.links());
+        String rooms = getRooms(courseCell.links());
 
         String additionalInfo = getAdditionalInfo(courseCell.text());
 
@@ -98,13 +98,11 @@ public class CourseMapper {
         return linesSplit[0].split(",");
     }
 
-    private Set<String> getTeachers(Set<Link> links) {
-        return links.stream()
-                .filter(link -> getTypeFromUrl(link.href())
-                        .equals(CourseMapperProperties.COURSE_LINK_TEACHER_TYPE)
-                )
-                .map(Link::text)
-                .collect(Collectors.toSet());
+    private String getTeachers(Set<Link> links) {
+        return String.join(", ", getTextFromLinks(
+                links,
+                CourseMapperProperties.COURSE_LINK_TEACHER_TYPE)
+        );
     }
 
     private String getTypeFromUrl(String href) {
@@ -135,13 +133,11 @@ public class CourseMapper {
         return CourseMapperProperties.DAY_OF_WEEK_MAP.get(left - CourseMapperProperties.WEEK_CELL_HALF_OF_WIDTH);
     }
 
-    private Set<String> getRooms(Set<Link> links) {
-        return links.stream()
-                .filter(link -> getTypeFromUrl(link.href())
-                        .equals(CourseMapperProperties.COURSE_LINK_ROOM_TYPE)
-                )
-                .map(Link::text)
-                .collect(Collectors.toSet());
+    private String getRooms(Set<Link> links) {
+        return String.join(", ", getTextFromLinks(
+                links,
+                CourseMapperProperties.COURSE_LINK_ROOM_TYPE)
+        );
     }
 
     private Weeks getWeeks(int left, int cw, DayOfWeek dayOfWeek) {
@@ -167,5 +163,12 @@ public class CourseMapper {
         return text.substring(idx).trim()
                 .replaceAll("\n", " ")
                 .replaceAll(" +", " ");
+    }
+
+    private Set<String> getTextFromLinks(Set<Link> links, String type) {
+        return links.stream()
+                .filter(link -> getTypeFromUrl(link.href()).equals(type))
+                .map(Link::text)
+                .collect(Collectors.toSet());
     }
 }

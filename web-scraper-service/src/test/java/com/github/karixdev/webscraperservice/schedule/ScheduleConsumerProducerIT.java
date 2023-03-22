@@ -108,10 +108,10 @@ public class ScheduleConsumerProducerIT extends ContainersEnvironment {
                                 LocalTime.of(10, 45),
                                 "This is course div",
                                 CourseType.LAB,
-                                Set.of("dr. Adam"),
+                                "dr. Adam",
                                 DayOfWeek.TUESDAY,
                                 Weeks.EVERY,
-                                Set.of("314MS"),
+                                "314MS",
                                 null
                         )
                 )
