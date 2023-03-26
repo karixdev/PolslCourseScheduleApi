@@ -4,7 +4,7 @@ import com.github.karixdev.scheduleservice.ContainersEnvironment;
 import com.github.karixdev.scheduleservice.course.CourseRepository;
 import com.github.karixdev.scheduleservice.course.CourseType;
 import com.github.karixdev.scheduleservice.course.WeekType;
-import com.github.karixdev.scheduleservice.course.message.CourseMessage;
+import com.github.karixdev.scheduleservice.course.dto.BaseCourseDTO;
 import com.github.karixdev.scheduleservice.schedule.message.ScheduleUpdateResponseMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -58,27 +58,27 @@ public class ScheduleConsumerIT extends ContainersEnvironment {
 
         scheduleRepository.save(schedule);
 
-        var courseMessage1 = new CourseMessage(
+        var courseMessage1 = new BaseCourseDTO(
                 LocalTime.of(8, 30),
                 LocalTime.of(10, 15),
                 "Calculus",
                 CourseType.LAB,
-                Set.of("dr Adam", "mgr Marcin"),
+                "dr Adam, mgr Marcin",
                 DayOfWeek.FRIDAY,
                 WeekType.EVEN,
-                Set.of("314 RMS", "CEK Room C"),
+                "314 RMS, CEK Room C",
                 "contact teacher"
         );
 
-        var courseMessage2 = new CourseMessage(
+        var courseMessage2 = new BaseCourseDTO(
                 LocalTime.of(14, 30),
                 LocalTime.of(16, 15),
                 "C++",
                 CourseType.LECTURE,
-                Set.of("dr. Henryk"),
+                "dr. Henryk",
                 DayOfWeek.WEDNESDAY,
                 WeekType.EVERY,
-                Set.of("CEK Room C"),
+                "CEK Room C",
                 "contact teacher"
         );
 
