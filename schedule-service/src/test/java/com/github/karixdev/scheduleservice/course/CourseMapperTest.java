@@ -1,12 +1,11 @@
 package com.github.karixdev.scheduleservice.course;
 
-import com.github.karixdev.scheduleservice.course.message.CourseMessage;
+import com.github.karixdev.scheduleservice.course.dto.BaseCourseDTO;
 import com.github.karixdev.scheduleservice.schedule.Schedule;
 import org.junit.jupiter.api.Test;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
-import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -15,17 +14,17 @@ public class CourseMapperTest {
     CourseMapper underTest = new CourseMapper();
 
     @Test
-    void GivenCourseMessageAndSchedule_WhenMap_ThenReturnsCorrectCourseMapper() {
+    void GivenBaseCourseDTOAndSchedule_WhenMap_ThenReturnsCorrectCourseMapper() {
         // Given
-        var courseMessage = new CourseMessage(
+        var message = new BaseCourseDTO(
                 LocalTime.of(8, 30),
                 LocalTime.of(10, 15),
                 "Calculus",
                 CourseType.LAB,
-                Set.of("dr Adam", "mgr Marcin"),
+                "dr Adam, mgr Marcin",
                 DayOfWeek.FRIDAY,
                 WeekType.EVEN,
-                Set.of("314 RMS", "CEK Room C"),
+                "314 RMS, CEK Room C",
                 null
         );
 
@@ -40,7 +39,7 @@ public class CourseMapperTest {
                 .build();
 
         // When
-        var result = underTest.map(courseMessage, schedule);
+        var result = underTest.map(message, schedule);
 
         // Then
         assertThat(result.getName())
