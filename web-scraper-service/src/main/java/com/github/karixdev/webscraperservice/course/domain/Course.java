@@ -3,8 +3,8 @@ package com.github.karixdev.webscraperservice.course.domain;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalTimeDeserializer;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer;
+import com.github.karixdev.webscraperservice.shared.mapping.LocalTimeDeserializer;
+import com.github.karixdev.webscraperservice.shared.mapping.LocalTimeSerializer;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
