@@ -1,8 +1,12 @@
 package com.github.karixdev.scheduleservice.course.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.github.karixdev.scheduleservice.course.CourseType;
 import com.github.karixdev.scheduleservice.course.WeekType;
+import com.github.karixdev.scheduleservice.shared.mapping.LocalTimeDeserializer;
+import com.github.karixdev.scheduleservice.shared.mapping.LocalTimeSerializer;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -18,9 +22,13 @@ import java.time.LocalTime;
 @NoArgsConstructor
 @SuperBuilder
 public class BaseCourseDTO {
+        @JsonSerialize(using = LocalTimeSerializer.class)
+        @JsonDeserialize(using = LocalTimeDeserializer.class)
         @JsonProperty("starts_at")
         @NotNull
         private LocalTime startsAt;
+        @JsonDeserialize(using = LocalTimeDeserializer.class)
+        @JsonSerialize(using = LocalTimeSerializer.class)
         @JsonProperty("ends_at")
         @NotNull
         private LocalTime endsAt;
