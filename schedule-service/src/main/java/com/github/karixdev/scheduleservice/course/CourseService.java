@@ -58,8 +58,7 @@ public class CourseService {
 
     @Transactional
     public CourseResponse create(CourseRequest courseRequest) {
-        Schedule schedule = scheduleService.findByIdOrElseThrow(
-                courseRequest.getScheduleId(), false);
+        Schedule schedule = getSchedule(courseRequest.getScheduleId());
 
         Course course = Course.builder()
                 .startsAt(courseRequest.getStartsAt())
@@ -81,12 +80,41 @@ public class CourseService {
 
     @Transactional
     public void delete(UUID id) {
-        Course course = repository.findById(id)
+        Course course = findByIdOrElseThrow(id);
+
+        repository.delete(course);
+    }
+
+    private Course findByIdOrElseThrow(UUID id) {
+        return repository.findById(id)
                 .orElseThrow(() -> {
                     throw new ResourceNotFoundException(
                             "Course with id %s not found".formatted(id));
                 });
+    }
 
-        repository.delete(course);
+    private Schedule getSchedule(UUID id) {
+        return scheduleService.findByIdOrElseThrow(id, false);
+    }
+
+    public CourseResponse update(UUID id, CourseRequest courseRequest) {
+        Course course = findByIdOrElseThrow(id);
+
+        Schedule schedule = getSchedule(courseRequest.getScheduleId());
+
+        course.setSchedule(schedule);
+        course.setStartsAt(courseRequest.getStartsAt());
+        course.setEndsAt(courseRequest.getEndsAt());
+        course.setName(courseRequest.getName());
+        course.setCourseType(courseRequest.getCourseType());
+        course.setTeachers(courseRequest.getTeachers());
+        course.setDayOfWeek(courseRequest.getDayOfWeek());
+        course.setWeekType(courseRequest.getWeekType());
+        course.setClassroom(courseRequest.getClassrooms());
+        course.setAdditionalInfo(courseRequest.getAdditionalInfo());
+
+        repository.save(course);
+
+        return mapper.map(course);
     }
 }

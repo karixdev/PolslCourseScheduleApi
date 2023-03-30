@@ -9,7 +9,10 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.UUID;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -40,6 +43,39 @@ public class CourseControllerTest {
         String json = objectMapper.writeValueAsString(dto);
 
         mockMvc.perform(post("/api/v2/courses")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isBadRequest())
+                .andExpectAll(
+                        jsonPath("$.constraints.starts_at").isNotEmpty(),
+                        jsonPath("$.constraints.ends_at").isNotEmpty(),
+                        jsonPath("$.constraints.name").isNotEmpty(),
+                        jsonPath("$.constraints.course_type").isNotEmpty(),
+                        jsonPath("$.constraints.day_of_week").isNotEmpty(),
+                        jsonPath("$.constraints.week_type").isNotEmpty(),
+                        jsonPath("$.message").value("Validation Failed")
+                );
+    }
+
+    @Test
+    void GivenInvalidCourseRequest_WhenUpdate_ThenRespondsWithBadRequestAndProperBody() throws Exception {
+        BaseCourseDTO dto = BaseCourseDTO.builder()
+                .startsAt(null)
+                .endsAt(null)
+                .name(null)
+                .courseType(null)
+                .teachers("John Doe")
+                .dayOfWeek(null)
+                .weekType(null)
+                .classrooms("Room 101")
+                .additionalInfo("Additional information")
+                .build();
+
+        UUID id = UUID.randomUUID();
+
+        String json = objectMapper.writeValueAsString(dto);
+
+        mockMvc.perform(put("/api/v2/courses/" + id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isBadRequest())

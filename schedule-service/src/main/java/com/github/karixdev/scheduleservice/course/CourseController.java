@@ -26,6 +26,17 @@ public class CourseController {
         );
     }
 
+    @PutMapping("/{id}")
+    ResponseEntity<CourseResponse> update(
+            @Valid @RequestBody CourseRequest courseRequest,
+            @PathVariable UUID id
+    ) {
+        return new ResponseEntity<>(
+                service.update(id, courseRequest),
+                HttpStatus.OK
+        );
+    }
+
     @DeleteMapping("/{id}")
     ResponseEntity<Void> delete(
             @PathVariable UUID id
