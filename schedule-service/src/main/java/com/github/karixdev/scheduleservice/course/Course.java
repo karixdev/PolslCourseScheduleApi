@@ -10,10 +10,11 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Builder
-@AllArgsConstructor
-@NoArgsConstructor
 @Getter
 @Setter
+@ToString
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Table(name = "course")
 public class Course {
@@ -48,14 +49,12 @@ public class Course {
     private CourseType courseType;
 
     @Column(
-            name = "teachers",
-            nullable = false
+            name = "teachers"
     )
     private String teachers;
 
     @Column(
-            name = "classroom",
-            nullable = false
+            name = "classroom"
     )
     private String classroom;
 

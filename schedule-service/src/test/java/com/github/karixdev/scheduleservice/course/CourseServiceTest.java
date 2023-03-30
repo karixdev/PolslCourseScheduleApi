@@ -1,6 +1,8 @@
 package com.github.karixdev.scheduleservice.course;
 
+import com.github.karixdev.scheduleservice.course.dto.CourseRequest;
 import com.github.karixdev.scheduleservice.schedule.Schedule;
+import com.github.karixdev.scheduleservice.schedule.ScheduleService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -12,7 +14,9 @@ import java.time.LocalTime;
 import java.util.Set;
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class CourseServiceTest {
@@ -21,6 +25,12 @@ public class CourseServiceTest {
 
     @Mock
     CourseRepository repository;
+
+    @Mock
+    ScheduleService scheduleService;
+
+    @Mock
+    CourseMapper courseMapper;
 
     @Test
     void GivenScheduleAndSetOfRetrievedCourses_WhenUpdateScheduleCourses_ThenSavesAndDeletesProperCourses() {
@@ -78,5 +88,59 @@ public class CourseServiceTest {
         // Then
         verify(repository).deleteAll(Set.of(course3));
         verify(repository).saveAll(Set.of(course1));
+    }
+
+    @Test
+    void GivenCourseRequest_WhenCreate_ThenRetrievesScheduleSavesCourseAndMapsEntityToResponse() {
+        // Given
+        CourseRequest courseRequest = CourseRequest.builder()
+                .scheduleId(UUID.randomUUID())
+                .startsAt(LocalTime.of(8, 30))
+                .endsAt(LocalTime.of(10, 15))
+                .name("course-name")
+                .courseType(CourseType.LAB)
+                .teachers("dr Adam, dr Marcin")
+                .dayOfWeek(DayOfWeek.FRIDAY)
+                .weekType(WeekType.EVERY)
+                .classrooms("LAB 1")
+                .additionalInfo("Only on 8.03")
+                .build();
+
+        Schedule schedule = Schedule.builder()
+                .id(UUID.randomUUID())
+                .type(0)
+                .planPolslId(1)
+                .semester(2)
+                .groupNumber(3)
+                .wd(0)
+                .name("schedule")
+                .build();
+
+        when(scheduleService.findByIdOrElseThrow(eq(courseRequest.getScheduleId()), eq(false)))
+                .thenReturn(schedule);
+
+        Course course = Course.builder()
+                .schedule(schedule)
+                .startsAt(LocalTime.of(8, 30))
+                .endsAt(LocalTime.of(10, 15))
+                .name("course-name")
+                .courseType(CourseType.LAB)
+                .teachers("dr Adam, dr Marcin")
+                .dayOfWeek(DayOfWeek.FRIDAY)
+                .weekType(WeekType.EVERY)
+                .classroom("LAB 1")
+                .additionalInfo("Only on 8.03")
+                .build();
+
+        // When
+        underTest.create(courseRequest);
+
+        // Then
+        verify(scheduleService).findByIdOrElseThrow(
+                eq(courseRequest.getScheduleId()), eq(false));
+
+        verify(repository).save(eq(course));
+
+        verify(courseMapper).map(eq(course));
     }
 }

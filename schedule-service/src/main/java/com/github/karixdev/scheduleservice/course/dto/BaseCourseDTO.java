@@ -47,7 +47,7 @@ public class BaseCourseDTO {
         @JsonProperty("week_type")
         @NotNull
         private WeekType weekType;
-        @JsonProperty("rooms")
+        @JsonProperty("classrooms")
         @Nullable
         private String classrooms;
         @JsonProperty("additional_info")

@@ -1,6 +1,9 @@
 package com.github.karixdev.scheduleservice.course;
 
+import com.github.karixdev.scheduleservice.course.dto.CourseRequest;
+import com.github.karixdev.scheduleservice.course.dto.CourseResponse;
 import com.github.karixdev.scheduleservice.schedule.Schedule;
+import com.github.karixdev.scheduleservice.schedule.ScheduleService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -12,6 +15,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CourseService {
     private final CourseRepository repository;
+    private final ScheduleService scheduleService;
+    private final CourseMapper mapper;
 
     @Transactional
     public void updateScheduleCourses(Schedule schedule, Set<Course> retrievedCourses) {
@@ -47,5 +52,28 @@ public class CourseService {
                 course1.getDayOfWeek().equals(course2.getDayOfWeek()) &&
                 course1.getEndsAt().equals(course2.getEndsAt()) &&
                 course1.getStartsAt().equals(course2.getStartsAt());
+    }
+
+    @Transactional
+    public CourseResponse create(CourseRequest courseRequest) {
+        Schedule schedule = scheduleService.findByIdOrElseThrow(
+                courseRequest.getScheduleId(), false);
+
+        Course course = Course.builder()
+                .startsAt(courseRequest.getStartsAt())
+                .endsAt(courseRequest.getEndsAt())
+                .name(courseRequest.getName())
+                .courseType(courseRequest.getCourseType())
+                .teachers(courseRequest.getTeachers())
+                .dayOfWeek(courseRequest.getDayOfWeek())
+                .weekType(courseRequest.getWeekType())
+                .classroom(courseRequest.getClassrooms())
+                .additionalInfo(courseRequest.getAdditionalInfo())
+                .schedule(schedule)
+                .build();
+
+        repository.save(course);
+
+        return mapper.map(course);
     }
 }
