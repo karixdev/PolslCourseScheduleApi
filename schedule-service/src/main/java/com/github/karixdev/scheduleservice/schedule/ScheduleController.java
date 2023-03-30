@@ -2,7 +2,6 @@ package com.github.karixdev.scheduleservice.schedule;
 
 import com.github.karixdev.scheduleservice.schedule.dto.ScheduleRequest;
 import com.github.karixdev.scheduleservice.schedule.dto.ScheduleResponse;
-import com.github.karixdev.scheduleservice.schedule.ScheduleService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -67,7 +66,7 @@ public class ScheduleController {
     }
 
     @PostMapping("/{id}/courses/update")
-    public ResponseEntity<Void> requestScheduleCoursesUpdate(
+    ResponseEntity<Void> requestScheduleCoursesUpdate(
             @PathVariable(name = "id") UUID id
     ) {
         service.requestScheduleCoursesUpdate(id);
