@@ -4,11 +4,13 @@ import com.github.karixdev.scheduleservice.course.dto.CourseRequest;
 import com.github.karixdev.scheduleservice.course.dto.CourseResponse;
 import com.github.karixdev.scheduleservice.schedule.Schedule;
 import com.github.karixdev.scheduleservice.schedule.ScheduleService;
+import com.github.karixdev.scheduleservice.shared.exception.ResourceNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -75,5 +77,16 @@ public class CourseService {
         repository.save(course);
 
         return mapper.map(course);
+    }
+
+    @Transactional
+    public void delete(UUID id) {
+        Course course = repository.findById(id)
+                .orElseThrow(() -> {
+                    throw new ResourceNotFoundException(
+                            "Course with id %s not found".formatted(id));
+                });
+
+        repository.delete(course);
     }
 }

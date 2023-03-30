@@ -29,7 +29,6 @@ public class CourseControllerIT extends ContainersEnvironment {
 
     @Test
     void shouldNotCreateCourseForNotExistingSchedule() {
-
         scheduleRepository.save(Schedule.builder()
                 .type(0)
                 .planPolslId(1)
@@ -123,5 +122,47 @@ public class CourseControllerIT extends ContainersEnvironment {
         assertThat(course.getWeekType()).isEqualTo(WeekType.EVEN);
         assertThat(course.getStartsAt()).isEqualTo(LocalTime.of(8, 30));
         assertThat(course.getEndsAt()).isEqualTo(LocalTime.of(10, 15));
+    }
+
+    @Test
+    void shouldNotDeleteNotExistingCourse() {
+        webClient.delete().uri("/api/v2/courses/11111111-1111-1111-1111-111111111111")
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.status").isEqualTo(404)
+                .jsonPath("$.message").isEqualTo("Course with id 11111111-1111-1111-1111-111111111111 not found");
+    }
+
+    @Test
+    void shouldDeleteCourse() {
+        Schedule schedule = Schedule.builder()
+                .type(0)
+                .planPolslId(1337)
+                .semester(1)
+                .groupNumber(2)
+                .name("schedule-2")
+                .wd(4)
+                .build();
+
+        scheduleRepository.save(schedule);
+
+        Course course = Course.builder()
+                .schedule(schedule)
+                .name("course-name")
+                .courseType(CourseType.INFO)
+                .dayOfWeek(DayOfWeek.FRIDAY)
+                .weekType(WeekType.EVERY)
+                .startsAt(LocalTime.of(8, 30))
+                .endsAt(LocalTime.of(10, 15))
+                .build();
+
+        courseRepository.save(course);
+
+        webClient.delete().uri("/api/v2/courses/" + course.getId())
+                .exchange()
+                .expectStatus().isNoContent();
+
+        assertThat(courseRepository.findAll()).isEmpty();
     }
 }

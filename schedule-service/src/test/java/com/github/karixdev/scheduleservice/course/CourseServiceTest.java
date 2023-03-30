@@ -3,6 +3,7 @@ package com.github.karixdev.scheduleservice.course;
 import com.github.karixdev.scheduleservice.course.dto.CourseRequest;
 import com.github.karixdev.scheduleservice.schedule.Schedule;
 import com.github.karixdev.scheduleservice.schedule.ScheduleService;
+import com.github.karixdev.scheduleservice.shared.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -11,9 +12,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -142,5 +145,57 @@ public class CourseServiceTest {
         verify(repository).save(eq(course));
 
         verify(courseMapper).map(eq(course));
+    }
+
+    @Test
+    void GivenNotExistingCourseId_WhenDelete_ThenThrowsResourceNotFoundExceptionWithProperMessage() {
+        // Given
+        UUID id = UUID.randomUUID();
+
+        when(repository.findById(eq(id)))
+                .thenReturn(Optional.empty());
+
+        // When & Then
+        assertThatThrownBy(() -> underTest.delete(id))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("Course with id %s not found".formatted(id));
+    }
+
+    @Test
+    void GivenExistingCourseId_WhenDelete_ThenShouldDeleteCourse() {
+        // Given
+        UUID id = UUID.randomUUID();
+
+        Schedule schedule = Schedule.builder()
+                .id(UUID.randomUUID())
+                .type(0)
+                .planPolslId(1)
+                .semester(2)
+                .groupNumber(3)
+                .wd(0)
+                .name("schedule")
+                .build();
+
+        Course course = Course.builder()
+                .schedule(schedule)
+                .startsAt(LocalTime.of(8, 30))
+                .endsAt(LocalTime.of(10, 15))
+                .name("course-name")
+                .courseType(CourseType.LAB)
+                .teachers("dr Adam, dr Marcin")
+                .dayOfWeek(DayOfWeek.FRIDAY)
+                .weekType(WeekType.EVERY)
+                .classroom("LAB 1")
+                .additionalInfo("Only on 8.03")
+                .build();
+
+        when(repository.findById(eq(id)))
+                .thenReturn(Optional.of(course));
+
+        // When
+        underTest.delete(id);
+
+        // Then
+        verify(repository).delete(course);
     }
 }
