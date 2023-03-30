@@ -26,7 +26,7 @@ public record Course(
         String teachers,
         @JsonProperty("day_of_week")
         DayOfWeek dayOfWeek,
-        @JsonProperty("weeks")
+        @JsonProperty("week_type")
         WeekType weeks,
         @JsonProperty("classrooms")
         String classrooms,
