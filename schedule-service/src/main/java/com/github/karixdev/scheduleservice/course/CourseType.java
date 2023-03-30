@@ -4,5 +4,6 @@ public enum CourseType {
     LECTURE,
     LAB,
     PROJECT,
-    PRACTICAL
+    PRACTICAL,
+    INFO
 }
