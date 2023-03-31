@@ -64,12 +64,14 @@ public class CourseServiceTest {
                 .classroom("LAB 1")
                 .additionalInfo("Only on 8.03")
                 .build();
+
+        sampleSchedule.setCourses(Set.of(sampleCourse));
     }
 
     @Test
     void GivenScheduleAndSetOfRetrievedCourses_WhenUpdateScheduleCourses_ThenSavesAndDeletesProperCourses() {
         // Given
-        var course1 = Course.builder()
+        Course course1 = Course.builder()
                 .name("Calculus I")
                 .courseType(CourseType.PRACTICAL)
                 .teachers("dr. Adam")
@@ -80,7 +82,7 @@ public class CourseServiceTest {
                 .endsAt(LocalTime.of(10, 15))
                 .build();
 
-        var course2 = Course.builder()
+        Course course2 = Course.builder()
                 .name("Physics")
                 .courseType(CourseType.LAB)
                 .teachers("dr. Max")
@@ -91,7 +93,7 @@ public class CourseServiceTest {
                 .endsAt(LocalTime.of(12, 15))
                 .build();
 
-        var course3 = Course.builder()
+        Course course3 = Course.builder()
                 .name("C++")
                 .courseType(CourseType.LECTURE)
                 .teachers("dr. Henryk")
@@ -103,18 +105,21 @@ public class CourseServiceTest {
                 .endsAt(LocalTime.of(16, 15))
                 .build();
 
-        var retrievedCourses = Set.of(course1, course2);
+        Set<Course> retrievedCourses = Set.of(course1, course2);
 
-        var schedule = Schedule.builder()
-                .id(UUID.randomUUID())
-                .type(0)
-                .planPolslId(1333)
-                .semester(3)
-                .name("Schedule")
-                .groupNumber(1)
-                .wd(4)
-                .courses(Set.of(course2, course3))
-                .build();
+        Schedule schedule = sampleSchedule;
+        schedule.setCourses(Set.of(course2, course3));
+
+//        var schedule = Schedule.builder()
+//                .id(UUID.randomUUID())
+//                .type(0)
+//                .planPolslId(1333)
+//                .semester(3)
+//                .name("Schedule")
+//                .groupNumber(1)
+//                .wd(4)
+//                .courses(Set.of(course2, course3))
+//                .build();
 
         // When
         underTest.updateScheduleCourses(schedule, retrievedCourses);
@@ -197,28 +202,7 @@ public class CourseServiceTest {
         // Given
         UUID id = UUID.randomUUID();
 
-        Schedule schedule = Schedule.builder()
-                .id(UUID.randomUUID())
-                .type(0)
-                .planPolslId(1)
-                .semester(2)
-                .groupNumber(3)
-                .wd(0)
-                .name("schedule")
-                .build();
-
-        Course course = Course.builder()
-                .schedule(schedule)
-                .startsAt(LocalTime.of(8, 30))
-                .endsAt(LocalTime.of(10, 15))
-                .name("course-name")
-                .courseType(CourseType.LAB)
-                .teachers("dr Adam, dr Marcin")
-                .dayOfWeek(DayOfWeek.FRIDAY)
-                .weekType(WeekType.EVERY)
-                .classroom("LAB 1")
-                .additionalInfo("Only on 8.03")
-                .build();
+        Course course = sampleCourse;
 
         when(repository.findById(eq(id)))
                 .thenReturn(Optional.of(course));
