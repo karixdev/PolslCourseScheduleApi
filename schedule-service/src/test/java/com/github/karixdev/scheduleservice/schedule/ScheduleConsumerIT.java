@@ -46,7 +46,7 @@ public class ScheduleConsumerIT extends ContainersEnvironment {
     }
 
     @Test
-    void name() {
+    void shouldConsumeMessageFromMQAndUpdateScheduleCourses() {
         Schedule schedule = Schedule.builder()
                 .type(0)
                 .planPolslId(1)
@@ -92,9 +92,7 @@ public class ScheduleConsumerIT extends ContainersEnvironment {
         );
 
         await().atMost(30, TimeUnit.SECONDS)
-                .untilAsserted(() -> {
-                    assertThat(courseRepository.findAll())
-                            .hasSize(2);
-                });
+                .untilAsserted(() -> assertThat(courseRepository.findAll())
+                        .hasSize(2));
     }
 }
