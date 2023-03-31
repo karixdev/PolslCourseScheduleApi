@@ -1,5 +1,8 @@
 package com.github.karixdev.scheduleservice.schedule;
 
+import com.github.karixdev.scheduleservice.course.CourseComparator;
+import com.github.karixdev.scheduleservice.course.CourseMapper;
+import com.github.karixdev.scheduleservice.course.dto.CourseResponse;
 import com.github.karixdev.scheduleservice.schedule.dto.ScheduleRequest;
 import com.github.karixdev.scheduleservice.schedule.dto.ScheduleResponse;
 import com.github.karixdev.scheduleservice.schedule.exception.ScheduleNameUnavailableException;
@@ -17,6 +20,8 @@ import java.util.UUID;
 public class ScheduleService {
     private final ScheduleRepository repository;
     private final ScheduleProducer producer;
+    private final CourseComparator courseComparator;
+    private final CourseMapper courseMapper;
 
     @Transactional
     public ScheduleResponse create(ScheduleRequest scheduleRequest) {
@@ -125,5 +130,14 @@ public class ScheduleService {
         Schedule schedule = findByIdOrElseThrow(id, false);
 
         producer.sendScheduleUpdateRequest(schedule);
+    }
+
+    public List<CourseResponse> findScheduleCourses(UUID id) {
+        Schedule schedule = findByIdOrElseThrow(id, true);
+
+        return schedule.getCourses().stream()
+                .sorted(courseComparator)
+                .map(courseMapper::map)
+                .toList();
     }
 }

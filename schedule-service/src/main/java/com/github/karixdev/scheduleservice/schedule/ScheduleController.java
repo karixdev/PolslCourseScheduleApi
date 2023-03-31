@@ -1,5 +1,6 @@
 package com.github.karixdev.scheduleservice.schedule;
 
+import com.github.karixdev.scheduleservice.course.dto.CourseResponse;
 import com.github.karixdev.scheduleservice.schedule.dto.ScheduleRequest;
 import com.github.karixdev.scheduleservice.schedule.dto.ScheduleResponse;
 import jakarta.validation.Valid;
@@ -72,5 +73,14 @@ public class ScheduleController {
         service.requestScheduleCoursesUpdate(id);
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+
+    @GetMapping("/{id}/courses")
+    ResponseEntity<List<CourseResponse>> findScheduleCourses(@PathVariable UUID id) {
+        return new ResponseEntity<>(
+                service.findScheduleCourses(id),
+                HttpStatus.OK
+        );
     }
 }

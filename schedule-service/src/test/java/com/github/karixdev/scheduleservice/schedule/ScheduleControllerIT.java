@@ -1,6 +1,10 @@
 package com.github.karixdev.scheduleservice.schedule;
 
 import com.github.karixdev.scheduleservice.ContainersEnvironment;
+import com.github.karixdev.scheduleservice.course.Course;
+import com.github.karixdev.scheduleservice.course.CourseRepository;
+import com.github.karixdev.scheduleservice.course.CourseType;
+import com.github.karixdev.scheduleservice.course.WeekType;
 import com.github.karixdev.scheduleservice.schedule.message.ScheduleUpdateRequestMessage;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
@@ -14,6 +18,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import java.lang.reflect.Type;
+import java.time.DayOfWeek;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -38,6 +44,9 @@ public class ScheduleControllerIT extends ContainersEnvironment {
 
     @Autowired
     RabbitAdmin rabbitAdmin;
+
+    @Autowired
+    CourseRepository courseRepository;
 
     @AfterEach
     void tearDown() {
@@ -427,5 +436,59 @@ public class ScheduleControllerIT extends ContainersEnvironment {
         };
 
         return rabbitTemplate.receiveAndConvert(SCHEDULE_UPDATE_REQUEST_QUEUE, typeReference);
+    }
+
+    @Test
+    void shouldRetrieveAllScheduleCoursesInCorrectOrder() {
+        Schedule schedule = Schedule.builder()
+                .type(0)
+                .planPolslId(1337)
+                .semester(1)
+                .groupNumber(2)
+                .name("schedule-1")
+                .wd(4)
+                .build();
+
+        scheduleRepository.save(schedule);
+
+        Course course1 = Course.builder()
+                .schedule(schedule)
+                .name("course-name-1")
+                .courseType(CourseType.INFO)
+                .dayOfWeek(DayOfWeek.FRIDAY)
+                .weekType(WeekType.EVERY)
+                .startsAt(LocalTime.of(8, 30))
+                .endsAt(LocalTime.of(10, 15))
+                .build();
+
+        Course course2 = Course.builder()
+                .schedule(schedule)
+                .name("course-name-2")
+                .courseType(CourseType.LAB)
+                .dayOfWeek(DayOfWeek.TUESDAY)
+                .weekType(WeekType.EVERY)
+                .startsAt(LocalTime.of(10, 30))
+                .endsAt(LocalTime.of(12, 15))
+                .build();
+
+        Course course3 = Course.builder()
+                .schedule(schedule)
+                .name("course-name-3")
+                .courseType(CourseType.LECTURE)
+                .dayOfWeek(DayOfWeek.TUESDAY)
+                .weekType(WeekType.EVERY)
+                .startsAt(LocalTime.of(8, 30))
+                .endsAt(LocalTime.of(10, 15))
+                .build();
+
+        courseRepository.saveAll(List.of(course1, course2, course3));
+
+        webClient.get().uri("/api/v2/schedules/" + schedule.getId() + "/courses")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$[0].id").isEqualTo(course3.getId().toString())
+                .jsonPath("$[1].id").isEqualTo(course2.getId().toString())
+                .jsonPath("$[2].id").isEqualTo(course1.getId().toString());
     }
 }
