@@ -3,6 +3,7 @@ package com.github.karixdev.scheduleservice.course;
 import com.github.karixdev.scheduleservice.ContainersEnvironment;
 import com.github.karixdev.scheduleservice.schedule.Schedule;
 import com.github.karixdev.scheduleservice.schedule.ScheduleRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -26,6 +27,11 @@ public class CourseControllerIT extends ContainersEnvironment {
 
     @Autowired
     ScheduleRepository scheduleRepository;
+
+    @AfterEach
+    void tearDown() {
+        scheduleRepository.deleteAll();
+    }
 
     @Test
     void shouldNotCreateCourseForNotExistingSchedule() {
