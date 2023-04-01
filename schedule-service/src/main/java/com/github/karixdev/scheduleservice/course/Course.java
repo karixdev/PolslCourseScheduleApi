@@ -61,7 +61,6 @@ public class Course {
     @Column(
             name = "additional_info"
     )
-    @Builder.Default
     private String additionalInfo;
 
     @Column(
