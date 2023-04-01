@@ -62,7 +62,7 @@ public class Course {
             name = "additional_info"
     )
     @Builder.Default
-    private String additionalInfo = "";
+    private String additionalInfo;
 
     @Column(
             name = "day_of_week",
