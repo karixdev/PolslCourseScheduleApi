@@ -26,6 +26,12 @@ spring:
     host: localhost
     port: 5672
 
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8000/realms/my_realm
+
 eureka:
   client:
     service-url:
