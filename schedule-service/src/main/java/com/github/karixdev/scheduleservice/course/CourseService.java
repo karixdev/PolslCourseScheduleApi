@@ -9,6 +9,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -45,15 +46,17 @@ public class CourseService {
     }
 
     private boolean hasSameParameters(Course course1, Course course2) {
-        return course1.getName().equals(course2.getName()) &&
-                course1.getCourseType().equals(course2.getCourseType()) &&
-                course1.getTeachers().equals(course2.getTeachers()) &&
-                course1.getClassroom().equals(course2.getClassroom()) &&
-                course1.getAdditionalInfo().equals(course2.getAdditionalInfo()) &&
-                course1.getWeekType().equals(course2.getWeekType()) &&
-                course1.getDayOfWeek().equals(course2.getDayOfWeek()) &&
-                course1.getEndsAt().equals(course2.getEndsAt()) &&
-                course1.getStartsAt().equals(course2.getStartsAt());
+        return Objects.equals(course1.getId(), course2.getId()) &&
+                Objects.equals(course1.getSchedule(), course2.getSchedule()) &&
+                Objects.equals(course1.getName(), course2.getName()) &&
+                course1.getCourseType() == course2.getCourseType() &&
+                Objects.equals(course1.getTeachers(), course2.getTeachers()) &&
+                Objects.equals(course1.getClassroom(), course2.getClassroom()) &&
+                Objects.equals(course1.getAdditionalInfo(), course2.getAdditionalInfo()) &&
+                course1.getDayOfWeek() == course2.getDayOfWeek() &&
+                course1.getWeekType() == course2.getWeekType() &&
+                Objects.equals(course1.getStartsAt(), course2.getStartsAt()) &&
+                Objects.equals(course1.getEndsAt(), course2.getEndsAt());
     }
 
     @Transactional
