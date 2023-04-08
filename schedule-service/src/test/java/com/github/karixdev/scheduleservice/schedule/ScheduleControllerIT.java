@@ -78,7 +78,7 @@ public class ScheduleControllerIT extends ContainersEnvironment {
                 }
                 """;
 
-        webClient.post().uri("/api/v2/schedules")
+        webClient.post().uri("/api/schedules")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(payload)
                 .exchange()
@@ -101,7 +101,7 @@ public class ScheduleControllerIT extends ContainersEnvironment {
                 }
                 """;
 
-        webClient.post().uri("/api/v2/schedules")
+        webClient.post().uri("/api/schedules")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(payload)
                 .exchange()
@@ -172,7 +172,7 @@ public class ScheduleControllerIT extends ContainersEnvironment {
                         .build()
         ));
 
-        webClient.get().uri("/api/v2/schedules")
+        webClient.get().uri("/api/schedules")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -189,7 +189,7 @@ public class ScheduleControllerIT extends ContainersEnvironment {
     void shouldNotFindScheduleById() {
         String id = UUID.randomUUID().toString();
 
-        webClient.get().uri("/api/v2/schedules/" + id)
+        webClient.get().uri("/api/schedules/" + id)
                 .exchange()
                 .expectStatus().isNotFound()
                 .expectBody()
@@ -220,7 +220,7 @@ public class ScheduleControllerIT extends ContainersEnvironment {
                 .wd(0)
                 .build());
 
-        webClient.get().uri("/api/v2/schedules/" + schedule.getId().toString())
+        webClient.get().uri("/api/schedules/" + schedule.getId().toString())
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -245,7 +245,7 @@ public class ScheduleControllerIT extends ContainersEnvironment {
                 }
                 """;
 
-        webClient.put().uri("/api/v2/schedules/" + id)
+        webClient.put().uri("/api/schedules/" + id)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(payload)
                 .exchange()
@@ -282,7 +282,7 @@ public class ScheduleControllerIT extends ContainersEnvironment {
                 }
                 """;
 
-        webClient.put().uri("/api/v2/schedules/" + schedule.getId())
+        webClient.put().uri("/api/schedules/" + schedule.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(payload)
                 .exchange()
@@ -320,7 +320,7 @@ public class ScheduleControllerIT extends ContainersEnvironment {
                 }
                 """;
 
-        webClient.put().uri("/api/v2/schedules/" + schedule.getId())
+        webClient.put().uri("/api/schedules/" + schedule.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(payload)
                 .exchange()
@@ -362,7 +362,7 @@ public class ScheduleControllerIT extends ContainersEnvironment {
                 .wd(2)
                 .build());
 
-        webClient.delete().uri("/api/v2/schedules/" + UUID.randomUUID())
+        webClient.delete().uri("/api/schedules/" + UUID.randomUUID())
                 .exchange()
                 .expectStatus().isNotFound();
     }
@@ -378,7 +378,7 @@ public class ScheduleControllerIT extends ContainersEnvironment {
                 .wd(2)
                 .build());
 
-        webClient.delete().uri("/api/v2/schedules/" + schedule.getId())
+        webClient.delete().uri("/api/schedules/" + schedule.getId())
                 .exchange()
                 .expectStatus().isNoContent();
     }
@@ -394,7 +394,7 @@ public class ScheduleControllerIT extends ContainersEnvironment {
                 .wd(2)
                 .build());
 
-        webClient.post().uri("/api/v2/schedules/" + UUID.randomUUID() + "/courses/update")
+        webClient.post().uri("/api/schedules/" + UUID.randomUUID() + "/courses/update")
                 .exchange()
                 .expectStatus().isNotFound();
     }
@@ -410,7 +410,7 @@ public class ScheduleControllerIT extends ContainersEnvironment {
                 .wd(2)
                 .build());
 
-        webClient.post().uri("/api/v2/schedules/" + schedule.getId() + "/courses/update")
+        webClient.post().uri("/api/schedules/" + schedule.getId() + "/courses/update")
                 .exchange()
                 .expectStatus().isNoContent();
 
@@ -483,7 +483,7 @@ public class ScheduleControllerIT extends ContainersEnvironment {
 
         courseRepository.saveAll(List.of(course1, course2, course3));
 
-        webClient.get().uri("/api/v2/schedules/" + schedule.getId() + "/courses")
+        webClient.get().uri("/api/schedules/" + schedule.getId() + "/courses")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()

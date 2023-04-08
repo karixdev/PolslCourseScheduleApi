@@ -59,7 +59,7 @@ public class ScheduleControllerTest {
         String content = mapper.writeValueAsString(invalidScheduleRequest);
 
         // When & Then
-        mockMvc.perform(post("/api/v2/schedules")
+        mockMvc.perform(post("/api/schedules")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(content))
                 .andExpect(status().isBadRequest())
@@ -83,7 +83,7 @@ public class ScheduleControllerTest {
                 .thenThrow(exception);
 
         // When & Then
-        mockMvc.perform(post("/api/v2/schedules")
+        mockMvc.perform(post("/api/schedules")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(content))
                 .andExpect(status().isBadRequest())
@@ -104,7 +104,7 @@ public class ScheduleControllerTest {
                 .thenThrow(exception);
 
         // When & Then
-        mockMvc.perform(get("/api/v2/schedules/" + id))
+        mockMvc.perform(get("/api/schedules/" + id))
                 .andExpect(status().isNotFound())
                 .andExpectAll(
                         jsonPath("$.status").value(404),
@@ -119,7 +119,7 @@ public class ScheduleControllerTest {
         String content = mapper.writeValueAsString(invalidScheduleRequest);
 
         // When & Then
-        mockMvc.perform(put("/api/v2/schedules/" + id)
+        mockMvc.perform(put("/api/schedules/" + id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(content))
                 .andExpect(status().isBadRequest())
@@ -145,7 +145,7 @@ public class ScheduleControllerTest {
                 .thenThrow(exception);
 
         // When & Then
-        mockMvc.perform(put("/api/v2/schedules/" + id)
+        mockMvc.perform(put("/api/schedules/" + id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(content))
                 .andExpect(status().isBadRequest())

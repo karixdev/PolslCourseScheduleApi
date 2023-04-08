@@ -59,7 +59,7 @@ public class CourseControllerIT extends ContainersEnvironment {
                 }
                 """;
 
-        webClient.post().uri("/api/v2/courses")
+        webClient.post().uri("/api/courses")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(payload)
                 .exchange()
@@ -106,7 +106,7 @@ public class CourseControllerIT extends ContainersEnvironment {
                 }
                 """.formatted(schedule.getId());
 
-        webClient.post().uri("/api/v2/courses")
+        webClient.post().uri("/api/courses")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(payload)
                 .exchange()
@@ -132,7 +132,7 @@ public class CourseControllerIT extends ContainersEnvironment {
 
     @Test
     void shouldNotDeleteNotExistingCourse() {
-        webClient.delete().uri("/api/v2/courses/11111111-1111-1111-1111-111111111111")
+        webClient.delete().uri("/api/courses/11111111-1111-1111-1111-111111111111")
                 .exchange()
                 .expectStatus().isNotFound()
                 .expectBody()
@@ -165,7 +165,7 @@ public class CourseControllerIT extends ContainersEnvironment {
 
         courseRepository.save(course);
 
-        webClient.delete().uri("/api/v2/courses/" + course.getId())
+        webClient.delete().uri("/api/courses/" + course.getId())
                 .exchange()
                 .expectStatus().isNoContent();
 
@@ -189,7 +189,7 @@ public class CourseControllerIT extends ContainersEnvironment {
                 }
                 """;
 
-        webClient.put().uri("/api/v2/courses/11111111-1111-1111-1111-111111111111")
+        webClient.put().uri("/api/courses/11111111-1111-1111-1111-111111111111")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(payload)
                 .exchange()
@@ -239,7 +239,7 @@ public class CourseControllerIT extends ContainersEnvironment {
                 }
                 """;
 
-        webClient.put().uri("/api/v2/courses/" + course.getId())
+        webClient.put().uri("/api/courses/" + course.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(payload)
                 .exchange()
@@ -298,7 +298,7 @@ public class CourseControllerIT extends ContainersEnvironment {
                 }
                 """.formatted(schedule2.getId());
 
-        webClient.put().uri("/api/v2/courses/" + course.getId())
+        webClient.put().uri("/api/courses/" + course.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(payload)
                 .exchange()

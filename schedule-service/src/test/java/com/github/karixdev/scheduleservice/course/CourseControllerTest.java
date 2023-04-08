@@ -42,7 +42,7 @@ public class CourseControllerTest {
 
         String json = objectMapper.writeValueAsString(dto);
 
-        mockMvc.perform(post("/api/v2/courses")
+        mockMvc.perform(post("/api/courses")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isBadRequest())
@@ -75,7 +75,7 @@ public class CourseControllerTest {
 
         String json = objectMapper.writeValueAsString(dto);
 
-        mockMvc.perform(put("/api/v2/courses/" + id)
+        mockMvc.perform(put("/api/courses/" + id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isBadRequest())
