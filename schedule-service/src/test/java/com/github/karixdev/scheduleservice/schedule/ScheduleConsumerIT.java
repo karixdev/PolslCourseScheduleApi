@@ -22,8 +22,9 @@ import static com.github.karixdev.scheduleservice.schedule.props.ScheduleMQPrope
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.NONE;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
-@SpringBootTest(webEnvironment = NONE)
+@SpringBootTest(webEnvironment = RANDOM_PORT)
 public class ScheduleConsumerIT extends ContainersEnvironment {
     @Autowired
     RabbitTemplate rabbitTemplate;

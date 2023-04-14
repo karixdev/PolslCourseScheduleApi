@@ -57,7 +57,34 @@ public class ScheduleControllerIT extends ContainersEnvironment {
     }
 
     @Test
+    void shouldNotCreateScheduleForStandardUser() {
+        String token = getUserToken();
+
+        String payload = """
+                {
+                    "type": 1,
+                    "plan_polsl_id": 1999,
+                    "semester": 2,
+                    "name": "schedule-name",
+                    "group_number": 1,
+                    "wd": 0
+                }
+                """;
+
+        webClient.post().uri("/api/schedules")
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(payload)
+                .exchange()
+                .expectStatus().isForbidden();
+
+        assertThat(scheduleRepository.findAll()).isEmpty();
+    }
+
+    @Test
     void shouldNotCreateSchedule() {
+        String token = getAdminToken();
+
         scheduleRepository.save(Schedule.builder()
                 .type(1)
                 .planPolslId(1999)
@@ -79,6 +106,7 @@ public class ScheduleControllerIT extends ContainersEnvironment {
                 """;
 
         webClient.post().uri("/api/schedules")
+                .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(payload)
                 .exchange()
@@ -90,6 +118,8 @@ public class ScheduleControllerIT extends ContainersEnvironment {
 
     @Test
     void shouldCreateSchedule() {
+        String token = getAdminToken();
+
         String payload = """
                 {
                     "type": 1,
@@ -103,6 +133,7 @@ public class ScheduleControllerIT extends ContainersEnvironment {
 
         webClient.post().uri("/api/schedules")
                 .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + token)
                 .bodyValue(payload)
                 .exchange()
                 .expectStatus().isCreated()
@@ -231,7 +262,8 @@ public class ScheduleControllerIT extends ContainersEnvironment {
     }
 
     @Test
-    void shouldNotUpdateNotExistingSchedule() {
+    void shouldNotUpdateScheduleForStandardUser() {
+        String token = getUserToken();
         UUID id = UUID.randomUUID();
 
         String payload = """
@@ -246,6 +278,31 @@ public class ScheduleControllerIT extends ContainersEnvironment {
                 """;
 
         webClient.put().uri("/api/schedules/" + id)
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(payload)
+                .exchange()
+                .expectStatus().isForbidden();
+    }
+
+    @Test
+    void shouldNotUpdateNotExistingSchedule() {
+        String token = getAdminToken();
+        UUID id = UUID.randomUUID();
+
+        String payload = """
+                {
+                    "type": 1,
+                    "plan_polsl_id": 1999,
+                    "semester": 2,
+                    "name": "schedule-name",
+                    "group_number": 1,
+                    "wd": 0
+                }
+                """;
+
+        webClient.put().uri("/api/schedules/" + id)
+                .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(payload)
                 .exchange()
@@ -254,6 +311,8 @@ public class ScheduleControllerIT extends ContainersEnvironment {
 
     @Test
     void shouldNotUpdateScheduleWhileTryingToAssignUnavailableName() {
+        String token = getAdminToken();
+
         Schedule schedule = scheduleRepository.save(Schedule.builder()
                 .type(1)
                 .planPolslId(2000)
@@ -283,6 +342,7 @@ public class ScheduleControllerIT extends ContainersEnvironment {
                 """;
 
         webClient.put().uri("/api/schedules/" + schedule.getId())
+                .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(payload)
                 .exchange()
@@ -291,6 +351,8 @@ public class ScheduleControllerIT extends ContainersEnvironment {
 
     @Test
     void shouldUpdateSchedule() {
+        String token = getAdminToken();
+
         Schedule schedule = scheduleRepository.save(Schedule.builder()
                 .type(1)
                 .planPolslId(2000)
@@ -321,6 +383,7 @@ public class ScheduleControllerIT extends ContainersEnvironment {
                 """;
 
         webClient.put().uri("/api/schedules/" + schedule.getId())
+                .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(payload)
                 .exchange()
@@ -352,7 +415,9 @@ public class ScheduleControllerIT extends ContainersEnvironment {
     }
 
     @Test
-    void shouldNotDeleteNotExistingSchedule() {
+    void shouldNotDeleteScheduleForStandardUser() {
+        String token = getUserToken();
+
         scheduleRepository.save(Schedule.builder()
                 .type(1)
                 .planPolslId(1999)
@@ -363,12 +428,34 @@ public class ScheduleControllerIT extends ContainersEnvironment {
                 .build());
 
         webClient.delete().uri("/api/schedules/" + UUID.randomUUID())
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus().isForbidden();
+    }
+
+    @Test
+    void shouldNotDeleteNotExistingSchedule() {
+        String token = getAdminToken();
+
+        scheduleRepository.save(Schedule.builder()
+                .type(1)
+                .planPolslId(1999)
+                .semester(1)
+                .name("schedule2")
+                .groupNumber(1)
+                .wd(2)
+                .build());
+
+        webClient.delete().uri("/api/schedules/" + UUID.randomUUID())
+                .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus().isNotFound();
     }
 
     @Test
     void shouldDeleteSchedule() {
+        String token = getAdminToken();
+
         Schedule schedule = scheduleRepository.save(Schedule.builder()
                 .type(1)
                 .planPolslId(1999)
@@ -379,12 +466,15 @@ public class ScheduleControllerIT extends ContainersEnvironment {
                 .build());
 
         webClient.delete().uri("/api/schedules/" + schedule.getId())
+                .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus().isNoContent();
     }
 
     @Test
     void shouldNotRequestScheduleCoursesUpdateForNotExistingSchedule() {
+        String token = getAdminToken();
+
         scheduleRepository.save(Schedule.builder()
                 .type(1)
                 .planPolslId(1999)
@@ -395,12 +485,15 @@ public class ScheduleControllerIT extends ContainersEnvironment {
                 .build());
 
         webClient.post().uri("/api/schedules/" + UUID.randomUUID() + "/courses/update")
+                .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus().isNotFound();
     }
 
     @Test
     void shouldRequestScheduleCourses() {
+        String token = getAdminToken();
+
         Schedule schedule = scheduleRepository.save(Schedule.builder()
                 .type(1)
                 .planPolslId(1999)
@@ -411,6 +504,7 @@ public class ScheduleControllerIT extends ContainersEnvironment {
                 .build());
 
         webClient.post().uri("/api/schedules/" + schedule.getId() + "/courses/update")
+                .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus().isNoContent();
 
