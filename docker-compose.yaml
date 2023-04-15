@@ -32,8 +32,6 @@ services:
     ports:
       - '5672:5672'
       - '15672:15672'
-    networks:
-      - rabbitmq
 
   keycloak:
     container_name: 'keycloak'
@@ -61,30 +59,14 @@ services:
       dockerfile: Dockerfile
     ports:
       - '8761:8761'
-    networks:
-      - discovery-service
 
-  web-scraper-service:
-    container_name: 'web-scraper-service'
-    build:
-      context: web-scraper-service
-      dockerfile: Dockerfile
+  discord-webhooks-mongo:
+    container_name: 'discord-webhooks-mongo'
+    image: mongo:latest
+    restart: always
     environment:
-      SPRING_PROFILES_ACTIVE: docker
-      RABBITMQ_PASSWORD: password
-      RABBITMQ_USERNAME: user
-      RABBITMQ_HOST: rabbitmq
-      EUREKA_NAME: discovery-server
-      EUREKA_PORT: 8761
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+      MONGO_INITDB_DATABASE: discord-webhooks-service
     ports:
-      - '8081:8081'
-    depends_on:
-      - rabbitmq
-      - discovery-server
-    networks:
-      - rabbitmq
-      - discovery-service
-
-networks:
-  rabbitmq:
-  discovery-service:
+      - '27017:27017'
