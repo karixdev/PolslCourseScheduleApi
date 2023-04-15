@@ -53,7 +53,7 @@ public class ScheduleJobIT extends ContainersEnvironment {
     }
 
     @Test
-    void shouldPush() {
+    void shouldRequestForThreeUpdates() {
         scheduleRepository.saveAll(List.of(
                 Schedule.builder()
                         .type(1)
