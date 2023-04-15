@@ -132,6 +132,11 @@ public class ScheduleService {
         producer.sendScheduleUpdateRequest(schedule);
     }
 
+    public void requestScheduleCoursesUpdateForAll() {
+        repository.findAll()
+                .forEach(producer::sendScheduleUpdateRequest);
+    }
+
     public List<CourseResponse> findScheduleCourses(UUID id) {
         Schedule schedule = findByIdOrElseThrow(id, true);
 
