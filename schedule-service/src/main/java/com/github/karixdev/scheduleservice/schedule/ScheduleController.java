@@ -29,9 +29,11 @@ public class ScheduleController {
     }
 
     @GetMapping
-    ResponseEntity<List<ScheduleResponse>> findAll() {
+    ResponseEntity<List<ScheduleResponse>> findAll(
+            @RequestParam(name = "ids", required = false) UUID[] ids
+    ) {
         return new ResponseEntity<>(
-                service.findAll(),
+                service.findAll(ids),
                 HttpStatus.OK
         );
     }

@@ -14,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -392,5 +393,133 @@ public class ScheduleServiceTest {
         // Then
         verify(courseComparator, times(2)).compare(any(), any());
         verify(courseMapper, times(3)).map(any());
+    }
+
+    @Test
+    void GivenEmptyIdsArray_WhenFindAll_ThenMapsAllEntitiesToResponses() {
+        // Given
+        UUID[] ids = {};
+
+        var schedule1 = Schedule.builder()
+                .id(UUID.randomUUID())
+                .type(0)
+                .planPolslId(1)
+                .semester(2)
+                .groupNumber(3)
+                .name("schedule-1")
+                .build();
+        var schedule2 = Schedule.builder()
+                .id(UUID.randomUUID())
+                .type(0)
+                .planPolslId(2)
+                .semester(2)
+                .groupNumber(3)
+                .name("schedule-2")
+                .build();
+        var schedule3 = Schedule.builder()
+                .id(UUID.randomUUID())
+                .type(0)
+                .planPolslId(3)
+                .semester(2)
+                .groupNumber(3)
+                .name("schedule-3")
+                .build();
+
+        when(repository.findAllOrderBySemesterAndGroupNumberAsc()).thenReturn(List.of(schedule1, schedule2, schedule3));
+
+        // When
+        List<ScheduleResponse> result = underTest.findAll(ids);
+
+        // Then
+        assertThat(result).contains(
+                new ScheduleResponse(
+                        schedule1.getId(),
+                        schedule1.getSemester(),
+                        schedule1.getName(),
+                        schedule1.getGroupNumber()
+                )
+        );
+
+        assertThat(result).contains(
+                new ScheduleResponse(
+                        schedule2.getId(),
+                        schedule2.getSemester(),
+                        schedule2.getName(),
+                        schedule2.getGroupNumber()
+                )
+        );
+
+        assertThat(result).contains(
+                new ScheduleResponse(
+                        schedule3.getId(),
+                        schedule3.getSemester(),
+                        schedule3.getName(),
+                        schedule3.getGroupNumber()
+                )
+        );
+    }
+
+    @Test
+    void GivenNotEmptyIdsArray_WhenFindAll_ThenMapsSelectedEntitiesToResponses() {
+        // Given
+        var schedule1 = Schedule.builder()
+                .id(UUID.randomUUID())
+                .type(0)
+                .planPolslId(1)
+                .semester(2)
+                .groupNumber(3)
+                .name("schedule-1")
+                .build();
+        var schedule2 = Schedule.builder()
+                .id(UUID.randomUUID())
+                .type(0)
+                .planPolslId(2)
+                .semester(2)
+                .groupNumber(3)
+                .name("schedule-2")
+                .build();
+        var schedule3 = Schedule.builder()
+                .id(UUID.randomUUID())
+                .type(0)
+                .planPolslId(3)
+                .semester(2)
+                .groupNumber(3)
+                .name("schedule-3")
+                .build();
+
+        UUID[] ids = { schedule1.getId(), schedule3.getId() };
+
+        when(repository.findAllOrderBySemesterAndGroupNumberAsc()).thenReturn(List.of(schedule1, schedule2, schedule3));
+
+        // When
+        List<ScheduleResponse> result = underTest.findAll(ids);
+
+        // Then
+        assertThat(result).contains(
+                new ScheduleResponse(
+                        schedule1.getId(),
+                        schedule1.getSemester(),
+                        schedule1.getName(),
+                        schedule1.getGroupNumber()
+                )
+        );
+
+        assertThat(result).doesNotContain(
+                new ScheduleResponse(
+                        schedule2.getId(),
+                        schedule2.getSemester(),
+                        schedule2.getName(),
+                        schedule2.getGroupNumber()
+                )
+        );
+
+        assertThat(result).contains(
+                new ScheduleResponse(
+                        schedule3.getId(),
+                        schedule3.getSemester(),
+                        schedule3.getName(),
+                        schedule3.getGroupNumber()
+                )
+        );
     }
 }
