@@ -217,6 +217,54 @@ public class ScheduleControllerIT extends ContainersEnvironment {
     }
 
     @Test
+    void shouldRetrieveAllSchedulesWithProvidedIdsInCorrectOrder() {
+        Schedule schedule1 = scheduleRepository.save(
+                Schedule.builder()
+                        .type(1)
+                        .planPolslId(2000)
+                        .semester(1)
+                        .name("schedule1")
+                        .groupNumber(2)
+                        .wd(1)
+                        .build()
+        );
+
+        scheduleRepository.save(Schedule.builder()
+                .type(1)
+                .planPolslId(1999)
+                .semester(1)
+                .name("schedule2")
+                .groupNumber(1)
+                .wd(4)
+                .build());
+
+        Schedule schedule3 = scheduleRepository.save(
+                Schedule.builder()
+                        .type(1)
+                        .planPolslId(1000)
+                        .semester(2)
+                        .name("schedule3")
+                        .groupNumber(1)
+                        .wd(0)
+                        .build()
+        );
+
+        String ids = String.join(",", List.of(
+                schedule1.getId().toString(),
+                schedule3.getId().toString()));
+
+        webClient.get().uri("/api/schedules?ids=" + ids)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.*").isArray()
+                .jsonPath("$[0].id").isEqualTo(
+                        schedule1.getId().toString())
+                .jsonPath("$[1].id").isEqualTo(
+                        schedule3.getId().toString());
+    }
+
+    @Test
     void shouldNotFindScheduleById() {
         String id = UUID.randomUUID().toString();
 

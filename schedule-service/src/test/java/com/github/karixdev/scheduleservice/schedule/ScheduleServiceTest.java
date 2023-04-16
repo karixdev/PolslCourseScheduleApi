@@ -398,7 +398,7 @@ public class ScheduleServiceTest {
     @Test
     void GivenEmptyIdsArray_WhenFindAll_ThenMapsAllEntitiesToResponses() {
         // Given
-        UUID[] ids = {};
+        Set<UUID> ids = Set.of();
 
         var schedule1 = Schedule.builder()
                 .id(UUID.randomUUID())
@@ -425,7 +425,8 @@ public class ScheduleServiceTest {
                 .name("schedule-3")
                 .build();
 
-        when(repository.findAllOrderBySemesterAndGroupNumberAsc()).thenReturn(List.of(schedule1, schedule2, schedule3));
+        when(repository.findAllOrderBySemesterAndGroupNumberAsc())
+                .thenReturn(List.of(schedule1, schedule2, schedule3));
 
         // When
         List<ScheduleResponse> result = underTest.findAll(ids);
@@ -487,9 +488,10 @@ public class ScheduleServiceTest {
                 .name("schedule-3")
                 .build();
 
-        UUID[] ids = { schedule1.getId(), schedule3.getId() };
+        Set<UUID> ids = Set.of(schedule1.getId(), schedule3.getId());
 
-        when(repository.findAllOrderBySemesterAndGroupNumberAsc()).thenReturn(List.of(schedule1, schedule2, schedule3));
+        when(repository.findAllOrderBySemesterAndGroupNumberAsc())
+                .thenReturn(List.of(schedule1, schedule2, schedule3));
 
         // When
         List<ScheduleResponse> result = underTest.findAll(ids);

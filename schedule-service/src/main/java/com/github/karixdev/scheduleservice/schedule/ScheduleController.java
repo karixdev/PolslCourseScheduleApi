@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @RestController
@@ -30,7 +31,7 @@ public class ScheduleController {
 
     @GetMapping
     ResponseEntity<List<ScheduleResponse>> findAll(
-            @RequestParam(name = "ids", required = false) UUID[] ids
+            @RequestParam(name = "ids", required = false) Set<UUID> ids
     ) {
         return new ResponseEntity<>(
                 service.findAll(ids),

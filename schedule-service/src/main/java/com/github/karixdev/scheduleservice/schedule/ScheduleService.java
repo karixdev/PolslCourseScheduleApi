@@ -11,10 +11,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -50,12 +47,12 @@ public class ScheduleService {
         );
     }
 
-    public List<ScheduleResponse> findAll(UUID[] ids) {
+    public List<ScheduleResponse> findAll(Set<UUID> ids) {
         List<Schedule> schedules = repository.findAllOrderBySemesterAndGroupNumberAsc();
 
-        if (ids.length > 0) {
+        if (ids.size() > 0) {
             schedules = schedules.stream()
-                    .filter(schedule -> Arrays.asList(ids).contains(schedule.getId()))
+                    .filter(schedule -> ids.contains(schedule.getId()))
                     .toList();
         }
 
