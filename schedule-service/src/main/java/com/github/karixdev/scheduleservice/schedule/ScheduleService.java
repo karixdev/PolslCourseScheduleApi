@@ -50,7 +50,7 @@ public class ScheduleService {
     public List<ScheduleResponse> findAll(Set<UUID> ids) {
         List<Schedule> schedules = repository.findAllOrderBySemesterAndGroupNumberAsc();
 
-        if (ids.size() > 0) {
+        if (ids != null && ids.size() > 0) {
             schedules = schedules.stream()
                     .filter(schedule -> ids.contains(schedule.getId()))
                     .toList();
