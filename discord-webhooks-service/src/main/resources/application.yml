@@ -18,9 +18,14 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8000/realms/my_realm
+          issuer-uri: http://localhost:8000/realms/polsl-course-api
 
 eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka
+  instance:
+    hostname: localhost
+
+schedule-service:
+  base-url: http://schedule-service

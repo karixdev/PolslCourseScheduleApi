@@ -15,8 +15,14 @@ spring:
           uri: lb://schedule-service
           predicates:
             - Path=/api/schedules/**, /api/courses/**
+        - id: discord-webhooks-service
+          uri: lb://discord-webhooks-service
+          predicates:
+            - Path=/api/webhooks/**
 
 eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka
+  instance:
+    hostname: localhost
