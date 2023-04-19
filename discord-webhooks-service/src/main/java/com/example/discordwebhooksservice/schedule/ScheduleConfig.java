@@ -23,11 +23,11 @@ public class ScheduleConfig {
                 .filter(filterFunction)
                 .build();
 
-        HttpServiceProxyFactory httpServiceProxyFactory
-                = HttpServiceProxyFactory
-                .builder(WebClientAdapter.forClient(webClient))
-                .build();
+        HttpServiceProxyFactory factory =
+                HttpServiceProxyFactory
+                        .builder(WebClientAdapter.forClient(webClient))
+                        .build();
 
-        return httpServiceProxyFactory.createClient(ScheduleClient.class);
+        return factory.createClient(ScheduleClient.class);
     }
 }
