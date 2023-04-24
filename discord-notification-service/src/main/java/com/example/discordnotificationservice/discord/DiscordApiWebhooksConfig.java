@@ -20,8 +20,6 @@ public class DiscordApiWebhooksConfig {
                 })
                 .build();
 
-        System.out.println(baseUrl);
-
         HttpServiceProxyFactory factory =
                 HttpServiceProxyFactory
                         .builder(WebClientAdapter.forClient(webClient))
