@@ -18,9 +18,9 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @WireMockTest(httpPort = 9999)
-class DiscordWebhooksClientTest extends ContainersEnvironment {
+class DiscordApiWebhooksClientTest extends ContainersEnvironment {
     @Autowired
-    DiscordWebhooksClient underTest;
+    DiscordApiWebhooksClient underTest;
 
     @DynamicPropertySource
     static void overrideScheduleServiceBaseUrl(DynamicPropertyRegistry registry) {

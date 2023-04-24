@@ -10,9 +10,9 @@ import org.springframework.web.reactive.function.client.support.WebClientAdapter
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 
 @Configuration
-public class DiscordWebhooksConfig {
+public class DiscordApiWebhooksConfig {
     @Bean
-    DiscordWebhooksClient discordApiClient(@Value("${discord-api.base-url}") String baseUrl) {
+    DiscordApiWebhooksClient discordApiClient(@Value("${discord-api.base-url}") String baseUrl) {
         WebClient webClient = WebClient.builder()
                 .baseUrl(baseUrl)
                 .defaultStatusHandler(HttpStatusCode::isError, resp -> {
@@ -27,6 +27,6 @@ public class DiscordWebhooksConfig {
                         .builder(WebClientAdapter.forClient(webClient))
                         .build();
 
-        return factory.createClient(DiscordWebhooksClient.class);
+        return factory.createClient(DiscordApiWebhooksClient.class);
     }
 }
