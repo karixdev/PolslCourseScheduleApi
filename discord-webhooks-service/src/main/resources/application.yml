@@ -29,3 +29,6 @@ eureka:
 
 schedule-service:
   base-url: http://schedule-service
+
+discord-api:
+  base-url: https://discord.com/api/webhooks
