@@ -23,7 +23,7 @@ class DiscordApiWebhooksClientTest extends ContainersEnvironment {
     DiscordApiWebhooksClient underTest;
 
     @DynamicPropertySource
-    static void overrideScheduleServiceBaseUrl(DynamicPropertyRegistry registry) {
+    static void overrideDiscordApiBaseUrl(DynamicPropertyRegistry registry) {
         registry.add(
                 "discord-api.base-url",
                 () -> "http://localhost:9999");
