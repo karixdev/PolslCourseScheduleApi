@@ -6,6 +6,8 @@ import com.example.discordnotificationservice.discord.dto.DiscordWebhookRequest;
 import com.example.discordnotificationservice.discord.dto.DiscordWebhookResponse;
 import com.example.discordnotificationservice.discord.exception.InvalidDiscordWebhookUrlException;
 import com.example.discordnotificationservice.discord.exception.NotExistingSchedulesException;
+import com.example.discordnotificationservice.discord.exception.UnavailableDiscordApiIdException;
+import com.example.discordnotificationservice.discord.exception.UnavailableTokenException;
 import com.example.discordnotificationservice.schedule.ScheduleService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.oauth2.jwt.Jwt;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -61,10 +64,71 @@ class DiscordWebhookServiceTest {
         when(scheduleService.checkIfSchedulesExist(eq(schedules)))
                 .thenReturn(false);
 
+        when(repository.findByDiscordApiId(eq("123")))
+                .thenReturn(Optional.empty());
+
+        when(repository.findByToken(eq("abc")))
+                .thenReturn(Optional.empty());
+
         // When & Then
         assertThatThrownBy(() -> underTest.create(request, jwt))
                 .isInstanceOf(NotExistingSchedulesException.class)
                 .hasMessage("Provided set of schedules includes non-existing schedules");
+    }
+
+    @Test
+    void GivenUrlWithUnavailableDiscordApiId_WhenCreate_ThenThrowsUnavailableDiscordApiIdException() {
+        // Given
+        UUID scheduleId = UUID.randomUUID();
+        Set<UUID> schedules = Set.of(scheduleId);
+
+        DiscordWebhookRequest request = new DiscordWebhookRequest(
+                "https://discord.com/api/webhooks/123/abc", schedules);
+
+        DiscordWebhook discordWebhook = DiscordWebhook.builder()
+                .id("111-222-333")
+                .discordApiId("123")
+                .token("abc")
+                .addedBy("123-456-789")
+                .schedules(schedules)
+                .build();
+
+        when(repository.findByDiscordApiId(eq("123")))
+                .thenReturn(Optional.of(discordWebhook));
+
+        // When & Then
+        assertThatThrownBy(() -> underTest.create(request, jwt))
+                .isInstanceOf(UnavailableDiscordApiIdException.class)
+                .hasMessage("Id in provided url is unavailable");
+    }
+
+    @Test
+    void GivenUrlWithUnavailableToken_WhenCreate_ThenThrowsUnavailableTokenException() {
+        // Given
+        UUID scheduleId = UUID.randomUUID();
+        Set<UUID> schedules = Set.of(scheduleId);
+
+        DiscordWebhookRequest request = new DiscordWebhookRequest(
+                "https://discord.com/api/webhooks/123/abc", schedules);
+
+        DiscordWebhook discordWebhook = DiscordWebhook.builder()
+                .id("111-222-333")
+                .discordApiId("456")
+                .token("abc")
+                .addedBy("123-456-789")
+                .schedules(schedules)
+                .build();
+
+        when(repository.findByDiscordApiId(eq("123")))
+                .thenReturn(Optional.empty());
+
+        when(repository.findByToken(eq("abc")))
+                .thenReturn(Optional.of(discordWebhook));
+
+        // When & Then
+        assertThatThrownBy(() -> underTest.create(request, jwt))
+                .isInstanceOf(UnavailableTokenException.class)
+                .hasMessage("Token in provided url is unavailable");
     }
 
     @Test
@@ -82,6 +146,12 @@ class DiscordWebhookServiceTest {
 
         when(scheduleService.checkIfSchedulesExist(eq(schedules)))
                 .thenReturn(true);
+
+        when(repository.findByDiscordApiId(eq("123")))
+                .thenReturn(Optional.empty());
+
+        when(repository.findByToken(eq("abc")))
+                .thenReturn(Optional.empty());
 
         DiscordWebhook savedDiscordWebhook = DiscordWebhook.builder()
                 .id("111-222-333")

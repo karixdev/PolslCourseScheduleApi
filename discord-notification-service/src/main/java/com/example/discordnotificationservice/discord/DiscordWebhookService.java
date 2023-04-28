@@ -5,6 +5,8 @@ import com.example.discordnotificationservice.discord.dto.DiscordWebhookRequest;
 import com.example.discordnotificationservice.discord.dto.DiscordWebhookResponse;
 import com.example.discordnotificationservice.discord.exception.InvalidDiscordWebhookUrlException;
 import com.example.discordnotificationservice.discord.exception.NotExistingSchedulesException;
+import com.example.discordnotificationservice.discord.exception.UnavailableDiscordApiIdException;
+import com.example.discordnotificationservice.discord.exception.UnavailableTokenException;
 import com.example.discordnotificationservice.schedule.ScheduleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -33,7 +35,14 @@ public class DiscordWebhookService {
         }
 
         String discordApiId = getDiscordApiIdFromUrl(discordWebhookUrl);
+        if (repository.findByDiscordApiId(discordApiId).isPresent()) {
+            throw new UnavailableDiscordApiIdException();
+        }
+
         String token = getTokenFromUrl(discordWebhookUrl);
+        if (repository.findByToken(token).isPresent()) {
+            throw new UnavailableTokenException();
+        }
 
         Set<UUID> schedules = request.schedules();
 
