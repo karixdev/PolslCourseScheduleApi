@@ -16,9 +16,9 @@ spring:
           predicates:
             - Path=/api/schedules/**, /api/courses/**
         - id: discord-webhooks-service
-          uri: lb://discord-webhooks-service
+          uri: lb://discord-notification-service
           predicates:
-            - Path=/api/webhooks/**
+            - Path=/api/discord-webhooks/**
 
 eureka:
   client:
