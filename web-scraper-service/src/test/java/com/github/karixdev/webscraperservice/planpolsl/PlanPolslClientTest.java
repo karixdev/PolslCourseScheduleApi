@@ -1,46 +1,36 @@
 package com.github.karixdev.webscraperservice.planpolsl;
 
-import com.github.karixdev.webscraperservice.planpolsl.domain.CourseCell;
-import com.github.karixdev.webscraperservice.planpolsl.domain.PlanPolslResponse;
-import com.github.karixdev.webscraperservice.planpolsl.domain.TimeCell;
+import com.github.karixdev.webscraperservice.ContainersEnvironment;
 import com.github.karixdev.webscraperservice.planpolsl.exception.PlanPolslUnavailableException;
 import com.github.karixdev.webscraperservice.planpolsl.properties.PlanPolslClientProperties;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.web.reactive.function.client.WebClient;
-
-import java.util.Set;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
-@WireMockTest(httpPort = 8888)
-public class PlanPolslClientTest {
+@SpringBootTest(webEnvironment = RANDOM_PORT)
+@WireMockTest(httpPort = 9999)
+public class PlanPolslClientTest extends ContainersEnvironment {
+    @Autowired
     PlanPolslClient underTest;
 
-    PlanPolslResponseMapper planPolslAdapter;
-
-    @BeforeEach
-    void setUp() {
-        WebClient webClient = WebClient.builder()
-                .baseUrl("http://localhost:8888/")
-                .build();
-
-        planPolslAdapter = mock(PlanPolslResponseMapper.class);
-
-        underTest = new PlanPolslClient(
-                webClient,
-                planPolslAdapter
-        );
+    @DynamicPropertySource
+    static void overridePlanPolslUrl(DynamicPropertyRegistry registry) {
+        registry.add(
+                "plan-polsl-url",
+                () -> "http://localhost:9999");
     }
 
     @Test
-    void GivenAttrsThatSiteRespondsWith4xx_WhenGetSchedule_ThenThrowsPlanPolslUnavailableException() {
+    void GivenAttrsThatSiteRespondsWithErrorStatus_WhenGetSchedule_ThenThrowsPlanPolslUnavailableException() {
         // Given
         int planPolslId = 1337;
         int type = 0;
@@ -57,38 +47,16 @@ public class PlanPolslClientTest {
         );
 
         // When & Then
-        assertThatThrownBy(() -> underTest.getSchedule(planPolslId, type, wd))
+        assertThatThrownBy(() ->
+                underTest.getSchedule(
+                        planPolslId,
+                        type,
+                        wd,
+                        PlanPolslClientProperties.WIN_W,
+                        PlanPolslClientProperties.WIN_H
+                ))
                 .isInstanceOf(PlanPolslUnavailableException.class)
-                .hasMessage("plan.polsl.pl responded with status: 404 NOT_FOUND")
-                .hasFieldOrPropertyWithValue("planPolslId", planPolslId)
-                .hasFieldOrPropertyWithValue("type", type)
-                .hasFieldOrPropertyWithValue("wd", wd);
-    }
-
-    @Test
-    void GivenAttrsThatSiteReturnsEmptyResponse_WhenGetSchedule_ThenThrowsPlanPolslUnavailableException() {
-        // Given
-        int planPolslId = 2000;
-        int type = 1;
-        int wd = 3;
-
-        stubFor(get(urlPathEqualTo("/plan.php"))
-                .withQueryParam("id",   equalTo(String.valueOf(planPolslId)))
-                .withQueryParam("type", equalTo(String.valueOf(type)))
-                .withQueryParam("wd",   equalTo(String.valueOf(wd)))
-                .withQueryParam("winH", equalTo(String.valueOf(PlanPolslClientProperties.WIN_W)))
-                .withQueryParam("winW", equalTo(String.valueOf(PlanPolslClientProperties.WIN_H)))
-
-                .willReturn(ok())
-        );
-
-        // When & Then
-        assertThatThrownBy(() -> underTest.getSchedule(planPolslId, type, wd))
-                .isInstanceOf(PlanPolslUnavailableException.class)
-                .hasMessage("plan.polsl.pl responded with empty body")
-                .hasFieldOrPropertyWithValue("planPolslId", planPolslId)
-                .hasFieldOrPropertyWithValue("type", type)
-                .hasFieldOrPropertyWithValue("wd", wd);
+                .hasMessage("plan.polsl.pl responded with error status code 404");
     }
 
     @Test
@@ -113,30 +81,26 @@ public class PlanPolslClientTest {
                         """)
         ));
 
-        TimeCell timeCell = new TimeCell("07-00:08:00");
-        CourseCell courseCell = new CourseCell(
-                30,
-                40,
-                10,
-                20,
-                "This is course div"
-        );
-
-        when(planPolslAdapter.map(any()))
-                .thenReturn(new PlanPolslResponse(
-                        Set.of(timeCell),
-                        Set.of(courseCell)
-                ));
+        String expectedResponse = """
+                <div class="cd">07:00-08:00</div>
+                <div class="coursediv" styles="left: 40px; top: 30px;" cw="20" ch="10">
+                    This is course div
+                </div>
+                """;
 
         // When
-        PlanPolslResponse result = underTest.getSchedule(
-                planPolslId, type, wd);
+        ByteArrayResource result = underTest.getSchedule(
+                planPolslId,
+                type,
+                wd,
+                PlanPolslClientProperties.WIN_W,
+                PlanPolslClientProperties.WIN_H
+        );
 
         // Then
         assertThat(result)
-                .isEqualTo(new PlanPolslResponse(
-                        Set.of(timeCell),
-                        Set.of(courseCell))
-                );
+                .isEqualTo(new ByteArrayResource(
+                        expectedResponse.getBytes()
+                ));
     }
 }

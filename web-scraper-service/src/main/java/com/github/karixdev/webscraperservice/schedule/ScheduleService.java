@@ -3,7 +3,7 @@ package com.github.karixdev.webscraperservice.schedule;
 import com.github.karixdev.webscraperservice.course.CourseMapper;
 import com.github.karixdev.webscraperservice.course.TimeService;
 import com.github.karixdev.webscraperservice.course.domain.Course;
-import com.github.karixdev.webscraperservice.planpolsl.PlanPolslClient;
+import com.github.karixdev.webscraperservice.planpolsl.PlanPolslService;
 import com.github.karixdev.webscraperservice.planpolsl.domain.PlanPolslResponse;
 import com.github.karixdev.webscraperservice.planpolsl.exception.EmptyCourseCellsSetException;
 import com.github.karixdev.webscraperservice.schedule.message.ScheduleUpdateRequestMessage;
@@ -17,13 +17,13 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class ScheduleService {
-    private final PlanPolslClient planPolslClient;
+    private final PlanPolslService planPolslService;
     private final TimeService timeService;
     private final CourseMapper courseMapper;
     private final ScheduleProducer scheduleProducer;
 
     public void updateSchedule(ScheduleUpdateRequestMessage message) {
-        PlanPolslResponse planPolslResponse = planPolslClient.getSchedule(
+        PlanPolslResponse planPolslResponse = planPolslService.getSchedule(
                 message.planPolslId(), message.type(), message.wd());
 
         if (planPolslResponse.courseCells().isEmpty()) {

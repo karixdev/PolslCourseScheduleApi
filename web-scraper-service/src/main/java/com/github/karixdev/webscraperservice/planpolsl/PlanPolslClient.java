@@ -1,63 +1,18 @@
 package com.github.karixdev.webscraperservice.planpolsl;
 
-import com.github.karixdev.webscraperservice.planpolsl.domain.PlanPolslResponse;
-import com.github.karixdev.webscraperservice.planpolsl.properties.PlanPolslClientProperties;
-import com.github.karixdev.webscraperservice.planpolsl.exception.PlanPolslUnavailableException;
-import lombok.RequiredArgsConstructor;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.service.annotation.GetExchange;
+import org.springframework.web.service.annotation.HttpExchange;
 
-import java.nio.charset.Charset;
-import java.util.Optional;
-
-@Service
-@RequiredArgsConstructor
-public class PlanPolslClient {
-    private final WebClient webClient;
-    private final PlanPolslResponseMapper mapper;
-
-    public PlanPolslResponse getSchedule(int planPolslId, int type, int wd) {
-        String uri = buildUri(planPolslId, type, wd);
-
-        Optional<ByteArrayResource> response = webClient.get().uri(uri)
-                .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> {
-                    throw new PlanPolslUnavailableException(
-                            "plan.polsl.pl responded with status: " + clientResponse.statusCode(),
-                            planPolslId, type, wd);
-                })
-                .bodyToMono(ByteArrayResource.class)
-                .blockOptional();
-
-        if (response.isEmpty()) {
-            throw new PlanPolslUnavailableException(
-                    "plan.polsl.pl responded with empty body",
-                    planPolslId, type, wd);
-        }
-
-        String responseStr = new String(
-                response.get().getByteArray(),
-                Charset.forName("ISO-8859-2")
-        );
-
-        Document document = Jsoup.parse(responseStr);
-
-        return mapper.map(document);
-    }
-
-    private String buildUri(int planPolslId, int type, int wd) {
-        return UriComponentsBuilder
-                .fromPath(PlanPolslClientProperties.PATH)
-                .queryParam("type", type)
-                .queryParam("id", planPolslId)
-                .queryParam("wd", wd)
-                .queryParam("winW", PlanPolslClientProperties.WIN_W)
-                .queryParam("winH", PlanPolslClientProperties.WIN_H)
-                .toUriString();
-    }
+@HttpExchange
+public interface PlanPolslClient {
+    @GetExchange("/plan.php")
+    ByteArrayResource getSchedule(
+            @RequestParam(name = "id") int id,
+            @RequestParam(name = "type") int type,
+            @RequestParam(name = "wd") int wd,
+            @RequestParam(name = "winW") int winW,
+            @RequestParam(name = "winH") int winH
+    );
 }

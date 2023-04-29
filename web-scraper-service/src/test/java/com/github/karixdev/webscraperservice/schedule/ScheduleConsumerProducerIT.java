@@ -49,13 +49,13 @@ public class ScheduleConsumerProducerIT extends ContainersEnvironment {
     static void overridePlanPolslUrl(DynamicPropertyRegistry registry) {
         registry.add(
                 "plan-polsl-url",
-                () -> "http://localhost:9090"
+                () -> "http://localhost:9999"
         );
     }
 
     @BeforeEach
     void setUp() {
-        wm = new WireMockServer(9090);
+        wm = new WireMockServer(9999);
         wm.start();
 
         admin.purgeQueue(SCHEDULE_UPDATE_REQUEST_QUEUE, true);

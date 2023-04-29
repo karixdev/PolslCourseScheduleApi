@@ -3,6 +3,7 @@ package com.github.karixdev.webscraperservice.schedule;
 import com.github.karixdev.webscraperservice.course.CourseMapper;
 import com.github.karixdev.webscraperservice.course.TimeService;
 import com.github.karixdev.webscraperservice.planpolsl.PlanPolslClient;
+import com.github.karixdev.webscraperservice.planpolsl.PlanPolslService;
 import com.github.karixdev.webscraperservice.planpolsl.domain.PlanPolslResponse;
 import com.github.karixdev.webscraperservice.planpolsl.exception.EmptyCourseCellsSetException;
 import com.github.karixdev.webscraperservice.schedule.message.ScheduleUpdateRequestMessage;
@@ -26,7 +27,7 @@ public class ScheduleServiceTest {
     ScheduleService underTest;
 
     @Mock
-    PlanPolslClient planPolslClient;
+    PlanPolslService planPolslService;
 
     @Test
     void GivenScheduleUpdateRequestMessageSuchThatPlanPolslClientReturnsResponseWithEmptyCourseCellsSet_WhenUpdateSchedule_ThenThrowsEmptyCourseCellsSetExceptionWithProperMessage() {
@@ -38,7 +39,7 @@ public class ScheduleServiceTest {
                 4
         );
 
-        when(planPolslClient.getSchedule(anyInt(), anyInt(), anyInt()))
+        when(planPolslService.getSchedule(anyInt(), anyInt(), anyInt()))
                 .thenReturn(new PlanPolslResponse(Set.of(), Set.of()));
 
         // When & Then
