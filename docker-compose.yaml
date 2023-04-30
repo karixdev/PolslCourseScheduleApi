@@ -70,3 +70,24 @@ services:
       MONGO_INITDB_DATABASE: discord-webhooks-service
     ports:
       - '27017:27017'
+
+  schedule-service:
+    container_name: schedule-service
+    build:
+      context: schedule-service
+      dockerfile: Dockerfile
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      RABBITMQ_PASSWORD: password
+      RABBITMQ_USERNAME: user
+      RABBITMQ_HOST: rabbitmq
+      EUREKA_NAME: discovery-server
+      EUREKA_PORT: 8761
+      POSTGRES_URL: schedule-service-postgres
+      POSTGRES_USERNAME: root
+      POSTGRES_PASSWORD: root
+    ports:
+      - '8080:8080'
+    depends_on:
+      - rabbitmq
+      - schedule-service-postgres
