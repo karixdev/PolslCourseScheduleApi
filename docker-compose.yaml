@@ -49,8 +49,9 @@ services:
       - '8000:8080'
     depends_on:
       - keycloak-postgres
-    command:
-      - start-dev
+    volumes:
+      - ./keycloak/polsl-course-api-realm.json:/opt/keycloak/data/import/realm.json
+    command: start --hostname=keycloak --proxy=edge --import-realm
 
   discovery-server:
     container_name: 'discovery-server'
