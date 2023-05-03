@@ -87,8 +87,11 @@ services:
       POSTGRES_URL: schedule-service-postgres
       POSTGRES_USERNAME: root
       POSTGRES_PASSWORD: root
+      KEYCLOAK_URL: keycloak
     ports:
       - '8080:8080'
     depends_on:
       - rabbitmq
       - schedule-service-postgres
+      - keycloak
+      - discovery-server

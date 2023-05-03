@@ -10,6 +10,13 @@ spring:
     username: ${RABBITMQ_USERNAME}
     host: ${RABBITMQ_HOST}
 
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://${KEYCLOAK_URL}:8080/realms/polsl-course-api
+          jwk-set-uri: http://${KEYCLOAK_URL}:8080/realms/polsl-course-api/protocol/openid-connect/certs
+
 eureka:
   client:
     service-url:
