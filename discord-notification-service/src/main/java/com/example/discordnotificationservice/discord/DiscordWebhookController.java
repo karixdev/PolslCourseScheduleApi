@@ -24,7 +24,6 @@ public class DiscordWebhookController {
             @Valid @RequestBody DiscordWebhookRequest discordWebhookRequest,
             @AuthenticationPrincipal Jwt jwt
     ) {
-        System.out.println("x");
         return new ResponseEntity<>(
                 service.create(discordWebhookRequest, jwt),
                 HttpStatus.CREATED
