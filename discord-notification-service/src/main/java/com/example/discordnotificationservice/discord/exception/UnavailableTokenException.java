@@ -1,11 +1,12 @@
 package com.example.discordnotificationservice.discord.exception;
 
+import com.example.discordnotificationservice.shared.exception.ValidationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.BAD_REQUEST)
-public class UnavailableTokenException extends RuntimeException {
+public class UnavailableTokenException extends ValidationException {
     public UnavailableTokenException() {
-        super("Token in provided url is unavailable");
+        super("url", "Token in provided url is unavailable");
     }
 }
