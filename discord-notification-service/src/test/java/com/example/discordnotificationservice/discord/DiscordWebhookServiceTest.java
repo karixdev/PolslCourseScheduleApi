@@ -9,13 +9,18 @@ import com.example.discordnotificationservice.discord.exception.NotExistingSched
 import com.example.discordnotificationservice.discord.exception.UnavailableDiscordApiIdException;
 import com.example.discordnotificationservice.discord.exception.UnavailableTokenException;
 import com.example.discordnotificationservice.schedule.ScheduleService;
+import com.example.discordnotificationservice.security.SecurityService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.oauth2.jwt.Jwt;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -39,6 +44,12 @@ class DiscordWebhookServiceTest {
 
     @Mock
     DiscordApiWebhooksClient discordApiWebhooksClient;
+
+    @Mock
+    SecurityService securityService;
+
+    @Mock
+    DiscordWebhookDTOMapper mapper;
 
     @Mock
     Jwt jwt;
@@ -188,5 +199,95 @@ class DiscordWebhookServiceTest {
         );
 
         assertThat(result).isEqualTo(expected);
+    }
+
+    @Test
+    void GivenAdminJwt_WhenFindAll_ThenReturnsDiscordWebhooksResponsesPage() {
+        // Given
+        PageRequest pageRequest = PageRequest.of(0, 10);
+
+        Set<UUID> schedules = Set.of(UUID.randomUUID());
+
+        DiscordWebhook discordWebhook = DiscordWebhook.builder()
+                .id("111-222-333")
+                .discordApiId("123")
+                .token("abc")
+                .addedBy("userId")
+                .schedules(Set.of(UUID.randomUUID()))
+                .build();
+
+        DiscordWebhookResponse expected = new DiscordWebhookResponse(
+                "111-222-333",
+                "123",
+                "abc",
+                schedules
+        );
+
+        PageImpl<DiscordWebhook> page =
+                new PageImpl<>(List.of(discordWebhook));
+
+        when(securityService.isAdmin(jwt))
+                .thenReturn(true);
+
+        when(repository.findAll(pageRequest))
+                .thenReturn(page);
+
+        when(mapper.map(eq(discordWebhook)))
+                .thenReturn(expected);
+
+        // When
+        Page<DiscordWebhookResponse> result =
+                underTest.findAll(jwt, 0);
+
+        // Then
+        assertThat(result.getContent())
+                .isEqualTo(List.of(expected));
+    }
+
+    @Test
+    void GivenUserJwt_whenFindAll_thenReturnsDiscordWebhookResponsesPage() {
+        // Given
+        PageRequest pageRequest = PageRequest.of(0, 10);
+
+        Set<UUID> schedules = Set.of(UUID.randomUUID());
+        String userId = "userId";
+
+        DiscordWebhook discordWebhook = DiscordWebhook.builder()
+                .id("111-222-333")
+                .discordApiId("123")
+                .token("abc")
+                .addedBy(userId)
+                .schedules(Set.of(UUID.randomUUID()))
+                .build();
+
+        DiscordWebhookResponse expected = new DiscordWebhookResponse(
+                "111-222-333",
+                "123",
+                "abc",
+                schedules
+        );
+
+        PageImpl<DiscordWebhook> page =
+                new PageImpl<>(List.of(discordWebhook));
+
+        when(securityService.getUserId(eq(jwt)))
+                .thenReturn(userId);
+
+        when(securityService.isAdmin(eq(jwt)))
+                .thenReturn(false);
+
+        when(repository.findByAddedBy(eq(userId), eq(pageRequest)))
+                .thenReturn(page);
+
+        when(mapper.map(eq(discordWebhook)))
+                .thenReturn(expected);
+
+        // When
+        Page<DiscordWebhookResponse> result =
+                underTest.findAll(jwt, 0);
+
+        // Then
+        assertThat(result.getContent())
+                .isEqualTo(List.of(expected));
     }
 }

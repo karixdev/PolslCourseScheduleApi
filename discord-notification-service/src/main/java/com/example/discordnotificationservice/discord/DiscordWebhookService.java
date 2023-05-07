@@ -8,7 +8,10 @@ import com.example.discordnotificationservice.discord.exception.NotExistingSched
 import com.example.discordnotificationservice.discord.exception.UnavailableDiscordApiIdException;
 import com.example.discordnotificationservice.discord.exception.UnavailableTokenException;
 import com.example.discordnotificationservice.schedule.ScheduleService;
+import com.example.discordnotificationservice.security.SecurityService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,9 +25,13 @@ public class DiscordWebhookService {
     private final DiscordApiWebhooksClient discordApiWebhooksClient;
     private final ScheduleService scheduleService;
     private final DiscordWebhookRepository repository;
+    private final SecurityService securityService;
+    private final DiscordWebhookDTOMapper mapper;
 
     private static final String DISCORD_WEBHOOK_URL_PREFIX = "https://discord.com/api/webhooks/";
     private static final String WELCOME_MESSAGE = "Hello form PolslCourseApi!";
+
+    private static final int PAGE_SIZE = 10;
 
     @Transactional
     public DiscordWebhookResponse create(DiscordWebhookRequest request, Jwt jwt) {
@@ -100,5 +107,17 @@ public class DiscordWebhookService {
 
     private String getTokenFromUrl(String url) {
         return splitUrlIntoParts(url)[1];
+    }
+
+    public Page<DiscordWebhookResponse> findAll(Jwt jwt, Integer page) {
+        PageRequest pageRequest = PageRequest.of(page, PAGE_SIZE);
+
+        String userId = securityService.getUserId(jwt);
+
+        Page<DiscordWebhook> discordWebhooks = securityService.isAdmin(jwt) ?
+                repository.findAll(pageRequest) :
+                repository.findByAddedBy(userId, pageRequest);
+
+        return discordWebhooks.map(mapper::map);
     }
 }

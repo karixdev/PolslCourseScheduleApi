@@ -16,6 +16,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.IntStream;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -310,5 +311,63 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
                 .isEqualTo("token");
         assertThat(result.getSchedules())
                 .isEqualTo(schedules);
+    }
+
+    @Test
+    void shouldRetrieveForAdmin() {
+        String adminToken = getAdminToken();
+        String userToken = getUserToken();
+
+        UUID id = UUID.randomUUID();
+
+        stubFor(
+                get(urlPathEqualTo("/api/schedules"))
+                        .withQueryParam("ids", havingExactly(
+                                id.toString()
+                        ))
+                        .willReturn(ok()
+                                .withHeader(
+                                        "Content-Type",
+                                        "application/json"
+                                )
+                                .withBody("""
+                                        [
+                                            {
+                                                "id": "%s"
+                                            }
+                                        ]
+                                        """.formatted(id)
+                                )
+                        )
+        );
+
+        stubFor(
+                post(urlPathMatching("/webhooks/([a-z1-9]*)/([a-z1-9]*)"))
+                        .willReturn(noContent())
+        );
+
+        IntStream.range(1, 30)
+                .forEach(i -> {
+                    String payload = """
+                            {
+                                "url": "https://discord.com/api/webhooks/discordApiId%d/token%d",
+                                "schedules": ["%s"]
+                            }
+                            """.formatted(i, i, id.toString());
+
+                    String token = i <= 19 ? adminToken : userToken;
+
+                    webClient.post().uri("/api/discord-webhooks")
+                            .header(
+                                    "Authorization",
+                                    "Bearer " + token
+                            )
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .bodyValue(payload)
+                            .exchange()
+                            .expectStatus().isCreated();
+                });
+
+
     }
 }

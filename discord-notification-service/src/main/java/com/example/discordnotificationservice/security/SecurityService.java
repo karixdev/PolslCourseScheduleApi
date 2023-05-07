@@ -24,4 +24,8 @@ public class SecurityService {
                 .map(GrantedAuthority::getAuthority)
                 .anyMatch(authority -> authority.equals("ROLE_admin"));
     }
+
+    public String getUserId(Jwt jwt) {
+        return jwt.getSubject();
+    }
 }
