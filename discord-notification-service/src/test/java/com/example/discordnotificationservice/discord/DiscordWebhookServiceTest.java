@@ -245,7 +245,7 @@ class DiscordWebhookServiceTest {
     }
 
     @Test
-    void GivenUserJwt_whenFindAll_thenReturnsDiscordWebhookResponsesPage() {
+    void GivenUserJwt_WhenFindAll_ThenReturnsDiscordWebhookResponsesPage() {
         // Given
         PageRequest pageRequest = PageRequest.of(0, 10);
 
