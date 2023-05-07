@@ -314,7 +314,7 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
     }
 
     @Test
-    void shouldRetrieveForAdmin() {
+    void shouldRetrievePaginatedCoursesForAdmin() {
         String adminToken = getAdminToken();
         String userToken = getUserToken();
 
@@ -342,11 +342,11 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
         );
 
         stubFor(
-                post(urlPathMatching("/webhooks/([a-z1-9]*)/([a-z1-9]*)"))
+                post(urlPathMatching("/[A-Za-z0-9]+/[A-Za-z0-9]+/[A-Za-z0-9]+"))
                         .willReturn(noContent())
         );
 
-        IntStream.range(1, 30)
+        IntStream.range(1, 26)
                 .forEach(i -> {
                     String payload = """
                             {
@@ -368,6 +368,128 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
                             .expectStatus().isCreated();
                 });
 
+        webClient.get().uri("/api/discord-webhooks")
+                .header(
+                        "Authorization",
+                        "Bearer " + adminToken
+                )
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("numberOfElements").isEqualTo(10)
+                .jsonPath("totalElements").isEqualTo(25)
+                .jsonPath("size").isEqualTo(10)
+                .jsonPath("pageable.offset").isEqualTo(0)
+                .jsonPath("totalPages").isEqualTo(3)
+                .jsonPath("first").isEqualTo(true);
 
+        webClient.get().uri("/api/discord-webhooks?page=1")
+                .header(
+                        "Authorization",
+                        "Bearer " + adminToken
+                )
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("numberOfElements").isEqualTo(10)
+                .jsonPath("pageable.offset").isEqualTo(10)
+                .jsonPath("pageable.pageNumber").isEqualTo(1);
+
+        webClient.get().uri("/api/discord-webhooks?page=2")
+                .header(
+                        "Authorization",
+                        "Bearer " + adminToken
+                )
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("numberOfElements").isEqualTo(5)
+                .jsonPath("pageable.offset").isEqualTo(20)
+                .jsonPath("pageable.pageNumber").isEqualTo(2)
+                .jsonPath("last").isEqualTo(true);
+    }
+
+    @Test
+    void shouldRetrievePaginatedCoursesForUser() {
+        String adminToken = getAdminToken();
+        String userToken = getUserToken();
+
+        UUID id = UUID.randomUUID();
+
+        stubFor(
+                get(urlPathEqualTo("/api/schedules"))
+                        .withQueryParam("ids", havingExactly(
+                                id.toString()
+                        ))
+                        .willReturn(ok()
+                                .withHeader(
+                                        "Content-Type",
+                                        "application/json"
+                                )
+                                .withBody("""
+                                        [
+                                            {
+                                                "id": "%s"
+                                            }
+                                        ]
+                                        """.formatted(id)
+                                )
+                        )
+        );
+
+        stubFor(
+                post(urlPathMatching("/[A-Za-z0-9]+/[A-Za-z0-9]+/[A-Za-z0-9]+"))
+                        .willReturn(noContent())
+        );
+
+        IntStream.range(1, 21)
+                .forEach(i -> {
+                    String payload = """
+                            {
+                                "url": "https://discord.com/api/webhooks/discordApiId%d/token%d",
+                                "schedules": ["%s"]
+                            }
+                            """.formatted(i, i, id.toString());
+
+                    String token = i <= 13 ? userToken : adminToken;
+
+                    webClient.post().uri("/api/discord-webhooks")
+                            .header(
+                                    "Authorization",
+                                    "Bearer " + token
+                            )
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .bodyValue(payload)
+                            .exchange()
+                            .expectStatus().isCreated();
+                });
+
+        webClient.get().uri("/api/discord-webhooks")
+                .header(
+                        "Authorization",
+                        "Bearer " + userToken
+                )
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("numberOfElements").isEqualTo(10)
+                .jsonPath("totalElements").isEqualTo(13)
+                .jsonPath("size").isEqualTo(10)
+                .jsonPath("pageable.offset").isEqualTo(0)
+                .jsonPath("totalPages").isEqualTo(2)
+                .jsonPath("first").isEqualTo(true);
+
+        webClient.get().uri("/api/discord-webhooks?page=1")
+                .header(
+                        "Authorization",
+                        "Bearer " + userToken
+                )
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("numberOfElements").isEqualTo(3)
+                .jsonPath("pageable.pageNumber").isEqualTo(1)
+                .jsonPath("pageable.offset").isEqualTo(10)
+                .jsonPath("last").isEqualTo(true);
     }
 }
