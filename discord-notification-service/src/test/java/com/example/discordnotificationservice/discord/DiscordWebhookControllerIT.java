@@ -346,27 +346,8 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
                         .willReturn(noContent())
         );
 
-        IntStream.range(1, 26)
-                .forEach(i -> {
-                    String payload = """
-                            {
-                                "url": "https://discord.com/api/webhooks/discordApiId%d/token%d",
-                                "schedules": ["%s"]
-                            }
-                            """.formatted(i, i, id.toString());
-
-                    String token = i <= 19 ? adminToken : userToken;
-
-                    webClient.post().uri("/api/discord-webhooks")
-                            .header(
-                                    "Authorization",
-                                    "Bearer " + token
-                            )
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .bodyValue(payload)
-                            .exchange()
-                            .expectStatus().isCreated();
-                });
+        seedDatabase(1, 19, adminToken, id);
+        seedDatabase(20, 25, userToken, id);
 
         webClient.get().uri("/api/discord-webhooks")
                 .header(
@@ -442,27 +423,8 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
                         .willReturn(noContent())
         );
 
-        IntStream.range(1, 21)
-                .forEach(i -> {
-                    String payload = """
-                            {
-                                "url": "https://discord.com/api/webhooks/discordApiId%d/token%d",
-                                "schedules": ["%s"]
-                            }
-                            """.formatted(i, i, id.toString());
-
-                    String token = i <= 13 ? userToken : adminToken;
-
-                    webClient.post().uri("/api/discord-webhooks")
-                            .header(
-                                    "Authorization",
-                                    "Bearer " + token
-                            )
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .bodyValue(payload)
-                            .exchange()
-                            .expectStatus().isCreated();
-                });
+        seedDatabase(1, 13, userToken, id);
+        seedDatabase(14, 2, adminToken, id);
 
         webClient.get().uri("/api/discord-webhooks")
                 .header(
@@ -491,5 +453,27 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
                 .jsonPath("pageable.pageNumber").isEqualTo(1)
                 .jsonPath("pageable.offset").isEqualTo(10)
                 .jsonPath("last").isEqualTo(true);
+    }
+
+    private void seedDatabase(int start, int end, String token, UUID scheduleId) {
+        IntStream.rangeClosed(start, end)
+                .forEach(i -> {
+                    String payload = """
+                            {
+                                "url": "https://discord.com/api/webhooks/discordApiId%d/token%d",
+                                "schedules": ["%s"]
+                            }
+                            """.formatted(i, i, scheduleId.toString());
+
+                    webClient.post().uri("/api/discord-webhooks")
+                            .header(
+                                    "Authorization",
+                                    "Bearer " + token
+                            )
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .bodyValue(payload)
+                            .exchange()
+                            .expectStatus().isCreated();
+                });
     }
 }
