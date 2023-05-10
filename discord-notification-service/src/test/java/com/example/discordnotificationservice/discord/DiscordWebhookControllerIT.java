@@ -6,12 +6,14 @@ import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 import java.util.Set;
@@ -24,6 +26,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @WireMockTest(httpPort = 9999)
+@AutoConfigureMockMvc
 @ContextConfiguration(classes = {WebClientTestConfig.class})
 public class DiscordWebhookControllerIT extends ContainersEnvironment {
     @Autowired
@@ -31,6 +34,9 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
 
     @Autowired
     DiscordWebhookRepository discordWebhookRepository;
+
+    @Autowired
+    MockMvc mockMvc;
 
     @DynamicPropertySource
     static void overrideBaseUrls(DynamicPropertyRegistry registry) {
@@ -455,7 +461,118 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
                 .jsonPath("last").isEqualTo(true);
     }
 
+    @Test
+    void shouldNotDeleteNotExistingDiscordWebhook() {
+        String token = getUserToken();
+
+        seedDatabase(1, 1, token, UUID.randomUUID());
+
+        webClient.delete().uri("/api/discord-webhooks/123")
+                .header(
+                        "Authorization",
+                        "Bearer " + token
+                )
+                .exchange()
+                .expectStatus().isNotFound();
+
+        assertThat(discordWebhookRepository.findAll()).hasSize(1);
+    }
+
+    @Test
+    void shouldNotDeleteNotOwnedDiscordWebhookForUser() {
+        String token = getUserToken();
+
+        seedDatabase(1, 1, getAdminToken(), UUID.randomUUID());
+
+        String id = discordWebhookRepository.findAll().get(0).getId();
+
+        webClient.delete().uri("/api/discord-webhooks/%s".formatted(id))
+                .header(
+                        "Authorization",
+                        "Bearer " + token
+                )
+                .exchange()
+                .expectStatus().isForbidden();
+
+
+        assertThat(discordWebhookRepository.findAll()).hasSize(1);
+    }
+
+    @Test
+    void shouldDeleteNotOwnedDiscordWebhookForAdmin() {
+        String token = getAdminToken();
+
+        seedDatabase(1, 2, getUserToken(), UUID.randomUUID());
+
+        List<DiscordWebhook> currentDiscordWebhooks = discordWebhookRepository.findAll();
+
+        String id = currentDiscordWebhooks.get(1).getId();
+
+        webClient.delete().uri("/api/discord-webhooks/" + id)
+                .header(
+                        "Authorization",
+                        "Bearer " + token
+                )
+                .exchange()
+                .expectStatus().isNoContent();
+
+        List<DiscordWebhook> resultDiscordWebhooks = discordWebhookRepository.findAll();
+
+        assertThat(resultDiscordWebhooks).hasSize(1);
+        assertThat(resultDiscordWebhooks.get(0)).isEqualTo(currentDiscordWebhooks.get(0));
+    }
+
+    @Test
+    void shouldDeleteOwnedDiscordWebhookForUser() {
+        String token = getUserToken();
+
+        seedDatabase(1, 2, token, UUID.randomUUID());
+
+        List<DiscordWebhook> currentDiscordWebhooks = discordWebhookRepository.findAll();
+
+        String id = currentDiscordWebhooks.get(1).getId();
+
+        webClient.delete().uri("/api/discord-webhooks/" + id)
+                .header(
+                        "Authorization",
+                        "Bearer " + token
+                )
+                .exchange()
+                .expectStatus().isNoContent();
+
+        List<DiscordWebhook> resultDiscordWebhooks = discordWebhookRepository.findAll();
+
+        assertThat(resultDiscordWebhooks).hasSize(1);
+        assertThat(resultDiscordWebhooks.get(0)).isEqualTo(currentDiscordWebhooks.get(0));
+    }
+
     private void seedDatabase(int start, int end, String token, UUID scheduleId) {
+        stubFor(
+                get(urlPathEqualTo("/api/schedules"))
+                        .withQueryParam("ids", havingExactly(
+                                scheduleId.toString()
+                        ))
+                        .willReturn(ok()
+                                .withHeader(
+                                        "Content-Type",
+                                        "application/json"
+                                )
+                                .withBody("""
+                                        [
+                                            {
+                                                "id": "%s"
+                                            }
+                                        ]
+                                        """.formatted(scheduleId)
+                                )
+                        )
+        );
+
+        stubFor(
+                post(urlPathMatching("/[A-Za-z0-9]+/[A-Za-z0-9]+/[A-Za-z0-9]+"))
+                        .willReturn(noContent())
+        );
+
         IntStream.rangeClosed(start, end)
                 .forEach(i -> {
                     String payload = """

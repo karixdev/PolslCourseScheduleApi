@@ -42,4 +42,14 @@ public class DiscordWebhookController {
                 HttpStatus.OK
         );
     }
+
+    @DeleteMapping("/{id}")
+    ResponseEntity<Void> delete(
+            @PathVariable String id,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        service.delete(id, jwt);
+
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }

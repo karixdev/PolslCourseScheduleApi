@@ -9,6 +9,8 @@ import com.example.discordnotificationservice.discord.exception.UnavailableDisco
 import com.example.discordnotificationservice.discord.exception.UnavailableTokenException;
 import com.example.discordnotificationservice.schedule.ScheduleService;
 import com.example.discordnotificationservice.security.SecurityService;
+import com.example.discordnotificationservice.shared.exception.ForbiddenAccessException;
+import com.example.discordnotificationservice.shared.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -119,5 +121,24 @@ public class DiscordWebhookService {
                 repository.findByAddedBy(userId, pageRequest);
 
         return discordWebhooks.map(mapper::map);
+    }
+
+    private DiscordWebhook findByIdOrElseThrow(String id) {
+        return repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "DiscordWebhook with id %s not found".formatted(id)));
+    }
+
+    @Transactional
+    public void delete(String id, Jwt jwt) {
+        DiscordWebhook discordWebhook = findByIdOrElseThrow(id);
+
+        String userId = securityService.getUserId(jwt);
+
+        if (!discordWebhook.getAddedBy().equals(userId) && !securityService.isAdmin(jwt)) {
+            throw new ForbiddenAccessException();
+        }
+
+        repository.delete(discordWebhook);
     }
 }

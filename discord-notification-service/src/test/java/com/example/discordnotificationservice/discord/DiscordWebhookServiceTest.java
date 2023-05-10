@@ -10,6 +10,8 @@ import com.example.discordnotificationservice.discord.exception.UnavailableDisco
 import com.example.discordnotificationservice.discord.exception.UnavailableTokenException;
 import com.example.discordnotificationservice.schedule.ScheduleService;
 import com.example.discordnotificationservice.security.SecurityService;
+import com.example.discordnotificationservice.shared.exception.ForbiddenAccessException;
+import com.example.discordnotificationservice.shared.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -289,5 +291,101 @@ class DiscordWebhookServiceTest {
         // Then
         assertThat(result.getContent())
                 .isEqualTo(List.of(expected));
+    }
+
+    @Test
+    void GivenNotExistingId_WhenDelete_ThenThrowsResourceNotFoundException() {
+        // Given
+        String id = "id";
+
+        when(repository.findById(eq(id)))
+                .thenReturn(Optional.empty());
+
+        // When & Then
+        assertThatThrownBy(() -> underTest.delete(id, jwt))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("DiscordWebhook with id %s not found".formatted(id));
+    }
+
+    @Test
+    void GivenUserWhoDoesNotOwnDiscordWebhook_WhenDelete_ThenThrowsForbiddenAccessException() {
+        // Given
+        String id = "111-222-333";
+
+        DiscordWebhook discordWebhook = DiscordWebhook.builder()
+                .id("111-222-333")
+                .discordApiId("123")
+                .token("abc")
+                .addedBy("userId")
+                .schedules(Set.of(UUID.randomUUID()))
+                .build();
+
+        when(repository.findById(eq(id)))
+                .thenReturn(Optional.of(discordWebhook));
+
+        when(securityService.getUserId(eq(jwt)))
+                .thenReturn("otherUserId");
+
+        when(securityService.isAdmin(eq(jwt)))
+                .thenReturn(false);
+
+        // When & Then
+        assertThatThrownBy(() -> underTest.delete(id, jwt))
+                .isInstanceOf(ForbiddenAccessException.class);
+    }
+
+    @Test
+    void GivenAdminWhoDoesNotOwnDiscordWebhook_WhenDelete_ThenDeletesDiscordWebhook() {
+        // Given
+        String id = "111-222-333";
+
+        DiscordWebhook discordWebhook = DiscordWebhook.builder()
+                .id("111-222-333")
+                .discordApiId("123")
+                .token("abc")
+                .addedBy("userId")
+                .schedules(Set.of(UUID.randomUUID()))
+                .build();
+
+        when(repository.findById(eq(id)))
+                .thenReturn(Optional.of(discordWebhook));
+
+        when(securityService.getUserId(eq(jwt)))
+                .thenReturn("otherUserId");
+
+        when(securityService.isAdmin(eq(jwt)))
+                .thenReturn(true);
+
+        // When
+        underTest.delete(id, jwt);
+
+        // Then
+        verify(repository).delete(eq(discordWebhook));
+    }
+
+    @Test
+    void GivenUserWhoOwnsDiscordWebhook_WhenDelete_ThenDeletesDiscordWebhook() {
+        // Given
+        String id = "111-222-333";
+
+        DiscordWebhook discordWebhook = DiscordWebhook.builder()
+                .id("111-222-333")
+                .discordApiId("123")
+                .token("abc")
+                .addedBy("userId")
+                .schedules(Set.of(UUID.randomUUID()))
+                .build();
+
+        when(repository.findById(eq(id)))
+                .thenReturn(Optional.of(discordWebhook));
+
+        when(securityService.getUserId(eq(jwt)))
+                .thenReturn("userId");
+
+        // When
+        underTest.delete(id, jwt);
+
+        // Then
+        verify(repository).delete(eq(discordWebhook));
     }
 }
