@@ -45,7 +45,7 @@ public class DiscordWebhookController {
 
     @DeleteMapping("/{id}")
     ResponseEntity<Void> delete(
-            @PathVariable String id,
+            @PathVariable(name = "id") String id,
             @AuthenticationPrincipal Jwt jwt
     ) {
         service.delete(id, jwt);
