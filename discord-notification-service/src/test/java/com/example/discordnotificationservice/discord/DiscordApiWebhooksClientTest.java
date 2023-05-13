@@ -1,7 +1,7 @@
-package com.example.discordnotificationservice.webhook;
+package com.example.discordnotificationservice.discord;
 
 import com.example.discordnotificationservice.ContainersEnvironment;
-import com.example.discordnotificationservice.webhook.dto.DiscordMessageRequest;
+import com.example.discordnotificationservice.discord.dto.DiscordWebhookRequest;
 import com.example.discordnotificationservice.webhook.exception.DiscordApiException;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import org.junit.jupiter.api.Test;
@@ -39,7 +39,7 @@ class DiscordApiWebhooksClientTest extends ContainersEnvironment {
         assertThatThrownBy(() -> underTest.sendMessage(
                         "123",
                         "token",
-                        new DiscordMessageRequest("Message")
+                        new DiscordWebhookRequest("Message")
                 )
         ).isInstanceOf(DiscordApiException.class);
     }
@@ -54,7 +54,7 @@ class DiscordApiWebhooksClientTest extends ContainersEnvironment {
         var result = underTest.sendMessage(
                 "123",
                 "token",
-                new DiscordMessageRequest(
+                new DiscordWebhookRequest(
                         "Message"
                 )
         );

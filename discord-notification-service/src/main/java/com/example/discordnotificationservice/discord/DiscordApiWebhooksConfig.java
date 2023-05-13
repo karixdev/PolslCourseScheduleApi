@@ -1,4 +1,4 @@
-package com.example.discordnotificationservice.webhook;
+package com.example.discordnotificationservice.discord;
 
 import com.example.discordnotificationservice.webhook.exception.DiscordApiException;
 import org.springframework.beans.factory.annotation.Value;

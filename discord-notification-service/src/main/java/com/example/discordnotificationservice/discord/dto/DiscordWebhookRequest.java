@@ -1,8 +1,8 @@
-package com.example.discordnotificationservice.webhook.dto;
+package com.example.discordnotificationservice.discord.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public record DiscordMessageRequest(
+public record DiscordWebhookRequest(
         @JsonProperty("content")
         String content
 ) {}

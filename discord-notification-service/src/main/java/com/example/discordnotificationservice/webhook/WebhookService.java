@@ -1,6 +1,7 @@
 package com.example.discordnotificationservice.webhook;
 
-import com.example.discordnotificationservice.webhook.dto.DiscordMessageRequest;
+import com.example.discordnotificationservice.discord.DiscordApiWebhooksClient;
+import com.example.discordnotificationservice.discord.dto.DiscordWebhookRequest;
 import com.example.discordnotificationservice.webhook.dto.WebhookRequest;
 import com.example.discordnotificationservice.webhook.dto.WebhookResponse;
 import com.example.discordnotificationservice.webhook.exception.InvalidDiscordWebhookUrlException;
@@ -211,7 +212,7 @@ public class WebhookService {
         discordApiWebhooksClient.sendMessage(
                 discordApiId,
                 token,
-                new DiscordMessageRequest(WELCOME_MESSAGE)
+                new DiscordWebhookRequest(WELCOME_MESSAGE)
         );
     }
 }

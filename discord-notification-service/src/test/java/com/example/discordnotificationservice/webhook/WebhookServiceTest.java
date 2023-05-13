@@ -1,7 +1,8 @@
 package com.example.discordnotificationservice.webhook;
 
 
-import com.example.discordnotificationservice.webhook.dto.DiscordMessageRequest;
+import com.example.discordnotificationservice.discord.DiscordApiWebhooksClient;
+import com.example.discordnotificationservice.discord.dto.DiscordWebhookRequest;
 import com.example.discordnotificationservice.webhook.dto.WebhookRequest;
 import com.example.discordnotificationservice.webhook.dto.WebhookResponse;
 import com.example.discordnotificationservice.webhook.exception.InvalidDiscordWebhookUrlException;
@@ -197,7 +198,7 @@ class WebhookServiceTest {
         verify(discordApiWebhooksClient).sendMessage(
                 eq("123"),
                 eq("abc"),
-                eq(new DiscordMessageRequest("Hello form PolslCourseApi!"))
+                eq(new DiscordWebhookRequest("Hello form PolslCourseApi!"))
         );
 
         assertThat(result).isEqualTo(expected);
@@ -639,7 +640,7 @@ class WebhookServiceTest {
         verify(discordApiWebhooksClient).sendMessage(
                 eq("1234"),
                 eq("abcd"),
-                eq(new DiscordMessageRequest("Hello form PolslCourseApi!"))
+                eq(new DiscordWebhookRequest("Hello form PolslCourseApi!"))
         );
 
         assertThat(result).isEqualTo(expectedResponse);
@@ -711,7 +712,7 @@ class WebhookServiceTest {
         verify(discordApiWebhooksClient).sendMessage(
                 eq("1234"),
                 eq("abcd"),
-                eq(new DiscordMessageRequest("Hello form PolslCourseApi!"))
+                eq(new DiscordWebhookRequest("Hello form PolslCourseApi!"))
         );
 
         assertThat(result).isEqualTo(expectedResponse);

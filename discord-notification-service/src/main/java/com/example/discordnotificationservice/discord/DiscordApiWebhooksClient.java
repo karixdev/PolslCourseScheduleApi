@@ -1,6 +1,6 @@
-package com.example.discordnotificationservice.webhook;
+package com.example.discordnotificationservice.discord;
 
-import com.example.discordnotificationservice.webhook.dto.DiscordMessageRequest;
+import com.example.discordnotificationservice.discord.dto.DiscordWebhookRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -13,6 +13,6 @@ public interface DiscordApiWebhooksClient {
     ResponseEntity<Void> sendMessage(
             @PathVariable(name = "id") String id,
             @PathVariable(name = "token") String token,
-            @RequestBody DiscordMessageRequest message
+            @RequestBody DiscordWebhookRequest message
     );
 }
