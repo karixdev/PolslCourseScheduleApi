@@ -4,6 +4,7 @@ import com.example.discordnotificationservice.ContainersEnvironment;
 import com.example.discordnotificationservice.testconfig.WebClientTestConfig;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -53,8 +54,8 @@ public class WebhookControllerIT extends ContainersEnvironment {
                 () -> "http://localhost:9999");
     }
 
-    @AfterEach
-    void tearDown() {
+    @BeforeEach
+    void setUp() {
         webhookRepository.deleteAll();
     }
 
@@ -330,32 +331,6 @@ public class WebhookControllerIT extends ContainersEnvironment {
         String userToken = getUserToken();
 
         UUID id = UUID.randomUUID();
-
-        stubFor(
-                get(urlPathEqualTo("/api/schedules"))
-                        .withQueryParam("ids", havingExactly(
-                                id.toString()
-                        ))
-                        .willReturn(ok()
-                                .withHeader(
-                                        "Content-Type",
-                                        "application/json"
-                                )
-                                .withBody("""
-                                        [
-                                            {
-                                                "id": "%s"
-                                            }
-                                        ]
-                                        """.formatted(id)
-                                )
-                        )
-        );
-
-        stubFor(
-                post(urlPathMatching("/[A-Za-z0-9]+/[A-Za-z0-9]+/[A-Za-z0-9]+"))
-                        .willReturn(noContent())
-        );
 
         seedDatabase(1, 19, adminToken, id);
         seedDatabase(20, 25, userToken, id);
