@@ -1,7 +1,6 @@
 package com.example.discordnotificationservice.discord;
 
 
-import com.example.discordnotificationservice.discord.document.DiscordWebhook;
 import com.example.discordnotificationservice.discord.dto.DiscordMessageRequest;
 import com.example.discordnotificationservice.discord.dto.DiscordWebhookRequest;
 import com.example.discordnotificationservice.discord.dto.DiscordWebhookResponse;
