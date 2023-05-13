@@ -12,9 +12,9 @@ import java.util.Optional;
 @Repository
 public interface WebhookRepository
         extends MongoRepository<Webhook, String> {
-    @Query("{'discordApiId': :#{#discordApiId}}")
+    @Query("{'discordId': :#{#discordId}}")
     Optional<Webhook> findByDiscordApiId(
-            @Param("discordApiId") String discordApiId
+            @Param("discordId") String discordId
     );
 
     @Query("{'discordToken': :#{#discordToken}}")
