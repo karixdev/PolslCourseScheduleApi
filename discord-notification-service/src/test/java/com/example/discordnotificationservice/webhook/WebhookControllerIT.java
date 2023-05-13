@@ -383,32 +383,6 @@ public class WebhookControllerIT extends ContainersEnvironment {
 
         UUID id = UUID.randomUUID();
 
-        stubFor(
-                get(urlPathEqualTo("/api/schedules"))
-                        .withQueryParam("ids", havingExactly(
-                                id.toString()
-                        ))
-                        .willReturn(ok()
-                                .withHeader(
-                                        "Content-Type",
-                                        "application/json"
-                                )
-                                .withBody("""
-                                        [
-                                            {
-                                                "id": "%s"
-                                            }
-                                        ]
-                                        """.formatted(id)
-                                )
-                        )
-        );
-
-        stubFor(
-                post(urlPathMatching("/[A-Za-z0-9]+/[A-Za-z0-9]+/[A-Za-z0-9]+"))
-                        .willReturn(noContent())
-        );
-
         seedDatabase(1, 13, userToken, id);
         seedDatabase(14, 2, adminToken, id);
 
