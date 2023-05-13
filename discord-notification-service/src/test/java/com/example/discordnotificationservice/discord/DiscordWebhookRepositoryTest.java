@@ -1,14 +1,11 @@
 package com.example.discordnotificationservice.discord;
 
 import com.example.discordnotificationservice.ContainersEnvironment;
-import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.AfterEach;
+import com.example.discordnotificationservice.discord.document.DiscordWebhook;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
