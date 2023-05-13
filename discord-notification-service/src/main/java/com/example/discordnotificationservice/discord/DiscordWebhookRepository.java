@@ -1,6 +1,5 @@
 package com.example.discordnotificationservice.discord;
 
-import com.example.discordnotificationservice.discord.document.DiscordWebhook;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;

@@ -1,7 +1,6 @@
 package com.example.discordnotificationservice.discord;
 
 import com.example.discordnotificationservice.ContainersEnvironment;
-import com.example.discordnotificationservice.discord.document.DiscordWebhook;
 import com.example.discordnotificationservice.testconfig.WebClientTestConfig;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import org.junit.jupiter.api.AfterEach;

@@ -1,4 +1,4 @@
-package com.example.discordnotificationservice.discord.document;
+package com.example.discordnotificationservice.discord;
 
 import lombok.AccessLevel;
 import lombok.Builder;
