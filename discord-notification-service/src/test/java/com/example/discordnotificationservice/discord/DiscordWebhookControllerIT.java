@@ -5,6 +5,9 @@ import com.example.discordnotificationservice.testconfig.WebClientTestConfig;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,10 +18,13 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -312,7 +318,7 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
         DiscordWebhook result = resultList.get(0);
 
         assertThat(result.getDiscordApiId())
-                 .isEqualTo("discordApiId");
+                .isEqualTo("discordApiId");
         assertThat(result.getToken())
                 .isEqualTo("token");
         assertThat(result.getSchedules())
@@ -544,6 +550,305 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
 
         assertThat(resultDiscordWebhooks).hasSize(1);
         assertThat(resultDiscordWebhooks.get(0)).isEqualTo(currentDiscordWebhooks.get(0));
+    }
+
+    @Test
+    void shouldNotUpdateNotExistingDiscordWebhook() {
+        String token = getUserToken();
+
+        String payload = """
+                {
+                    "url": "https://discord.com/api/webhooks/discordApiId/token",
+                    "schedules": ["%s"]
+                }
+                """.formatted(UUID.randomUUID());
+
+        seedDatabase(1, 1, token, UUID.randomUUID());
+
+        webClient.put().uri("/api/discord-webhooks/123")
+                .header(
+                        "Authorization",
+                        "Bearer " + token
+                )
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(payload)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void shouldNotUpdateNotOwnedDiscordWebhookForUser() {
+        String token = getUserToken();
+
+        seedDatabase(1, 1, getAdminToken(), UUID.randomUUID());
+
+        String id = discordWebhookRepository.findAll().get(0).getId();
+
+        String payload = """
+                {
+                    "url": "https://discord.com/api/webhooks/discordApiId/token",
+                    "schedules": ["%s"]
+                }
+                """.formatted(UUID.randomUUID());
+
+        webClient.put().uri("/api/discord-webhooks/%s".formatted(id))
+                .header(
+                        "Authorization",
+                        "Bearer " + token
+                )
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(payload)
+                .exchange()
+                .expectStatus().isForbidden();
+
+
+        assertThat(discordWebhookRepository.findAll()).hasSize(1);
+    }
+
+    @Test
+    void shouldNotUpdateDiscordWebhookWhenProvidedUrlWithUnavailableDiscordApiId() {
+        String token = getUserToken();
+
+        seedDatabase(1, 2, token, UUID.randomUUID());
+
+        DiscordWebhook discordWebhookBefore = discordWebhookRepository.findAll().get(0);
+
+        String payload = """
+                {
+                    "url": "https://discord.com/api/webhooks/discordApiId2/token",
+                    "schedules": ["%s"]
+                }
+                """.formatted(UUID.randomUUID());
+
+        webClient.put().uri("/api/discord-webhooks/%s".formatted(discordWebhookBefore.getId()))
+                .header(
+                        "Authorization",
+                        "Bearer " + token
+                )
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(payload)
+                .exchange()
+                .expectStatus().isBadRequest();
+
+        List<DiscordWebhook> result = discordWebhookRepository.findAll();
+
+        assertThat(result).hasSize(2);
+        assertThat(result.get(0)).isEqualTo(discordWebhookBefore);
+    }
+
+    @Test
+    void shouldNotUpdateDiscordWebhookWhenProvidedUrlWithUnavailableToken() {
+        String token = getUserToken();
+
+        seedDatabase(1, 2, token, UUID.randomUUID());
+
+        DiscordWebhook discordWebhookBefore = discordWebhookRepository.findAll().get(0);
+
+        String payload = """
+                {
+                    "url": "https://discord.com/api/webhooks/discordApiId3/token2",
+                    "schedules": ["%s"]
+                }
+                """.formatted(UUID.randomUUID());
+
+        webClient.put().uri("/api/discord-webhooks/%s".formatted(discordWebhookBefore.getId()))
+                .header(
+                        "Authorization",
+                        "Bearer " + token
+                )
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(payload)
+                .exchange()
+                .expectStatus().isBadRequest();
+
+        List<DiscordWebhook> result = discordWebhookRepository.findAll();
+
+        assertThat(result).hasSize(2);
+        assertThat(result.get(0)).isEqualTo(discordWebhookBefore);
+    }
+
+    @Test
+    void shouldNotUpdateDiscordWebhookWhenProvidedNotExistingSchedules() {
+        UUID id1 = UUID.randomUUID();
+        UUID id2 = UUID.randomUUID();
+
+        stubFor(
+                get(urlPathEqualTo("/api/schedules"))
+                        .withQueryParam("ids", havingExactly(
+                                id1.toString(),
+                                id2.toString()
+                        ))
+                        .willReturn(ok()
+                                .withHeader(
+                                        "Content-Type",
+                                        "application/json"
+                                )
+                                .withBody("""
+                                        [
+                                            {
+                                                "id": "%s"
+                                            }
+                                        ]
+                                        """.formatted(id1)
+                                )
+                        )
+        );
+
+        String token = getUserToken();
+
+        seedDatabase(1, 2, token, UUID.randomUUID());
+
+        DiscordWebhook discordWebhookBefore = discordWebhookRepository.findAll().get(0);
+
+        String payload = """
+                {
+                    "url": "https://discord.com/api/webhooks/discordApiId3/token3",
+                    "schedules": ["%s", "%s"]
+                }
+                """.formatted(id1, id2);
+
+        webClient.put().uri("/api/discord-webhooks/%s".formatted(discordWebhookBefore.getId()))
+                .header(
+                        "Authorization",
+                        "Bearer " + token
+                )
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(payload)
+                .exchange()
+                .expectStatus().isBadRequest();
+
+        List<DiscordWebhook> result = discordWebhookRepository.findAll();
+
+        assertThat(result).hasSize(2);
+        assertThat(result.get(0)).isEqualTo(discordWebhookBefore);
+    }
+
+    @Test
+    void shouldNotUpdateDiscordWebhookWhenProvidedNotWorkingWebhookUrl() {
+        String token = getUserToken();
+
+        seedDatabase(1, 2, token, UUID.randomUUID());
+
+        DiscordWebhook discordWebhookBefore = discordWebhookRepository.findAll().get(0);
+
+
+        stubFor(
+                post(urlPathEqualTo("/webhooks/discordApiId/token"))
+                        .willReturn(badRequest())
+        );
+
+        String payload = """
+                {
+                    "url": "https://discord.com/api/webhooks/discordApiId/token",
+                    "schedules": ["%s"]
+                }
+                """.formatted(discordWebhookBefore.getSchedules().stream().toList().get(0));
+
+        webClient.post().uri("/api/discord-webhooks")
+                .header(
+                        "Authorization",
+                        "Bearer " + token
+                )
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(payload)
+                .exchange()
+                .expectStatus().isBadRequest();
+
+        List<DiscordWebhook> result = discordWebhookRepository.findAll();
+
+        assertThat(result).hasSize(2);
+        assertThat(result.get(0)).isEqualTo(discordWebhookBefore);
+    }
+
+    @ParameterizedTest
+    @MethodSource("ownerSenderValues")
+    void shouldUpdateDiscordWebhookForOwnerUserAndNotOwnerAdmin(String ownerToken, String senderToken) {
+        seedDatabase(1, 2, ownerToken, UUID.randomUUID());
+
+        DiscordWebhook discordWebhookBefore = discordWebhookRepository.findAll().get(0);
+
+        String newDiscordWebhookUrl = "https://discord.com/api/webhooks/discordApiId3/token3";
+
+        UUID newSchedule = UUID.randomUUID();
+        System.out.println(newSchedule);
+
+        stubFor(
+                get(urlPathEqualTo("/api/schedules"))
+                        .withQueryParam("ids", havingExactly(
+                                newSchedule.toString()
+                        ))
+                        .willReturn(ok()
+                                .withHeader(
+                                        "Content-Type",
+                                        "application/json"
+                                )
+                                .withBody("""
+                                        [
+                                            {
+                                                "id": "%s"
+                                            }
+                                        ]
+                                        """.formatted(newSchedule)
+                                )
+                        )
+        );
+
+        stubFor(
+                post(urlPathEqualTo("/webhooks/discordApiId3/token3"))
+                        .willReturn(ok())
+        );
+
+        String payload = """
+                {
+                    "url": "%s",
+                    "schedules": ["%s", "%s"]
+                }
+                """.formatted(
+                newDiscordWebhookUrl,
+                discordWebhookBefore.getSchedules()
+                        .stream()
+                        .toList()
+                        .get(0),
+                newSchedule);
+
+        webClient.put().uri("/api/discord-webhooks/" + discordWebhookBefore.getId())
+                .header(
+                        "Authorization",
+                        "Bearer " + senderToken
+                )
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(payload)
+                .exchange()
+                .expectStatus().isOk();
+
+
+        List<DiscordWebhook> result = discordWebhookRepository.findAll();
+
+        assertThat(result).hasSize(2);
+
+        DiscordWebhook resultWebhook = result.get(0);
+
+        assertThat(resultWebhook.getDiscordApiId())
+                .isEqualTo("discordApiId3");
+        assertThat(resultWebhook.getToken())
+                .isEqualTo("token3");
+
+        Set<UUID> expectedSchedules = new HashSet<>(discordWebhookBefore.getSchedules());
+        expectedSchedules.add(newSchedule);
+
+        assertThat(resultWebhook.getSchedules())
+                .isEqualTo(expectedSchedules);
+    }
+
+    private static Stream<Arguments> ownerSenderValues() {
+        // Put tokens in variables, so we don't make call to Keycloak everytime
+        String userToken = getUserToken();
+        String adminToken = getAdminToken();
+
+        return Stream.of(
+                Arguments.of(userToken, userToken),
+                Arguments.of(userToken, adminToken)
+        );
     }
 
     private void seedDatabase(int start, int end, String token, UUID scheduleId) {

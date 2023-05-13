@@ -57,7 +57,7 @@ public abstract class ContainersEnvironment {
         }
     }
 
-    private String getToken(String username, String password) {
+    private static String getToken(String username, String password) {
         WebClient webClient = WebClient.builder().build();
 
         MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
@@ -79,11 +79,11 @@ public abstract class ContainersEnvironment {
         return token.accessToken();
     }
 
-    protected String getAdminToken() {
+    protected static String getAdminToken() {
         return getToken("admin", "admin");
     }
 
-    protected String getUserToken() {
+    protected static String getUserToken() {
         return getToken("user", "user");
     }
 }

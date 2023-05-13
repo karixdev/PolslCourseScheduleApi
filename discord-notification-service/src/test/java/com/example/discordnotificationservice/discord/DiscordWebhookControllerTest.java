@@ -21,6 +21,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -149,6 +150,28 @@ class DiscordWebhookControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpectAll(
                         jsonPath("$.constraints.schedules").value("Provided set of schedules includes non-existing schedules"),
+                        jsonPath("$.message").value("Validation Failed")
+                );
+    }
+
+    @Test
+    void GivenInvalidRequest_WhenUpdate_ThenRespondsWithBadRequestAndProperBody() throws Exception {
+        // Given
+        DiscordWebhookRequest request = new DiscordWebhookRequest(
+                "",
+                Set.of()
+        );
+
+        String content = mapper.writeValueAsString(request);
+
+        // When & Then
+        mockMvc.perform(put("/api/discord-webhooks/123")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(content))
+                .andExpect(status().isBadRequest())
+                .andExpectAll(
+                        jsonPath("$.constraints.url").isNotEmpty(),
+                        jsonPath("$.constraints.schedules").isNotEmpty(),
                         jsonPath("$.message").value("Validation Failed")
                 );
     }

@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -140,5 +141,60 @@ public class DiscordWebhookService {
         }
 
         repository.delete(discordWebhook);
+    }
+
+    @Transactional
+    public DiscordWebhookResponse update(DiscordWebhookRequest request, Jwt jwt, String id) {
+        DiscordWebhook discordWebhook = findByIdOrElseThrow(id);
+
+        String userId = securityService.getUserId(jwt);
+
+        if (!discordWebhook.getAddedBy().equals(userId) && !securityService.isAdmin(jwt)) {
+            throw new ForbiddenAccessException();
+        }
+
+        String discordWebhookUrl = request.url();
+
+        if (!isValidDiscordWebhookUrl(discordWebhookUrl)) {
+            throw new InvalidDiscordWebhookUrlException();
+        }
+
+        String discordApiId = getDiscordApiIdFromUrl(discordWebhookUrl);
+        if (repository.findByDiscordApiId(discordApiId).isPresent() &&
+            !repository.findByDiscordApiId(discordApiId).get().getId().equals(discordWebhook.getId())
+        ) {
+            throw new UnavailableDiscordApiIdException();
+        }
+
+        String token = getTokenFromUrl(discordWebhookUrl);
+        if (repository.findByToken(token).isPresent() &&
+            !repository.findByToken(token).get().getId().equals(discordWebhook.getId())
+        ) {
+            throw new UnavailableTokenException();
+        }
+
+
+        Set<UUID> currentSchedules = discordWebhook.getSchedules();
+        Set<UUID> schedulesToCheck = request.schedules().stream()
+                .filter(schedule -> !currentSchedules.contains(schedule))
+                .collect(Collectors.toSet());
+
+        if (!scheduleService.checkIfSchedulesExist(schedulesToCheck)) {
+            throw new NotExistingSchedulesException();
+        }
+
+        discordApiWebhooksClient.sendMessage(
+                discordApiId,
+                token,
+                new DiscordMessageRequest(WELCOME_MESSAGE)
+        );
+
+        discordWebhook.setDiscordApiId(discordApiId);
+        discordWebhook.setToken(token);
+        discordWebhook.setSchedules(request.schedules());
+
+        discordWebhook = repository.save(discordWebhook);
+
+        return mapper.map(discordWebhook);
     }
 }

@@ -43,6 +43,18 @@ public class DiscordWebhookController {
         );
     }
 
+    @PutMapping("/{id}")
+    ResponseEntity<DiscordWebhookResponse> update(
+            @Valid @RequestBody DiscordWebhookRequest request,
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable String id
+    ) {
+        return new ResponseEntity<>(
+                service.update(request, jwt, id),
+                HttpStatus.OK
+        );
+    }
+
     @DeleteMapping("/{id}")
     ResponseEntity<Void> delete(
             @PathVariable(name = "id") String id,
