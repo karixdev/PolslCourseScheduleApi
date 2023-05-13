@@ -1,10 +1,10 @@
-package com.example.discordnotificationservice.discord;
+package com.example.discordnotificationservice.webhook;
 
-import com.example.discordnotificationservice.discord.dto.DiscordWebhookRequest;
-import com.example.discordnotificationservice.discord.exception.InvalidDiscordWebhookUrlException;
-import com.example.discordnotificationservice.discord.exception.NotExistingSchedulesException;
-import com.example.discordnotificationservice.discord.exception.UnavailableDiscordApiIdException;
-import com.example.discordnotificationservice.discord.exception.UnavailableTokenException;
+import com.example.discordnotificationservice.webhook.dto.WebhookRequest;
+import com.example.discordnotificationservice.webhook.exception.InvalidDiscordWebhookUrlException;
+import com.example.discordnotificationservice.webhook.exception.NotExistingSchedulesException;
+import com.example.discordnotificationservice.webhook.exception.UnavailableDiscordApiIdException;
+import com.example.discordnotificationservice.webhook.exception.UnavailableTokenException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -25,21 +25,21 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(controllers = DiscordWebhookController.class)
+@WebMvcTest(controllers = WebhookController.class)
 @AutoConfigureMockMvc(addFilters = false)
-class DiscordWebhookControllerTest {
+class WebhookControllerTest {
     @Autowired
     MockMvc mockMvc;
 
     @MockBean
-    DiscordWebhookService service;
+    WebhookService service;
 
     ObjectMapper mapper = new ObjectMapper();
 
     @Test
     void GivenInvalidRequest_WhenCreate_ThenRespondsWithBadRequestAndProperBody() throws Exception {
         // Given
-        DiscordWebhookRequest request = new DiscordWebhookRequest(
+        WebhookRequest request = new WebhookRequest(
                 "",
                 Set.of()
         );
@@ -47,7 +47,7 @@ class DiscordWebhookControllerTest {
         String content = mapper.writeValueAsString(request);
 
         // When & Then
-        mockMvc.perform(post("/api/discord-webhooks")
+        mockMvc.perform(post("/api/webhooks")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(content))
                 .andExpect(status().isBadRequest())
@@ -61,7 +61,7 @@ class DiscordWebhookControllerTest {
     @Test
     void GivenRequestWithInvalidDiscordWebhookUrl_WhenCreate_ThenRespondsWithBadRequestAndProperBody() throws Exception {
         // Given
-        DiscordWebhookRequest request = new DiscordWebhookRequest(
+        WebhookRequest request = new WebhookRequest(
                 "https://ivalid-url.com",
                 Set.of(UUID.randomUUID())
         );
@@ -72,7 +72,7 @@ class DiscordWebhookControllerTest {
                 .thenThrow(new InvalidDiscordWebhookUrlException());
 
         // When & Then
-        mockMvc.perform(post("/api/discord-webhooks")
+        mockMvc.perform(post("/api/webhooks")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(content))
                 .andExpect(status().isBadRequest())
@@ -85,7 +85,7 @@ class DiscordWebhookControllerTest {
     @Test
     void GivenRequestWithUrlContainingUnavailableDiscordApiId_WhenCreate_ThenRespondsWithBadRequestAndProperBody() throws Exception {
         // Given
-        DiscordWebhookRequest request = new DiscordWebhookRequest(
+        WebhookRequest request = new WebhookRequest(
                 "https://discord.com/api/webhooks/discordApiId/token",
                 Set.of(UUID.randomUUID())
         );
@@ -96,7 +96,7 @@ class DiscordWebhookControllerTest {
                 .thenThrow(new UnavailableDiscordApiIdException());
 
         // When & Then
-        mockMvc.perform(post("/api/discord-webhooks")
+        mockMvc.perform(post("/api/webhooks")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(content))
                 .andExpect(status().isBadRequest())
@@ -109,7 +109,7 @@ class DiscordWebhookControllerTest {
     @Test
     void GivenRequestWithUrlContainingUnavailableToken_WhenCreate_ThenRespondsWithBadRequestAndProperBody() throws Exception {
         // Given
-        DiscordWebhookRequest request = new DiscordWebhookRequest(
+        WebhookRequest request = new WebhookRequest(
                 "https://discord.com/api/webhooks/discordApiId/token",
                 Set.of(UUID.randomUUID())
         );
@@ -120,7 +120,7 @@ class DiscordWebhookControllerTest {
                 .thenThrow(new UnavailableTokenException());
 
         // When & Then
-        mockMvc.perform(post("/api/discord-webhooks")
+        mockMvc.perform(post("/api/webhooks")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(content))
                 .andExpect(status().isBadRequest())
@@ -133,7 +133,7 @@ class DiscordWebhookControllerTest {
     @Test
     void GivenRequestWithSchedulesContainingNotExistingOnes_WhenCreate_ThenRespondsWithBadRequestAndProperBody() throws Exception {
         // Given
-        DiscordWebhookRequest request = new DiscordWebhookRequest(
+        WebhookRequest request = new WebhookRequest(
                 "https://discord.com/api/webhooks/discordApiId/token",
                 Set.of(UUID.randomUUID())
         );
@@ -144,7 +144,7 @@ class DiscordWebhookControllerTest {
                 .thenThrow(new NotExistingSchedulesException());
 
         // When & Then
-        mockMvc.perform(post("/api/discord-webhooks")
+        mockMvc.perform(post("/api/webhooks")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(content))
                 .andExpect(status().isBadRequest())
@@ -157,7 +157,7 @@ class DiscordWebhookControllerTest {
     @Test
     void GivenInvalidRequest_WhenUpdate_ThenRespondsWithBadRequestAndProperBody() throws Exception {
         // Given
-        DiscordWebhookRequest request = new DiscordWebhookRequest(
+        WebhookRequest request = new WebhookRequest(
                 "",
                 Set.of()
         );
@@ -165,7 +165,7 @@ class DiscordWebhookControllerTest {
         String content = mapper.writeValueAsString(request);
 
         // When & Then
-        mockMvc.perform(put("/api/discord-webhooks/123")
+        mockMvc.perform(put("/api/webhooks/123")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(content))
                 .andExpect(status().isBadRequest())

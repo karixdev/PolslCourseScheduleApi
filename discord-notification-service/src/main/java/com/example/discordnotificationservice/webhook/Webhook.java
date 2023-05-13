@@ -1,4 +1,4 @@
-package com.example.discordnotificationservice.discord;
+package com.example.discordnotificationservice.webhook;
 
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -15,7 +15,7 @@ import java.util.UUID;
 @Data
 @Builder
 @Document
-public class DiscordWebhook {
+public class Webhook {
     @Id
     @Setter(AccessLevel.NONE)
     private String id;

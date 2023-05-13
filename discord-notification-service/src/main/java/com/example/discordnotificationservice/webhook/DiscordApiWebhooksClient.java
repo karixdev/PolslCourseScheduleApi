@@ -1,6 +1,6 @@
-package com.example.discordnotificationservice.discord;
+package com.example.discordnotificationservice.webhook;
 
-import com.example.discordnotificationservice.discord.dto.DiscordMessageRequest;
+import com.example.discordnotificationservice.webhook.dto.DiscordMessageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;

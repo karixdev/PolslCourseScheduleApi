@@ -1,8 +1,8 @@
-package com.example.discordnotificationservice.discord;
+package com.example.discordnotificationservice.webhook;
 
 import com.example.discordnotificationservice.ContainersEnvironment;
-import com.example.discordnotificationservice.discord.dto.DiscordMessageRequest;
-import com.example.discordnotificationservice.discord.exception.DiscordApiException;
+import com.example.discordnotificationservice.webhook.dto.DiscordMessageRequest;
+import com.example.discordnotificationservice.webhook.exception.DiscordApiException;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,4 +1,4 @@
-package com.example.discordnotificationservice.discord;
+package com.example.discordnotificationservice.webhook;
 
 import com.example.discordnotificationservice.ContainersEnvironment;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,9 +16,9 @@ import java.util.stream.IntStream;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataMongoTest
-class DiscordWebhookRepositoryTest extends ContainersEnvironment {
+class WebhookRepositoryTest extends ContainersEnvironment {
     @Autowired
-    DiscordWebhookRepository underTest;
+    WebhookRepository underTest;
 
     @BeforeEach
     void setUp() {
@@ -26,12 +26,12 @@ class DiscordWebhookRepositoryTest extends ContainersEnvironment {
     }
 
     @Test
-    void GivenNotExistingDiscordWebhookDiscordId_WhenFindByDiscordId_ThenReturnsEmptyOptional() {
+    void GivenNotExistingWebhookDiscordId_WhenFindByDiscordId_ThenReturnsEmptyOptional() {
         // Given
         String discordApiId = "discordApiId";
 
         underTest.save(
-                DiscordWebhook.builder()
+                Webhook.builder()
                         .discordId("otherDiscordApiId")
                         .discordToken("otherToken")
                         .addedBy("111")
@@ -40,7 +40,7 @@ class DiscordWebhookRepositoryTest extends ContainersEnvironment {
         );
 
         // When
-        Optional<DiscordWebhook> result =
+        Optional<Webhook> result =
                 underTest.findByDiscordApiId(discordApiId);
 
         // Then
@@ -48,12 +48,12 @@ class DiscordWebhookRepositoryTest extends ContainersEnvironment {
     }
 
     @Test
-    void GivenExistingDiscordWebhookDiscordId_WhenFindByDiscordId_ThenOptionalWithCorrectDocument() {
+    void GivenExistingWebhookDiscordId_WhenFindByDiscordId_ThenOptionalWithCorrectDocument() {
         // Given
         String discordApiId = "discordApiId";
 
-        DiscordWebhook expected = underTest.save(
-                DiscordWebhook.builder()
+        Webhook expected = underTest.save(
+                Webhook.builder()
                         .discordId(discordApiId)
                         .discordToken("token")
                         .addedBy("222")
@@ -62,7 +62,7 @@ class DiscordWebhookRepositoryTest extends ContainersEnvironment {
         );
 
         underTest.save(
-                DiscordWebhook.builder()
+                Webhook.builder()
                         .discordId("otherDiscordApiId")
                         .discordToken("otherToken")
                         .addedBy("111")
@@ -71,7 +71,7 @@ class DiscordWebhookRepositoryTest extends ContainersEnvironment {
         );
 
         // When
-        Optional<DiscordWebhook> result =
+        Optional<Webhook> result =
                 underTest.findByDiscordApiId(discordApiId);
 
         // Then
@@ -80,12 +80,12 @@ class DiscordWebhookRepositoryTest extends ContainersEnvironment {
     }
 
     @Test
-    void GivenNotExistingDiscordWebhookToken_WhenFindByDiscordToken_ThenReturnsEmptyOptional() {
+    void GivenNotExistingWebhookToken_WhenFindByDiscordToken_ThenReturnsEmptyOptional() {
         // Given
         String token = "token";
 
         underTest.save(
-                DiscordWebhook.builder()
+                Webhook.builder()
                         .discordId("discordApiId")
                         .discordToken("otherToken")
                         .addedBy("111")
@@ -94,19 +94,19 @@ class DiscordWebhookRepositoryTest extends ContainersEnvironment {
         );
 
         // When
-        Optional<DiscordWebhook> result = underTest.findByToken(token);
+        Optional<Webhook> result = underTest.findByToken(token);
 
         // Then
         assertThat(result).isEmpty();
     }
 
     @Test
-    void GivenExistingDiscordWebhookToken_WhenFindByDiscordToken_ThenOptionalWithCorrectDocument() {
+    void GivenExistingWebhookToken_WhenFindByDiscordToken_ThenOptionalWithCorrectDocument() {
         // Given
         String token = "token";
 
-        DiscordWebhook expected = underTest.save(
-                DiscordWebhook.builder()
+        Webhook expected = underTest.save(
+                Webhook.builder()
                         .discordId("discordApiId")
                         .discordToken(token)
                         .addedBy("222")
@@ -115,7 +115,7 @@ class DiscordWebhookRepositoryTest extends ContainersEnvironment {
         );
 
         underTest.save(
-                DiscordWebhook.builder()
+                Webhook.builder()
                         .discordId("discordApiId2")
                         .discordToken("otherToken")
                         .addedBy("111")
@@ -124,7 +124,7 @@ class DiscordWebhookRepositoryTest extends ContainersEnvironment {
         );
 
         // When
-        Optional<DiscordWebhook> result = underTest.findByToken(token);
+        Optional<Webhook> result = underTest.findByToken(token);
 
         // Then
         assertThat(result).isPresent();
@@ -138,7 +138,7 @@ class DiscordWebhookRepositoryTest extends ContainersEnvironment {
         PageRequest pageRequest = PageRequest.of(0, 10);
 
         underTest.save(
-                DiscordWebhook.builder()
+                Webhook.builder()
                         .discordId("discordApiId")
                         .discordToken("token")
                         .addedBy("111")
@@ -147,7 +147,7 @@ class DiscordWebhookRepositoryTest extends ContainersEnvironment {
         );
 
         // When
-        Page<DiscordWebhook> result = underTest.findByAddedBy(
+        Page<Webhook> result = underTest.findByAddedBy(
                 addedBy,
                 pageRequest);
 
@@ -163,7 +163,7 @@ class DiscordWebhookRepositoryTest extends ContainersEnvironment {
         PageRequest pageRequest2 = PageRequest.of(1, 2);
 
         underTest.save(
-                DiscordWebhook.builder()
+                Webhook.builder()
                         .discordId("otherDiscordApiId")
                         .discordToken("otherToken")
                         .addedBy("111")
@@ -173,7 +173,7 @@ class DiscordWebhookRepositoryTest extends ContainersEnvironment {
 
         underTest.saveAll(
                 IntStream.range(1, 4)
-                        .mapToObj(i -> DiscordWebhook.builder()
+                        .mapToObj(i -> Webhook.builder()
                                 .discordId("discordApiId" + i)
                                 .discordToken("token" + i)
                                 .addedBy(addedBy)
@@ -183,11 +183,11 @@ class DiscordWebhookRepositoryTest extends ContainersEnvironment {
         );
 
         // When
-        Page<DiscordWebhook> result1 = underTest.findByAddedBy(
+        Page<Webhook> result1 = underTest.findByAddedBy(
                 addedBy,
                 pageRequest1);
 
-        Page<DiscordWebhook> result2 = underTest.findByAddedBy(
+        Page<Webhook> result2 = underTest.findByAddedBy(
                 addedBy,
                 pageRequest2);
 

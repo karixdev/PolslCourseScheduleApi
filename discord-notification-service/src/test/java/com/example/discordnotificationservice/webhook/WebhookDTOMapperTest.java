@@ -1,7 +1,6 @@
-package com.example.discordnotificationservice.discord;
+package com.example.discordnotificationservice.webhook;
 
-import com.example.discordnotificationservice.discord.dto.DiscordWebhookResponse;
-import org.assertj.core.api.Assertions;
+import com.example.discordnotificationservice.webhook.dto.WebhookResponse;
 import org.junit.jupiter.api.Test;
 
 import java.util.Set;
@@ -9,14 +8,14 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class DiscordWebhookDTOMapperTest {
-    DiscordWebhookDTOMapper underTest = new DiscordWebhookDTOMapper();
+class WebhookDTOMapperTest {
+    WebhookDTOMapper underTest = new WebhookDTOMapper();
 
     @Test
     void GivenDiscordWebhook_WhenMap_ThenReturnsCorrectDTO() {
         // Given
         UUID id = UUID.randomUUID();
-        DiscordWebhook discordWebhook = new DiscordWebhook(
+        Webhook discordWebhook = new Webhook(
                 "12345",
                 "api123",
                 "token123",
@@ -25,11 +24,11 @@ class DiscordWebhookDTOMapperTest {
         );
 
         // When
-        DiscordWebhookResponse response = underTest.map(discordWebhook);
+        WebhookResponse response = underTest.map(discordWebhook);
 
         // Then
         assertThat(response.id()).isEqualTo("12345");
-        assertThat(response.discordToken()).isEqualTo("api123");
+        assertThat(response.discordId()).isEqualTo("api123");
         assertThat(response.discordToken()).isEqualTo("token123");
         assertThat(response.schedules()).containsExactly(id);
     }

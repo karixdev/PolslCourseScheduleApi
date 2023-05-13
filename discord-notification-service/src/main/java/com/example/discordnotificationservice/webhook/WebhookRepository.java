@@ -1,4 +1,4 @@
-package com.example.discordnotificationservice.discord;
+package com.example.discordnotificationservice.webhook;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -10,20 +10,20 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface DiscordWebhookRepository
-        extends MongoRepository<DiscordWebhook, String> {
+public interface WebhookRepository
+        extends MongoRepository<Webhook, String> {
     @Query("{'discordApiId': :#{#discordApiId}}")
-    Optional<DiscordWebhook> findByDiscordApiId(
+    Optional<Webhook> findByDiscordApiId(
             @Param("discordApiId") String discordApiId
     );
 
     @Query("{'discordToken': :#{#discordToken}}")
-    Optional<DiscordWebhook> findByToken(
+    Optional<Webhook> findByToken(
             @Param("discordToken") String discordToken
     );
 
     @Query("{'addedBy': :#{#addedBy}}")
-    Page<DiscordWebhook> findByAddedBy(
+    Page<Webhook> findByAddedBy(
             @Param("addedBy") String addedBy,
             Pageable pageable
     );

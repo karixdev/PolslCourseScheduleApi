@@ -1,12 +1,12 @@
-package com.example.discordnotificationservice.discord;
+package com.example.discordnotificationservice.webhook;
 
-import com.example.discordnotificationservice.discord.dto.DiscordMessageRequest;
-import com.example.discordnotificationservice.discord.dto.DiscordWebhookRequest;
-import com.example.discordnotificationservice.discord.dto.DiscordWebhookResponse;
-import com.example.discordnotificationservice.discord.exception.InvalidDiscordWebhookUrlException;
-import com.example.discordnotificationservice.discord.exception.NotExistingSchedulesException;
-import com.example.discordnotificationservice.discord.exception.UnavailableDiscordApiIdException;
-import com.example.discordnotificationservice.discord.exception.UnavailableTokenException;
+import com.example.discordnotificationservice.webhook.dto.DiscordMessageRequest;
+import com.example.discordnotificationservice.webhook.dto.WebhookRequest;
+import com.example.discordnotificationservice.webhook.dto.WebhookResponse;
+import com.example.discordnotificationservice.webhook.exception.InvalidDiscordWebhookUrlException;
+import com.example.discordnotificationservice.webhook.exception.NotExistingSchedulesException;
+import com.example.discordnotificationservice.webhook.exception.UnavailableDiscordApiIdException;
+import com.example.discordnotificationservice.webhook.exception.UnavailableTokenException;
 import com.example.discordnotificationservice.schedule.ScheduleService;
 import com.example.discordnotificationservice.security.SecurityService;
 import com.example.discordnotificationservice.shared.exception.ForbiddenAccessException;
@@ -24,12 +24,12 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class DiscordWebhookService {
+public class WebhookService {
     private final DiscordApiWebhooksClient discordApiWebhooksClient;
     private final ScheduleService scheduleService;
-    private final DiscordWebhookRepository repository;
+    private final WebhookRepository repository;
     private final SecurityService securityService;
-    private final DiscordWebhookDTOMapper mapper;
+    private final WebhookDTOMapper mapper;
 
     private static final String DISCORD_WEBHOOK_URL_PREFIX = "https://discord.com/api/webhooks/";
     private static final String WELCOME_MESSAGE = "Hello form PolslCourseApi!";
@@ -37,7 +37,7 @@ public class DiscordWebhookService {
     private static final int PAGE_SIZE = 10;
 
     @Transactional
-    public DiscordWebhookResponse create(DiscordWebhookRequest request, Jwt jwt) {
+    public WebhookResponse create(WebhookRequest request, Jwt jwt) {
         String discordWebhookUrl = request.url();
 
         if (isNotValidDiscordWebhookUrl(discordWebhookUrl)) {
@@ -62,8 +62,8 @@ public class DiscordWebhookService {
 
         sendWelcomeMessage(discordApiId, token);
 
-        DiscordWebhook discordWebhook = repository.save(
-                DiscordWebhook.builder()
+        Webhook discordWebhook = repository.save(
+                Webhook.builder()
                         .discordId(discordApiId)
                         .discordToken(token)
                         .addedBy(jwt.getSubject())
@@ -71,7 +71,7 @@ public class DiscordWebhookService {
                         .build()
         );
 
-        return new DiscordWebhookResponse(
+        return new WebhookResponse(
                 discordWebhook.getId(),
                 discordWebhook.getDiscordId(),
                 discordWebhook.getDiscordToken(),
@@ -108,27 +108,27 @@ public class DiscordWebhookService {
         return splitUrlIntoParts(url)[1];
     }
 
-    public Page<DiscordWebhookResponse> findAll(Jwt jwt, Integer page) {
+    public Page<WebhookResponse> findAll(Jwt jwt, Integer page) {
         PageRequest pageRequest = PageRequest.of(page, PAGE_SIZE);
 
         String userId = securityService.getUserId(jwt);
 
-        Page<DiscordWebhook> discordWebhooks = securityService.isAdmin(jwt) ?
+        Page<Webhook> discordWebhooks = securityService.isAdmin(jwt) ?
                 repository.findAll(pageRequest) :
                 repository.findByAddedBy(userId, pageRequest);
 
         return discordWebhooks.map(mapper::map);
     }
 
-    private DiscordWebhook findByIdOrElseThrow(String id) {
+    private Webhook findByIdOrElseThrow(String id) {
         return repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "DiscordWebhook with id %s not found".formatted(id)));
+                        "Webhook with id %s not found".formatted(id)));
     }
 
     @Transactional
     public void delete(String id, Jwt jwt) {
-        DiscordWebhook discordWebhook = findByIdOrElseThrow(id);
+        Webhook discordWebhook = findByIdOrElseThrow(id);
 
         String userId = securityService.getUserId(jwt);
 
@@ -140,8 +140,8 @@ public class DiscordWebhookService {
     }
 
     @Transactional
-    public DiscordWebhookResponse update(DiscordWebhookRequest request, Jwt jwt, String id) {
-        DiscordWebhook discordWebhook = findByIdOrElseThrow(id);
+    public WebhookResponse update(WebhookRequest request, Jwt jwt, String id) {
+        Webhook discordWebhook = findByIdOrElseThrow(id);
 
         String userId = securityService.getUserId(jwt);
 

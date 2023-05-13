@@ -1,4 +1,4 @@
-package com.example.discordnotificationservice.discord.dto;
+package com.example.discordnotificationservice.webhook.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

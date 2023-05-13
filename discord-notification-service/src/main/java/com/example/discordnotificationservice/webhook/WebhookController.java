@@ -1,7 +1,7 @@
-package com.example.discordnotificationservice.discord;
+package com.example.discordnotificationservice.webhook;
 
-import com.example.discordnotificationservice.discord.dto.DiscordWebhookRequest;
-import com.example.discordnotificationservice.discord.dto.DiscordWebhookResponse;
+import com.example.discordnotificationservice.webhook.dto.WebhookRequest;
+import com.example.discordnotificationservice.webhook.dto.WebhookResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -12,14 +12,14 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/discord-webhooks")
+@RequestMapping("/api/webhooks")
 @RequiredArgsConstructor
-public class DiscordWebhookController {
-    private final DiscordWebhookService service;
+public class WebhookController {
+    private final WebhookService service;
 
     @PostMapping
-    ResponseEntity<DiscordWebhookResponse> create(
-            @Valid @RequestBody DiscordWebhookRequest discordWebhookRequest,
+    ResponseEntity<WebhookResponse> create(
+            @Valid @RequestBody WebhookRequest discordWebhookRequest,
             @AuthenticationPrincipal Jwt jwt
     ) {
         return new ResponseEntity<>(
@@ -29,7 +29,7 @@ public class DiscordWebhookController {
     }
 
     @GetMapping
-    ResponseEntity<Page<DiscordWebhookResponse>> findAll(
+    ResponseEntity<Page<WebhookResponse>> findAll(
             @RequestParam(
                     name = "page",
                     required = false,
@@ -44,8 +44,8 @@ public class DiscordWebhookController {
     }
 
     @PutMapping("/{id}")
-    ResponseEntity<DiscordWebhookResponse> update(
-            @Valid @RequestBody DiscordWebhookRequest request,
+    ResponseEntity<WebhookResponse> update(
+            @Valid @RequestBody WebhookRequest request,
             @AuthenticationPrincipal Jwt jwt,
             @PathVariable String id
     ) {

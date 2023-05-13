@@ -1,4 +1,4 @@
-package com.example.discordnotificationservice.discord;
+package com.example.discordnotificationservice.webhook;
 
 import com.example.discordnotificationservice.ContainersEnvironment;
 import com.example.discordnotificationservice.testconfig.WebClientTestConfig;
@@ -33,12 +33,12 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @WireMockTest(httpPort = 9999)
 @AutoConfigureMockMvc
 @ContextConfiguration(classes = {WebClientTestConfig.class})
-public class DiscordWebhookControllerIT extends ContainersEnvironment {
+public class WebhookControllerIT extends ContainersEnvironment {
     @Autowired
     WebTestClient webClient;
 
     @Autowired
-    DiscordWebhookRepository discordWebhookRepository;
+    WebhookRepository webhookRepository;
 
     @Autowired
     MockMvc mockMvc;
@@ -55,11 +55,11 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
 
     @AfterEach
     void tearDown() {
-        discordWebhookRepository.deleteAll();
+        webhookRepository.deleteAll();
     }
 
     @Test
-    void shouldNotCreateDiscordWebhookWhenProvidedInvalidUrl() {
+    void shouldNotCreateWebhookWhenProvidedInvalidUrl() {
         UUID id1 = UUID.randomUUID();
 
         String payload = """
@@ -71,7 +71,7 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
 
         String token = getAdminToken();
 
-        webClient.post().uri("/api/discord-webhooks")
+        webClient.post().uri("/api/webhooks")
                 .header(
                         "Authorization",
                         "Bearer " + token
@@ -81,16 +81,16 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
                 .exchange()
                 .expectStatus().isBadRequest();
 
-        assertThat(discordWebhookRepository.findAll()).isEmpty();
+        assertThat(webhookRepository.findAll()).isEmpty();
     }
 
     @Test
-    void shouldNotCreateDiscordWebhookWhenProvidedUrlWithUnavailableDiscordId() {
+    void shouldNotCreateWebhookWhenProvidedUrlWithUnavailableDiscordId() {
         UUID id1 = UUID.randomUUID();
         Set<UUID> schedules = Set.of(id1);
 
-        discordWebhookRepository.save(
-                DiscordWebhook.builder()
+        webhookRepository.save(
+                Webhook.builder()
                         .discordId("discordApiId")
                         .discordToken("otherToken")
                         .schedules(schedules)
@@ -106,7 +106,7 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
 
         String token = getAdminToken();
 
-        webClient.post().uri("/api/discord-webhooks")
+        webClient.post().uri("/api/webhooks")
                 .header(
                         "Authorization",
                         "Bearer " + token
@@ -116,17 +116,17 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
                 .exchange()
                 .expectStatus().isBadRequest();
 
-        assertThat(discordWebhookRepository.findAll())
+        assertThat(webhookRepository.findAll())
                 .hasSize(1);
     }
 
     @Test
-    void shouldNotCreateDiscordWebhookWhenProvidedUrlWithUnavailableToken() {
+    void shouldNotCreateWebhookWhenProvidedUrlWithUnavailableToken() {
         UUID id1 = UUID.randomUUID();
         Set<UUID> schedules = Set.of(id1);
 
-        discordWebhookRepository.save(
-                DiscordWebhook.builder()
+        webhookRepository.save(
+                Webhook.builder()
                         .discordId("otherDiscordApiId")
                         .discordToken("token")
                         .schedules(schedules)
@@ -142,7 +142,7 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
 
         String token = getAdminToken();
 
-        webClient.post().uri("/api/discord-webhooks")
+        webClient.post().uri("/api/webhooks")
                 .header(
                         "Authorization",
                         "Bearer " + token
@@ -152,12 +152,12 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
                 .exchange()
                 .expectStatus().isBadRequest();
 
-        assertThat(discordWebhookRepository.findAll())
+        assertThat(webhookRepository.findAll())
                 .hasSize(1);
     }
 
     @Test
-    void shouldNotCreateDiscordWebhookWhenProvidedNotExistingSchedules() {
+    void shouldNotCreateWebhookWhenProvidedNotExistingSchedules() {
         UUID id1 = UUID.randomUUID();
         UUID id2 = UUID.randomUUID();
 
@@ -192,7 +192,7 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
 
         String token = getAdminToken();
 
-        webClient.post().uri("/api/discord-webhooks")
+        webClient.post().uri("/api/webhooks")
                 .header(
                         "Authorization",
                         "Bearer " + token
@@ -202,11 +202,11 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
                 .exchange()
                 .expectStatus().isBadRequest();
 
-        assertThat(discordWebhookRepository.findAll()).isEmpty();
+        assertThat(webhookRepository.findAll()).isEmpty();
     }
 
     @Test
-    void shouldNotCreateDiscordWebhookWhenProvidedNotWorkingWebhookUrl() {
+    void shouldNotCreateWebhookWhenProvidedNotWorkingWebhookUrl() {
         UUID id1 = UUID.randomUUID();
 
         stubFor(
@@ -244,7 +244,7 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
 
         String token = getAdminToken();
 
-        webClient.post().uri("/api/discord-webhooks")
+        webClient.post().uri("/api/webhooks")
                 .header(
                         "Authorization",
                         "Bearer " + token
@@ -254,11 +254,11 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
                 .exchange()
                 .expectStatus().isBadRequest();
 
-        assertThat(discordWebhookRepository.findAll()).isEmpty();
+        assertThat(webhookRepository.findAll()).isEmpty();
     }
 
     @Test
-    void shouldCreateDiscordWebhook() {
+    void shouldCreateWebhook() {
         UUID id1 = UUID.randomUUID();
 
         Set<UUID> schedules = Set.of(id1);
@@ -298,7 +298,7 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
 
         String token = getAdminToken();
 
-        webClient.post().uri("/api/discord-webhooks")
+        webClient.post().uri("/api/webhooks")
                 .header(
                         "Authorization",
                         "Bearer " + token
@@ -308,13 +308,13 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
                 .exchange()
                 .expectStatus().isCreated();
 
-        List<DiscordWebhook> resultList =
-                discordWebhookRepository.findAll();
+        List<Webhook> resultList =
+                webhookRepository.findAll();
 
         assertThat(resultList)
                 .hasSize(1);
 
-        DiscordWebhook result = resultList.get(0);
+        Webhook result = resultList.get(0);
 
         assertThat(result.getDiscordId())
                 .isEqualTo("discordApiId");
@@ -360,7 +360,7 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
         seedDatabase(1, 19, adminToken, id);
         seedDatabase(20, 25, userToken, id);
 
-        webClient.get().uri("/api/discord-webhooks")
+        webClient.get().uri("/api/webhooks")
                 .header(
                         "Authorization",
                         "Bearer " + adminToken
@@ -375,7 +375,7 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
                 .jsonPath("totalPages").isEqualTo(3)
                 .jsonPath("first").isEqualTo(true);
 
-        webClient.get().uri("/api/discord-webhooks?page=1")
+        webClient.get().uri("/api/webhooks?page=1")
                 .header(
                         "Authorization",
                         "Bearer " + adminToken
@@ -387,7 +387,7 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
                 .jsonPath("pageable.offset").isEqualTo(10)
                 .jsonPath("pageable.pageNumber").isEqualTo(1);
 
-        webClient.get().uri("/api/discord-webhooks?page=2")
+        webClient.get().uri("/api/webhooks?page=2")
                 .header(
                         "Authorization",
                         "Bearer " + adminToken
@@ -437,7 +437,7 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
         seedDatabase(1, 13, userToken, id);
         seedDatabase(14, 2, adminToken, id);
 
-        webClient.get().uri("/api/discord-webhooks")
+        webClient.get().uri("/api/webhooks")
                 .header(
                         "Authorization",
                         "Bearer " + userToken
@@ -452,7 +452,7 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
                 .jsonPath("totalPages").isEqualTo(2)
                 .jsonPath("first").isEqualTo(true);
 
-        webClient.get().uri("/api/discord-webhooks?page=1")
+        webClient.get().uri("/api/webhooks?page=1")
                 .header(
                         "Authorization",
                         "Bearer " + userToken
@@ -467,12 +467,12 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
     }
 
     @Test
-    void shouldNotDeleteNotExistingDiscordWebhook() {
+    void shouldNotDeleteNotExistingWebhook() {
         String token = getUserToken();
 
         seedDatabase(1, 1, token, UUID.randomUUID());
 
-        webClient.delete().uri("/api/discord-webhooks/123")
+        webClient.delete().uri("/api/webhooks/123")
                 .header(
                         "Authorization",
                         "Bearer " + token
@@ -480,18 +480,18 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
                 .exchange()
                 .expectStatus().isNotFound();
 
-        assertThat(discordWebhookRepository.findAll()).hasSize(1);
+        assertThat(webhookRepository.findAll()).hasSize(1);
     }
 
     @Test
-    void shouldNotDeleteNotOwnedDiscordWebhookForUser() {
+    void shouldNotDeleteNotOwnedWebhookForUser() {
         String token = getUserToken();
 
         seedDatabase(1, 1, getAdminToken(), UUID.randomUUID());
 
-        String id = discordWebhookRepository.findAll().get(0).getId();
+        String id = webhookRepository.findAll().get(0).getId();
 
-        webClient.delete().uri("/api/discord-webhooks/%s".formatted(id))
+        webClient.delete().uri("/api/webhooks/%s".formatted(id))
                 .header(
                         "Authorization",
                         "Bearer " + token
@@ -500,19 +500,19 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
                 .expectStatus().isForbidden();
 
 
-        assertThat(discordWebhookRepository.findAll()).hasSize(1);
+        assertThat(webhookRepository.findAll()).hasSize(1);
     }
 
     @ParameterizedTest
     @MethodSource("ownerSenderValues")
-    void shouldDeleteDiscordWebhookForOwnerUserAndNotOwnerAdmin(String ownerToken, String senderToken) {
+    void shouldDeleteWebhookForOwnerUserAndNotOwnerAdmin(String ownerToken, String senderToken) {
         seedDatabase(1, 2, ownerToken, UUID.randomUUID());
 
-        List<DiscordWebhook> currentDiscordWebhooks = discordWebhookRepository.findAll();
+        List<Webhook> currentWebhooks = webhookRepository.findAll();
 
-        String id = currentDiscordWebhooks.get(1).getId();
+        String id = currentWebhooks.get(1).getId();
 
-        webClient.delete().uri("/api/discord-webhooks/" + id)
+        webClient.delete().uri("/api/webhooks/" + id)
                 .header(
                         "Authorization",
                         "Bearer " + senderToken
@@ -520,14 +520,14 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
                 .exchange()
                 .expectStatus().isNoContent();
 
-        List<DiscordWebhook> resultDiscordWebhooks = discordWebhookRepository.findAll();
+        List<Webhook> resultWebhooks = webhookRepository.findAll();
 
-        assertThat(resultDiscordWebhooks).hasSize(1);
-        assertThat(resultDiscordWebhooks.get(0)).isEqualTo(currentDiscordWebhooks.get(0));
+        assertThat(resultWebhooks).hasSize(1);
+        assertThat(resultWebhooks.get(0)).isEqualTo(currentWebhooks.get(0));
     }
 
     @Test
-    void shouldNotUpdateNotExistingDiscordWebhook() {
+    void shouldNotUpdateNotExistingWebhook() {
         String token = getUserToken();
 
         String payload = """
@@ -539,7 +539,7 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
 
         seedDatabase(1, 1, token, UUID.randomUUID());
 
-        webClient.put().uri("/api/discord-webhooks/123")
+        webClient.put().uri("/api/webhooks/123")
                 .header(
                         "Authorization",
                         "Bearer " + token
@@ -551,12 +551,12 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
     }
 
     @Test
-    void shouldNotUpdateNotOwnedDiscordWebhookForUser() {
+    void shouldNotUpdateNotOwnedWebhookForUser() {
         String token = getUserToken();
 
         seedDatabase(1, 1, getAdminToken(), UUID.randomUUID());
 
-        String id = discordWebhookRepository.findAll().get(0).getId();
+        String id = webhookRepository.findAll().get(0).getId();
 
         String payload = """
                 {
@@ -565,7 +565,7 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
                 }
                 """.formatted(UUID.randomUUID());
 
-        webClient.put().uri("/api/discord-webhooks/%s".formatted(id))
+        webClient.put().uri("/api/webhooks/%s".formatted(id))
                 .header(
                         "Authorization",
                         "Bearer " + token
@@ -576,16 +576,16 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
                 .expectStatus().isForbidden();
 
 
-        assertThat(discordWebhookRepository.findAll()).hasSize(1);
+        assertThat(webhookRepository.findAll()).hasSize(1);
     }
 
     @Test
-    void shouldNotUpdateDiscordWebhookWhenProvidedUrlWithUnavailableDiscordId() {
+    void shouldNotUpdateWebhookWhenProvidedUrlWithUnavailableDiscordId() {
         String token = getUserToken();
 
         seedDatabase(1, 2, token, UUID.randomUUID());
 
-        DiscordWebhook discordWebhookBefore = discordWebhookRepository.findAll().get(0);
+        Webhook WebhookBefore = webhookRepository.findAll().get(0);
 
         String payload = """
                 {
@@ -594,7 +594,7 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
                 }
                 """.formatted(UUID.randomUUID());
 
-        webClient.put().uri("/api/discord-webhooks/%s".formatted(discordWebhookBefore.getId()))
+        webClient.put().uri("/api/webhooks/%s".formatted(WebhookBefore.getId()))
                 .header(
                         "Authorization",
                         "Bearer " + token
@@ -604,19 +604,19 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
                 .exchange()
                 .expectStatus().isBadRequest();
 
-        List<DiscordWebhook> result = discordWebhookRepository.findAll();
+        List<Webhook> result = webhookRepository.findAll();
 
         assertThat(result).hasSize(2);
-        assertThat(result.get(0)).isEqualTo(discordWebhookBefore);
+        assertThat(result.get(0)).isEqualTo(WebhookBefore);
     }
 
     @Test
-    void shouldNotUpdateDiscordWebhookWhenProvidedUrlWithUnavailableToken() {
+    void shouldNotUpdateWebhookWhenProvidedUrlWithUnavailableToken() {
         String token = getUserToken();
 
         seedDatabase(1, 2, token, UUID.randomUUID());
 
-        DiscordWebhook discordWebhookBefore = discordWebhookRepository.findAll().get(0);
+        Webhook WebhookBefore = webhookRepository.findAll().get(0);
 
         String payload = """
                 {
@@ -625,7 +625,7 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
                 }
                 """.formatted(UUID.randomUUID());
 
-        webClient.put().uri("/api/discord-webhooks/%s".formatted(discordWebhookBefore.getId()))
+        webClient.put().uri("/api/webhooks/%s".formatted(WebhookBefore.getId()))
                 .header(
                         "Authorization",
                         "Bearer " + token
@@ -635,14 +635,14 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
                 .exchange()
                 .expectStatus().isBadRequest();
 
-        List<DiscordWebhook> result = discordWebhookRepository.findAll();
+        List<Webhook> result = webhookRepository.findAll();
 
         assertThat(result).hasSize(2);
-        assertThat(result.get(0)).isEqualTo(discordWebhookBefore);
+        assertThat(result.get(0)).isEqualTo(WebhookBefore);
     }
 
     @Test
-    void shouldNotUpdateDiscordWebhookWhenProvidedNotExistingSchedules() {
+    void shouldNotUpdateWebhookWhenProvidedNotExistingSchedules() {
         UUID id1 = UUID.randomUUID();
         UUID id2 = UUID.randomUUID();
 
@@ -672,7 +672,7 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
 
         seedDatabase(1, 2, token, UUID.randomUUID());
 
-        DiscordWebhook discordWebhookBefore = discordWebhookRepository.findAll().get(0);
+        Webhook WebhookBefore = webhookRepository.findAll().get(0);
 
         String payload = """
                 {
@@ -681,7 +681,7 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
                 }
                 """.formatted(id1, id2);
 
-        webClient.put().uri("/api/discord-webhooks/%s".formatted(discordWebhookBefore.getId()))
+        webClient.put().uri("/api/webhooks/%s".formatted(WebhookBefore.getId()))
                 .header(
                         "Authorization",
                         "Bearer " + token
@@ -691,19 +691,19 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
                 .exchange()
                 .expectStatus().isBadRequest();
 
-        List<DiscordWebhook> result = discordWebhookRepository.findAll();
+        List<Webhook> result = webhookRepository.findAll();
 
         assertThat(result).hasSize(2);
-        assertThat(result.get(0)).isEqualTo(discordWebhookBefore);
+        assertThat(result.get(0)).isEqualTo(WebhookBefore);
     }
 
     @Test
-    void shouldNotUpdateDiscordWebhookWhenProvidedNotWorkingWebhookUrl() {
+    void shouldNotUpdateWebhookWhenProvidedNotWorkingWebhookUrl() {
         String token = getUserToken();
 
         seedDatabase(1, 2, token, UUID.randomUUID());
 
-        DiscordWebhook discordWebhookBefore = discordWebhookRepository.findAll().get(0);
+        Webhook WebhookBefore = webhookRepository.findAll().get(0);
 
 
         stubFor(
@@ -716,9 +716,9 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
                     "url": "https://discord.com/api/webhooks/discordApiId/token",
                     "schedules": ["%s"]
                 }
-                """.formatted(discordWebhookBefore.getSchedules().stream().toList().get(0));
+                """.formatted(WebhookBefore.getSchedules().stream().toList().get(0));
 
-        webClient.post().uri("/api/discord-webhooks")
+        webClient.post().uri("/api/webhooks")
                 .header(
                         "Authorization",
                         "Bearer " + token
@@ -728,20 +728,20 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
                 .exchange()
                 .expectStatus().isBadRequest();
 
-        List<DiscordWebhook> result = discordWebhookRepository.findAll();
+        List<Webhook> result = webhookRepository.findAll();
 
         assertThat(result).hasSize(2);
-        assertThat(result.get(0)).isEqualTo(discordWebhookBefore);
+        assertThat(result.get(0)).isEqualTo(WebhookBefore);
     }
 
     @ParameterizedTest
     @MethodSource("ownerSenderValues")
-    void shouldUpdateDiscordWebhookForOwnerUserAndNotOwnerAdmin(String ownerToken, String senderToken) {
+    void shouldUpdateWebhookForOwnerUserAndNotOwnerAdmin(String ownerToken, String senderToken) {
         seedDatabase(1, 2, ownerToken, UUID.randomUUID());
 
-        DiscordWebhook discordWebhookBefore = discordWebhookRepository.findAll().get(0);
+        Webhook WebhookBefore = webhookRepository.findAll().get(0);
 
-        String newDiscordWebhookUrl = "https://discord.com/api/webhooks/discordApiId3/token3";
+        String newWebhookUrl = "https://discord.com/api/webhooks/discordApiId3/token3";
 
         UUID newSchedule = UUID.randomUUID();
         System.out.println(newSchedule);
@@ -778,14 +778,14 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
                     "schedules": ["%s", "%s"]
                 }
                 """.formatted(
-                newDiscordWebhookUrl,
-                discordWebhookBefore.getSchedules()
+                newWebhookUrl,
+                WebhookBefore.getSchedules()
                         .stream()
                         .toList()
                         .get(0),
                 newSchedule);
 
-        webClient.put().uri("/api/discord-webhooks/" + discordWebhookBefore.getId())
+        webClient.put().uri("/api/webhooks/" + WebhookBefore.getId())
                 .header(
                         "Authorization",
                         "Bearer " + senderToken
@@ -796,18 +796,18 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
                 .expectStatus().isOk();
 
 
-        List<DiscordWebhook> result = discordWebhookRepository.findAll();
+        List<Webhook> result = webhookRepository.findAll();
 
         assertThat(result).hasSize(2);
 
-        DiscordWebhook resultWebhook = result.get(0);
+        Webhook resultWebhook = result.get(0);
 
         assertThat(resultWebhook.getDiscordId())
                 .isEqualTo("discordApiId3");
         assertThat(resultWebhook.getDiscordToken())
                 .isEqualTo("token3");
 
-        Set<UUID> expectedSchedules = new HashSet<>(discordWebhookBefore.getSchedules());
+        Set<UUID> expectedSchedules = new HashSet<>(WebhookBefore.getSchedules());
         expectedSchedules.add(newSchedule);
 
         assertThat(resultWebhook.getSchedules())
@@ -861,7 +861,7 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
                             }
                             """.formatted(i, i, scheduleId.toString());
 
-                    webClient.post().uri("/api/discord-webhooks")
+                    webClient.post().uri("/api/webhooks")
                             .header(
                                     "Authorization",
                                     "Bearer " + token

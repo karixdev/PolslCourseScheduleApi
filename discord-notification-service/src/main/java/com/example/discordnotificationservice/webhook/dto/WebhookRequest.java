@@ -1,4 +1,4 @@
-package com.example.discordnotificationservice.discord.dto;
+package com.example.discordnotificationservice.webhook.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotEmpty;
@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotEmpty;
 import java.util.Set;
 import java.util.UUID;
 
-public record DiscordWebhookRequest(
+public record WebhookRequest(
         @JsonProperty("url")
         @NotEmpty
         String url,

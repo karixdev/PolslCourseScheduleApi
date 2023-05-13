@@ -1,4 +1,4 @@
-package com.example.discordnotificationservice.discord.exception;
+package com.example.discordnotificationservice.webhook.exception;
 
 import com.example.discordnotificationservice.shared.exception.ValidationException;
 import org.springframework.http.HttpStatus;

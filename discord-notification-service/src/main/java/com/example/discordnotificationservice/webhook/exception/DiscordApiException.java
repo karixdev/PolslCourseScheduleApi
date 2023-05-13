@@ -1,4 +1,4 @@
-package com.example.discordnotificationservice.discord.exception;
+package com.example.discordnotificationservice.webhook.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
