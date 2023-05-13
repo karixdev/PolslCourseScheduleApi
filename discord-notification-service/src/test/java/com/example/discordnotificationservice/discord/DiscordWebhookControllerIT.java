@@ -22,7 +22,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -504,35 +503,10 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
         assertThat(discordWebhookRepository.findAll()).hasSize(1);
     }
 
-    @Test
-    void shouldDeleteNotOwnedDiscordWebhookForAdmin() {
-        String token = getAdminToken();
-
-        seedDatabase(1, 2, getUserToken(), UUID.randomUUID());
-
-        List<DiscordWebhook> currentDiscordWebhooks = discordWebhookRepository.findAll();
-
-        String id = currentDiscordWebhooks.get(1).getId();
-
-        webClient.delete().uri("/api/discord-webhooks/" + id)
-                .header(
-                        "Authorization",
-                        "Bearer " + token
-                )
-                .exchange()
-                .expectStatus().isNoContent();
-
-        List<DiscordWebhook> resultDiscordWebhooks = discordWebhookRepository.findAll();
-
-        assertThat(resultDiscordWebhooks).hasSize(1);
-        assertThat(resultDiscordWebhooks.get(0)).isEqualTo(currentDiscordWebhooks.get(0));
-    }
-
-    @Test
-    void shouldDeleteOwnedDiscordWebhookForUser() {
-        String token = getUserToken();
-
-        seedDatabase(1, 2, token, UUID.randomUUID());
+    @ParameterizedTest
+    @MethodSource("ownerSenderValues")
+    void shouldDeleteDiscordWebhookForOwnerUserAndNotOwnerAdmin(String ownerToken, String senderToken) {
+        seedDatabase(1, 2, ownerToken, UUID.randomUUID());
 
         List<DiscordWebhook> currentDiscordWebhooks = discordWebhookRepository.findAll();
 
@@ -541,7 +515,7 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
         webClient.delete().uri("/api/discord-webhooks/" + id)
                 .header(
                         "Authorization",
-                        "Bearer " + token
+                        "Bearer " + senderToken
                 )
                 .exchange()
                 .expectStatus().isNoContent();
