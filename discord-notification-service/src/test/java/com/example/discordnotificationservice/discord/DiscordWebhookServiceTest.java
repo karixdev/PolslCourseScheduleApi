@@ -90,7 +90,7 @@ class DiscordWebhookServiceTest {
     }
 
     @Test
-    void GivenUrlWithUnavailableDiscordApiId_WhenCreate_ThenThrowsUnavailableDiscordApiIdException() {
+    void GivenUrlWithUnavailableDiscordId_WhenCreate_ThenThrowsUnavailableDiscordApiIdException() {
         // Given
         UUID scheduleId = UUID.randomUUID();
         Set<UUID> schedules = Set.of(scheduleId);
@@ -100,7 +100,7 @@ class DiscordWebhookServiceTest {
 
         DiscordWebhook discordWebhook = DiscordWebhook.builder()
                 .id("111-222-333")
-                .discordApiId("123")
+                .discordId("123")
                 .discordToken("abc")
                 .addedBy("123-456-789")
                 .schedules(schedules)
@@ -126,7 +126,7 @@ class DiscordWebhookServiceTest {
 
         DiscordWebhook discordWebhook = DiscordWebhook.builder()
                 .id("111-222-333")
-                .discordApiId("456")
+                .discordId("456")
                 .discordToken("abc")
                 .addedBy("123-456-789")
                 .schedules(schedules)
@@ -168,7 +168,7 @@ class DiscordWebhookServiceTest {
 
         DiscordWebhook savedDiscordWebhook = DiscordWebhook.builder()
                 .id("111-222-333")
-                .discordApiId("123")
+                .discordId("123")
                 .discordToken("abc")
                 .addedBy(userId)
                 .schedules(schedules)
@@ -176,7 +176,7 @@ class DiscordWebhookServiceTest {
 
         when(repository.save(eq(
                 DiscordWebhook.builder()
-                        .discordApiId("123")
+                        .discordId("123")
                         .discordToken("abc")
                         .addedBy(userId)
                         .schedules(schedules)
@@ -212,7 +212,7 @@ class DiscordWebhookServiceTest {
 
         DiscordWebhook discordWebhook = DiscordWebhook.builder()
                 .id("111-222-333")
-                .discordApiId("123")
+                .discordId("123")
                 .discordToken("abc")
                 .addedBy("userId")
                 .schedules(Set.of(UUID.randomUUID()))
@@ -256,7 +256,7 @@ class DiscordWebhookServiceTest {
 
         DiscordWebhook discordWebhook = DiscordWebhook.builder()
                 .id("111-222-333")
-                .discordApiId("123")
+                .discordId("123")
                 .discordToken("abc")
                 .addedBy(userId)
                 .schedules(Set.of(UUID.randomUUID()))
@@ -314,7 +314,7 @@ class DiscordWebhookServiceTest {
 
         DiscordWebhook discordWebhook = DiscordWebhook.builder()
                 .id("111-222-333")
-                .discordApiId("123")
+                .discordId("123")
                 .discordToken("abc")
                 .addedBy("userId")
                 .schedules(Set.of(UUID.randomUUID()))
@@ -341,7 +341,7 @@ class DiscordWebhookServiceTest {
 
         DiscordWebhook discordWebhook = DiscordWebhook.builder()
                 .id("111-222-333")
-                .discordApiId("123")
+                .discordId("123")
                 .discordToken("abc")
                 .addedBy("userId")
                 .schedules(Set.of(UUID.randomUUID()))
@@ -370,7 +370,7 @@ class DiscordWebhookServiceTest {
 
         DiscordWebhook discordWebhook = DiscordWebhook.builder()
                 .id("111-222-333")
-                .discordApiId("123")
+                .discordId("123")
                 .discordToken("abc")
                 .addedBy("userId")
                 .schedules(Set.of(UUID.randomUUID()))
@@ -412,7 +412,7 @@ class DiscordWebhookServiceTest {
 
         DiscordWebhook discordWebhook = DiscordWebhook.builder()
                 .id("111-222-333")
-                .discordApiId("123")
+                .discordId("123")
                 .discordToken("abc")
                 .addedBy("userId")
                 .schedules(Set.of(UUID.randomUUID()))
@@ -440,7 +440,7 @@ class DiscordWebhookServiceTest {
 
         DiscordWebhook discordWebhook = DiscordWebhook.builder()
                 .id(id)
-                .discordApiId("123")
+                .discordId("123")
                 .discordToken("abc")
                 .addedBy("123-456-789")
                 .schedules(Set.of(UUID.randomUUID()))
@@ -459,7 +459,7 @@ class DiscordWebhookServiceTest {
     }
 
     @Test
-    void GivenUrlWithUnavailableDiscordApiId_WhenUpdate_ThenThrowsUnavailableDiscordApiIdException() {
+    void GivenUrlWithUnavailableDiscordId_WhenUpdate_ThenThrowsUnavailableDiscordApiIdException() {
         // Given
         UUID scheduleId = UUID.randomUUID();
         Set<UUID> schedules = Set.of(scheduleId);
@@ -470,7 +470,7 @@ class DiscordWebhookServiceTest {
 
         DiscordWebhook discordWebhook = DiscordWebhook.builder()
                 .id(id)
-                .discordApiId("123")
+                .discordId("123")
                 .discordToken("abc")
                 .addedBy("123-456-789")
                 .schedules(schedules)
@@ -503,7 +503,7 @@ class DiscordWebhookServiceTest {
 
         DiscordWebhook discordWebhook = DiscordWebhook.builder()
                 .id(id)
-                .discordApiId("123")
+                .discordId("123")
                 .discordToken("abc")
                 .addedBy("123-456-789")
                 .schedules(schedules)
@@ -543,7 +543,7 @@ class DiscordWebhookServiceTest {
 
         DiscordWebhook discordWebhook = DiscordWebhook.builder()
                 .id(id)
-                .discordApiId("123")
+                .discordId("123")
                 .discordToken("abc")
                 .addedBy("123-456-789")
                 .schedules(Set.of(UUID.fromString("bb46a7d5-f267-4527-a00b-13c1172ac442")))
@@ -587,7 +587,7 @@ class DiscordWebhookServiceTest {
 
         DiscordWebhook discordWebhook = DiscordWebhook.builder()
                 .id(id)
-                .discordApiId("123")
+                .discordId("123")
                 .discordToken("abc")
                 .addedBy("123-456-789")
                 .schedules(Set.of(oldSchedule))
@@ -613,7 +613,7 @@ class DiscordWebhookServiceTest {
 
         DiscordWebhook expectedToBeSaved = DiscordWebhook.builder()
                 .id(id)
-                .discordApiId("1234")
+                .discordId("1234")
                 .discordToken("abcd")
                 .addedBy("123-456-789")
                 .schedules(schedules)
@@ -662,7 +662,7 @@ class DiscordWebhookServiceTest {
 
         DiscordWebhook discordWebhook = DiscordWebhook.builder()
                 .id(id)
-                .discordApiId("123")
+                .discordId("123")
                 .discordToken("abc")
                 .addedBy("123-456-789")
                 .schedules(Set.of(oldSchedule))
@@ -685,7 +685,7 @@ class DiscordWebhookServiceTest {
 
         DiscordWebhook expectedToBeSaved = DiscordWebhook.builder()
                 .id(id)
-                .discordApiId("1234")
+                .discordId("1234")
                 .discordToken("abcd")
                 .addedBy("123-456-789")
                 .schedules(schedules)

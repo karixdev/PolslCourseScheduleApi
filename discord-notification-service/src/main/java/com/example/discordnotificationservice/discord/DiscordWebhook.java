@@ -21,7 +21,7 @@ public class DiscordWebhook {
     private String id;
 
     @Indexed(unique = true)
-    private String discordApiId;
+    private String discordId;
     @Indexed(unique = true)
     private String discordToken;
 

@@ -64,7 +64,7 @@ public class DiscordWebhookService {
 
         DiscordWebhook discordWebhook = repository.save(
                 DiscordWebhook.builder()
-                        .discordApiId(discordApiId)
+                        .discordId(discordApiId)
                         .discordToken(token)
                         .addedBy(jwt.getSubject())
                         .schedules(schedules)
@@ -73,7 +73,7 @@ public class DiscordWebhookService {
 
         return new DiscordWebhookResponse(
                 discordWebhook.getId(),
-                discordWebhook.getDiscordApiId(),
+                discordWebhook.getDiscordId(),
                 discordWebhook.getDiscordToken(),
                 discordWebhook.getSchedules()
         );
@@ -156,7 +156,7 @@ public class DiscordWebhookService {
         }
 
         String discordApiId = getDiscordApiIdFromUrl(discordWebhookUrl);
-        String currentDiscordApiId = discordWebhook.getDiscordApiId();
+        String currentDiscordApiId = discordWebhook.getDiscordId();
 
         if (isDiscordApiIdUnavailable(discordApiId, currentDiscordApiId)) {
             throw new UnavailableDiscordApiIdException();
@@ -180,7 +180,7 @@ public class DiscordWebhookService {
 
         sendWelcomeMessage(discordApiId, token);
 
-        discordWebhook.setDiscordApiId(discordApiId);
+        discordWebhook.setDiscordId(discordApiId);
         discordWebhook.setDiscordToken(token);
         discordWebhook.setSchedules(request.schedules());
 

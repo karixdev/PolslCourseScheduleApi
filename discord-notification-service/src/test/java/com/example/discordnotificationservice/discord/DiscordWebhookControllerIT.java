@@ -85,13 +85,13 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
     }
 
     @Test
-    void shouldNotCreateDiscordWebhookWhenProvidedUrlWithUnavailableDiscordApiId() {
+    void shouldNotCreateDiscordWebhookWhenProvidedUrlWithUnavailableDiscordId() {
         UUID id1 = UUID.randomUUID();
         Set<UUID> schedules = Set.of(id1);
 
         discordWebhookRepository.save(
                 DiscordWebhook.builder()
-                        .discordApiId("discordApiId")
+                        .discordId("discordApiId")
                         .discordToken("otherToken")
                         .schedules(schedules)
                         .build()
@@ -127,7 +127,7 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
 
         discordWebhookRepository.save(
                 DiscordWebhook.builder()
-                        .discordApiId("otherDiscordApiId")
+                        .discordId("otherDiscordApiId")
                         .discordToken("token")
                         .schedules(schedules)
                         .build()
@@ -316,7 +316,7 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
 
         DiscordWebhook result = resultList.get(0);
 
-        assertThat(result.getDiscordApiId())
+        assertThat(result.getDiscordId())
                 .isEqualTo("discordApiId");
         assertThat(result.getDiscordToken())
                 .isEqualTo("token");
@@ -580,7 +580,7 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
     }
 
     @Test
-    void shouldNotUpdateDiscordWebhookWhenProvidedUrlWithUnavailableDiscordApiId() {
+    void shouldNotUpdateDiscordWebhookWhenProvidedUrlWithUnavailableDiscordId() {
         String token = getUserToken();
 
         seedDatabase(1, 2, token, UUID.randomUUID());
@@ -802,7 +802,7 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
 
         DiscordWebhook resultWebhook = result.get(0);
 
-        assertThat(resultWebhook.getDiscordApiId())
+        assertThat(resultWebhook.getDiscordId())
                 .isEqualTo("discordApiId3");
         assertThat(resultWebhook.getDiscordToken())
                 .isEqualTo("token3");

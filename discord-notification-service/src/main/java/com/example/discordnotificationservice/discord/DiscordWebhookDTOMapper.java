@@ -8,7 +8,7 @@ public class DiscordWebhookDTOMapper {
     public DiscordWebhookResponse map(DiscordWebhook discordWebhook) {
         return new DiscordWebhookResponse(
                 discordWebhook.getId(),
-                discordWebhook.getDiscordApiId(),
+                discordWebhook.getDiscordId(),
                 discordWebhook.getDiscordToken(),
                 discordWebhook.getSchedules()
         );
