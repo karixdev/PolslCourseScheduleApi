@@ -1,5 +1,6 @@
 package com.example.discordnotificationservice.discord;
 
+import com.example.discordnotificationservice.discord.document.DiscordWebhook;
 import com.example.discordnotificationservice.discord.dto.DiscordWebhookResponse;
 import org.springframework.stereotype.Component;
 
