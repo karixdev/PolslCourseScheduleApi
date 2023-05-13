@@ -1,14 +1,10 @@
 package com.example.discordnotificationservice.discord;
 
 import com.example.discordnotificationservice.ContainersEnvironment;
-import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
@@ -30,14 +26,14 @@ class DiscordWebhookRepositoryTest extends ContainersEnvironment {
     }
 
     @Test
-    void GivenNotExistingDiscordWebhookDiscordApiId_WhenFindByToken_ThenReturnsEmptyOptional() {
+    void GivenNotExistingDiscordWebhookDiscordApiId_WhenFindByDiscordToken_ThenReturnsEmptyOptional() {
         // Given
         String discordApiId = "discordApiId";
 
         underTest.save(
                 DiscordWebhook.builder()
                         .discordApiId("otherDiscordApiId")
-                        .token("otherToken")
+                        .discordToken("otherToken")
                         .addedBy("111")
                         .schedules(Set.of(UUID.randomUUID()))
                         .build()
@@ -59,7 +55,7 @@ class DiscordWebhookRepositoryTest extends ContainersEnvironment {
         DiscordWebhook expected = underTest.save(
                 DiscordWebhook.builder()
                         .discordApiId(discordApiId)
-                        .token("token")
+                        .discordToken("token")
                         .addedBy("222")
                         .schedules(Set.of(UUID.randomUUID()))
                         .build()
@@ -68,7 +64,7 @@ class DiscordWebhookRepositoryTest extends ContainersEnvironment {
         underTest.save(
                 DiscordWebhook.builder()
                         .discordApiId("otherDiscordApiId")
-                        .token("otherToken")
+                        .discordToken("otherToken")
                         .addedBy("111")
                         .schedules(Set.of(UUID.randomUUID()))
                         .build()
@@ -84,14 +80,14 @@ class DiscordWebhookRepositoryTest extends ContainersEnvironment {
     }
 
     @Test
-    void GivenNotExistingDiscordWebhookToken_WhenFindByToken_ThenReturnsEmptyOptional() {
+    void GivenNotExistingDiscordWebhookToken_WhenFindByDiscordToken_ThenReturnsEmptyOptional() {
         // Given
         String token = "token";
 
         underTest.save(
                 DiscordWebhook.builder()
                         .discordApiId("discordApiId")
-                        .token("otherToken")
+                        .discordToken("otherToken")
                         .addedBy("111")
                         .schedules(Set.of(UUID.randomUUID()))
                         .build()
@@ -105,14 +101,14 @@ class DiscordWebhookRepositoryTest extends ContainersEnvironment {
     }
 
     @Test
-    void GivenExistingDiscordWebhookToken_WhenFindByToken_ThenOptionalWithCorrectDocument() {
+    void GivenExistingDiscordWebhookToken_WhenFindByDiscordToken_ThenOptionalWithCorrectDocument() {
         // Given
         String token = "token";
 
         DiscordWebhook expected = underTest.save(
                 DiscordWebhook.builder()
                         .discordApiId("discordApiId")
-                        .token(token)
+                        .discordToken(token)
                         .addedBy("222")
                         .schedules(Set.of(UUID.randomUUID()))
                         .build()
@@ -121,7 +117,7 @@ class DiscordWebhookRepositoryTest extends ContainersEnvironment {
         underTest.save(
                 DiscordWebhook.builder()
                         .discordApiId("discordApiId2")
-                        .token("otherToken")
+                        .discordToken("otherToken")
                         .addedBy("111")
                         .schedules(Set.of(UUID.randomUUID()))
                         .build()
@@ -144,7 +140,7 @@ class DiscordWebhookRepositoryTest extends ContainersEnvironment {
         underTest.save(
                 DiscordWebhook.builder()
                         .discordApiId("discordApiId")
-                        .token("token")
+                        .discordToken("token")
                         .addedBy("111")
                         .schedules(Set.of(UUID.randomUUID()))
                         .build()
@@ -169,7 +165,7 @@ class DiscordWebhookRepositoryTest extends ContainersEnvironment {
         underTest.save(
                 DiscordWebhook.builder()
                         .discordApiId("otherDiscordApiId")
-                        .token("otherToken")
+                        .discordToken("otherToken")
                         .addedBy("111")
                         .schedules(Set.of(UUID.randomUUID()))
                         .build()
@@ -179,7 +175,7 @@ class DiscordWebhookRepositoryTest extends ContainersEnvironment {
                 IntStream.range(1, 4)
                         .mapToObj(i -> DiscordWebhook.builder()
                                 .discordApiId("discordApiId" + i)
-                                .token("token" + i)
+                                .discordToken("token" + i)
                                 .addedBy(addedBy)
                                 .schedules(Set.of(UUID.randomUUID()))
                                 .build())

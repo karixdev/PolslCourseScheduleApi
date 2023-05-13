@@ -9,7 +9,7 @@ public class DiscordWebhookDTOMapper {
         return new DiscordWebhookResponse(
                 discordWebhook.getId(),
                 discordWebhook.getDiscordApiId(),
-                discordWebhook.getToken(),
+                discordWebhook.getDiscordToken(),
                 discordWebhook.getSchedules()
         );
     }

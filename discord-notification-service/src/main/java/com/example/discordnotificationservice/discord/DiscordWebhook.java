@@ -23,7 +23,7 @@ public class DiscordWebhook {
     @Indexed(unique = true)
     private String discordApiId;
     @Indexed(unique = true)
-    private String token;
+    private String discordToken;
 
     private String addedBy;
 

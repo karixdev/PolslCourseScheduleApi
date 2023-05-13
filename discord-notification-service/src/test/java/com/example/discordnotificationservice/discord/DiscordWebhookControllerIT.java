@@ -92,7 +92,7 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
         discordWebhookRepository.save(
                 DiscordWebhook.builder()
                         .discordApiId("discordApiId")
-                        .token("otherToken")
+                        .discordToken("otherToken")
                         .schedules(schedules)
                         .build()
         );
@@ -128,7 +128,7 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
         discordWebhookRepository.save(
                 DiscordWebhook.builder()
                         .discordApiId("otherDiscordApiId")
-                        .token("token")
+                        .discordToken("token")
                         .schedules(schedules)
                         .build()
         );
@@ -318,7 +318,7 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
 
         assertThat(result.getDiscordApiId())
                 .isEqualTo("discordApiId");
-        assertThat(result.getToken())
+        assertThat(result.getDiscordToken())
                 .isEqualTo("token");
         assertThat(result.getSchedules())
                 .isEqualTo(schedules);
@@ -804,7 +804,7 @@ public class DiscordWebhookControllerIT extends ContainersEnvironment {
 
         assertThat(resultWebhook.getDiscordApiId())
                 .isEqualTo("discordApiId3");
-        assertThat(resultWebhook.getToken())
+        assertThat(resultWebhook.getDiscordToken())
                 .isEqualTo("token3");
 
         Set<UUID> expectedSchedules = new HashSet<>(discordWebhookBefore.getSchedules());

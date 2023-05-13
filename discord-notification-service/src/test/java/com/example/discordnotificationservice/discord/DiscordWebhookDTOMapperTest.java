@@ -30,7 +30,7 @@ class DiscordWebhookDTOMapperTest {
         // Then
         assertThat(response.id()).isEqualTo("12345");
         assertThat(response.discordApiId()).isEqualTo("api123");
-        assertThat(response.token()).isEqualTo("token123");
+        assertThat(response.discordToken()).isEqualTo("token123");
         assertThat(response.schedules()).containsExactly(id);
     }
 }

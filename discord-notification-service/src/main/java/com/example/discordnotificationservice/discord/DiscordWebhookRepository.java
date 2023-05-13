@@ -17,9 +17,9 @@ public interface DiscordWebhookRepository
             @Param("discordApiId") String discordApiId
     );
 
-    @Query("{'token': :#{#token}}")
+    @Query("{'discordToken': :#{#discordToken}}")
     Optional<DiscordWebhook> findByToken(
-            @Param("token") String token
+            @Param("discordToken") String discordToken
     );
 
     @Query("{'addedBy': :#{#addedBy}}")

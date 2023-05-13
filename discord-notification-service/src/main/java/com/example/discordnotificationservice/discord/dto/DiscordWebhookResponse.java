@@ -10,8 +10,8 @@ public record DiscordWebhookResponse(
         String id,
         @JsonProperty("discord_api_id")
         String discordApiId,
-        @JsonProperty("token")
-        String token,
+        @JsonProperty("discord_token")
+        String discordToken,
         @JsonProperty("schedules")
         Set<UUID> schedules
 ) {}
