@@ -8,10 +8,8 @@ import java.util.UUID;
 public record WebhookResponse(
         @JsonProperty("id")
         String id,
-        @JsonProperty("discord_id")
-        String discordId,
-        @JsonProperty("discord_token")
-        String discordToken,
+        @JsonProperty("url")
+        String url,
         @JsonProperty("schedules")
         Set<UUID> schedules
 ) {}

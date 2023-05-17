@@ -74,12 +74,7 @@ public class WebhookService {
                         .build()
         );
 
-        return new WebhookResponse(
-                webhook.getId(),
-                webhook.getDiscordId(),
-                webhook.getDiscordToken(),
-                webhook.getSchedules()
-        );
+        return mapper.map(webhook);
     }
 
     private boolean isNotValidDiscordWebhookUrl(String url) {

@@ -153,10 +153,12 @@ class WebhookServiceTest {
 
         WebhookResponse expected = new WebhookResponse(
                 "111-222-333",
-                "123",
-                "abc",
+                "https://discord-webhook-url.com",
                 schedules
         );
+
+        when(mapper.map(eq(savedWebhook)))
+                .thenReturn(expected);
 
         // When
         WebhookResponse result = underTest.create(request, jwt);
@@ -188,8 +190,7 @@ class WebhookServiceTest {
 
         WebhookResponse expected = new WebhookResponse(
                 "111-222-333",
-                "123",
-                "abc",
+                "https://discord-webhook-url.com",
                 schedules
         );
 
@@ -232,8 +233,7 @@ class WebhookServiceTest {
 
         WebhookResponse expected = new WebhookResponse(
                 "111-222-333",
-                "123",
-                "abc",
+                "https://discord-webhook-url.com",
                 schedules
         );
 
@@ -566,8 +566,7 @@ class WebhookServiceTest {
 
         WebhookResponse expectedResponse = new WebhookResponse(
                 "111-222-333",
-                "123",
-                "abc",
+                "https://discord-webhook-url.com",
                 schedules
         );
 
@@ -639,8 +638,7 @@ class WebhookServiceTest {
 
         WebhookResponse expectedResponse = new WebhookResponse(
                 "111-222-333",
-                "123",
-                "abc",
+                "https://discord-webhook-url.com",
                 schedules
         );
 
