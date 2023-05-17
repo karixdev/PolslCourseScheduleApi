@@ -1,6 +1,8 @@
 package com.example.discordnotificationservice.webhook;
 
 import com.example.discordnotificationservice.ContainersEnvironment;
+import com.example.discordnotificationservice.discord.document.DiscordWebhook;
+import com.example.discordnotificationservice.security.SecurityService;
 import com.example.discordnotificationservice.testconfig.WebClientTestConfig;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import org.junit.jupiter.api.AfterEach;
@@ -19,10 +21,7 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -43,6 +42,9 @@ public class WebhookControllerIT extends ContainersEnvironment {
 
     @Autowired
     MockMvc mockMvc;
+
+    @Autowired
+    SecurityService securityService;
 
     @DynamicPropertySource
     static void overrideBaseUrls(DynamicPropertyRegistry registry) {
@@ -86,14 +88,18 @@ public class WebhookControllerIT extends ContainersEnvironment {
     }
 
     @Test
-    void shouldNotCreateWebhookWhenProvidedUrlWithUnavailableDiscordId() {
-        UUID id1 = UUID.randomUUID();
-        Set<UUID> schedules = Set.of(id1);
+    void shouldNotCreateWebhook() {
+        UUID scheduleId = UUID.randomUUID();
+        Set<UUID> schedules = Set.of(scheduleId);
 
         webhookRepository.save(
                 Webhook.builder()
                         .discordId("discordApiId")
                         .discordToken("otherToken")
+                        .discordWebhook(new DiscordWebhook(
+                                "discordApiId",
+                                "token"
+                        ))
                         .schedules(schedules)
                         .build()
         );
@@ -103,43 +109,7 @@ public class WebhookControllerIT extends ContainersEnvironment {
                     "url": "https://discord.com/api/webhooks/discordApiId/token",
                     "schedules": ["%s"]
                 }
-                """.formatted(id1.toString());
-
-        String token = getAdminToken();
-
-        webClient.post().uri("/api/webhooks")
-                .header(
-                        "Authorization",
-                        "Bearer " + token
-                )
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(payload)
-                .exchange()
-                .expectStatus().isBadRequest();
-
-        assertThat(webhookRepository.findAll())
-                .hasSize(1);
-    }
-
-    @Test
-    void shouldNotCreateWebhookWhenProvidedUrlWithUnavailableToken() {
-        UUID id1 = UUID.randomUUID();
-        Set<UUID> schedules = Set.of(id1);
-
-        webhookRepository.save(
-                Webhook.builder()
-                        .discordId("otherDiscordApiId")
-                        .discordToken("token")
-                        .schedules(schedules)
-                        .build()
-        );
-
-        String payload = """
-                {
-                    "url": "https://discord.com/api/webhooks/discordApiId/token",
-                    "schedules": ["%s"]
-                }
-                """.formatted(id1.toString());
+                """.formatted(scheduleId.toString());
 
         String token = getAdminToken();
 
@@ -529,52 +499,50 @@ public class WebhookControllerIT extends ContainersEnvironment {
     }
 
     @Test
-    void shouldNotUpdateWebhookWhenProvidedUrlWithUnavailableDiscordId() {
-        String token = getUserToken();
-
-        seedDatabase(1, 2, token, UUID.randomUUID());
-
-        Webhook WebhookBefore = webhookRepository.findAll().get(0);
-
-        String payload = """
-                {
-                    "url": "https://discord.com/api/webhooks/discordApiId2/token",
-                    "schedules": ["%s"]
-                }
-                """.formatted(UUID.randomUUID());
-
-        webClient.put().uri("/api/webhooks/%s".formatted(WebhookBefore.getId()))
-                .header(
-                        "Authorization",
-                        "Bearer " + token
-                )
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(payload)
-                .exchange()
-                .expectStatus().isBadRequest();
-
-        List<Webhook> result = webhookRepository.findAll();
-
-        assertThat(result).hasSize(2);
-        assertThat(result.get(0)).isEqualTo(WebhookBefore);
-    }
-
-    @Test
     void shouldNotUpdateWebhookWhenProvidedUrlWithUnavailableToken() {
         String token = getUserToken();
 
-        seedDatabase(1, 2, token, UUID.randomUUID());
+        UUID scheduleId = UUID.randomUUID();
 
-        Webhook WebhookBefore = webhookRepository.findAll().get(0);
+        System.out.println(scheduleId);
+
+        seedDatabase(1, 2, token, scheduleId);
+
+        Webhook webhookBefore = webhookRepository.findAll().get(0);
+
+        System.out.println("----------------------------");
+        System.out.println(webhookRepository.findAll());
+        System.out.println("----------------------------");
 
         String payload = """
                 {
-                    "url": "https://discord.com/api/webhooks/discordApiId3/token2",
+                    "url": "https://discord.com/api/webhooks/discordApiId2/token2",
                     "schedules": ["%s"]
                 }
                 """.formatted(UUID.randomUUID());
 
-        webClient.put().uri("/api/webhooks/%s".formatted(WebhookBefore.getId()))
+        stubFor(
+                get(urlPathEqualTo("/api/schedules"))
+                        .withQueryParam("ids", havingExactly(
+                                scheduleId.toString()
+                        ))
+                        .willReturn(ok()
+                                .withHeader(
+                                        "Content-Type",
+                                        "application/json"
+                                )
+                                .withBody("""
+                                        [
+                                            {
+                                                "id": "%s"
+                                            }
+                                        ]
+                                        """.formatted(scheduleId)
+                                )
+                        )
+        );
+
+        webClient.put().uri("/api/webhooks/%s".formatted(webhookBefore.getId()))
                 .header(
                         "Authorization",
                         "Bearer " + token
@@ -587,7 +555,7 @@ public class WebhookControllerIT extends ContainersEnvironment {
         List<Webhook> result = webhookRepository.findAll();
 
         assertThat(result).hasSize(2);
-        assertThat(result.get(0)).isEqualTo(WebhookBefore);
+        assertThat(result.get(0)).isEqualTo(webhookBefore);
     }
 
     @Test

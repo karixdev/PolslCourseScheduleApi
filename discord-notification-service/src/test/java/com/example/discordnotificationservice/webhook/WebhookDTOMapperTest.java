@@ -19,6 +19,7 @@ class WebhookDTOMapperTest {
                 "12345",
                 "api123",
                 "token123",
+                null,
                 "addedBy",
                 Set.of(id)
         );

@@ -2,13 +2,11 @@ package com.example.discordnotificationservice.webhook;
 
 
 import com.example.discordnotificationservice.discord.DiscordApiWebhooksClient;
+import com.example.discordnotificationservice.discord.document.DiscordWebhook;
 import com.example.discordnotificationservice.discord.dto.DiscordWebhookRequest;
 import com.example.discordnotificationservice.webhook.dto.WebhookRequest;
 import com.example.discordnotificationservice.webhook.dto.WebhookResponse;
-import com.example.discordnotificationservice.webhook.exception.InvalidDiscordWebhookUrlException;
-import com.example.discordnotificationservice.webhook.exception.NotExistingSchedulesException;
-import com.example.discordnotificationservice.webhook.exception.UnavailableDiscordApiIdException;
-import com.example.discordnotificationservice.webhook.exception.UnavailableTokenException;
+import com.example.discordnotificationservice.webhook.exception.*;
 import com.example.discordnotificationservice.schedule.ScheduleService;
 import com.example.discordnotificationservice.security.SecurityService;
 import com.example.discordnotificationservice.shared.exception.ForbiddenAccessException;
@@ -78,10 +76,7 @@ class WebhookServiceTest {
         when(scheduleService.checkIfSchedulesExist(eq(schedules)))
                 .thenReturn(false);
 
-        when(repository.findByDiscordApiId(eq("123")))
-                .thenReturn(Optional.empty());
-
-        when(repository.findByToken(eq("abc")))
+        when(repository.findByDiscordWebhook(eq(new DiscordWebhook("123", "abc"))))
                 .thenReturn(Optional.empty());
 
         // When & Then
@@ -91,39 +86,13 @@ class WebhookServiceTest {
     }
 
     @Test
-    void GivenUrlWithUnavailableDiscordId_WhenCreate_ThenThrowsUnavailableDiscordApiIdException() {
+    void GivenWebhookRequestWithUnavailableDiscordWebhookUrl_WhenCreate_ThenThrowsUnavailableDiscordWebhookException() {
         // Given
         UUID scheduleId = UUID.randomUUID();
         Set<UUID> schedules = Set.of(scheduleId);
 
         WebhookRequest request = new WebhookRequest(
-                "https://discord.com/api/webhooks/123/abc", schedules);
-
-        Webhook webhook = Webhook.builder()
-                .id("111-222-333")
-                .discordId("123")
-                .discordToken("abc")
-                .addedBy("123-456-789")
-                .schedules(schedules)
-                .build();
-
-        when(repository.findByDiscordApiId(eq("123")))
-                .thenReturn(Optional.of(webhook));
-
-        // When & Then
-        assertThatThrownBy(() -> underTest.create(request, jwt))
-                .isInstanceOf(UnavailableDiscordApiIdException.class)
-                .hasMessage("Id in provided url is unavailable");
-    }
-
-    @Test
-    void GivenUrlWithUnavailableToken_WhenCreate_ThenThrowsUnavailableTokenException() {
-        // Given
-        UUID scheduleId = UUID.randomUUID();
-        Set<UUID> schedules = Set.of(scheduleId);
-
-        WebhookRequest request = new WebhookRequest(
-                "https://discord.com/api/webhooks/123/abc", schedules);
+                "https://discord.com/api/webhooks/456/abc", schedules);
 
         Webhook webhook = Webhook.builder()
                 .id("111-222-333")
@@ -133,16 +102,13 @@ class WebhookServiceTest {
                 .schedules(schedules)
                 .build();
 
-        when(repository.findByDiscordApiId(eq("123")))
-                .thenReturn(Optional.empty());
-
-        when(repository.findByToken(eq("abc")))
+        when(repository.findByDiscordWebhook(eq(new DiscordWebhook("456", "abc"))))
                 .thenReturn(Optional.of(webhook));
 
         // When & Then
         assertThatThrownBy(() -> underTest.create(request, jwt))
-                .isInstanceOf(UnavailableTokenException.class)
-                .hasMessage("Token in provided url is unavailable");
+                .isInstanceOf(UnavailableDiscordWebhookException.class)
+                .hasMessage("Provided Discord webhook is not available");
     }
 
     @Test
@@ -161,10 +127,7 @@ class WebhookServiceTest {
         when(scheduleService.checkIfSchedulesExist(eq(schedules)))
                 .thenReturn(true);
 
-        when(repository.findByDiscordApiId(eq("123")))
-                .thenReturn(Optional.empty());
-
-        when(repository.findByToken(eq("abc")))
+        when(repository.findByDiscordWebhook(eq(new DiscordWebhook("123", "abc"))))
                 .thenReturn(Optional.empty());
 
         Webhook savedWebhook = Webhook.builder()
@@ -180,6 +143,10 @@ class WebhookServiceTest {
                         .discordId("123")
                         .discordToken("abc")
                         .addedBy(userId)
+                        .discordWebhook(new DiscordWebhook(
+                                "123",
+                                "abc"
+                        ))
                         .schedules(schedules)
                         .build())))
                 .thenReturn(savedWebhook);
@@ -460,14 +427,14 @@ class WebhookServiceTest {
     }
 
     @Test
-    void GivenUrlWithUnavailableDiscordId_WhenUpdate_ThenThrowsUnavailableDiscordApiIdException() {
+    void GivenWebhookRequestWithUnavailableDiscordWebhookUrl_WhenUpdate_ThenThrowsUnavailableDiscordWebhookException() {
         // Given
         UUID scheduleId = UUID.randomUUID();
         Set<UUID> schedules = Set.of(scheduleId);
         String id = "id";
 
         WebhookRequest request = new WebhookRequest(
-                "https://discord.com/api/webhooks/123/abc", schedules);
+                "https://discord.com/api/webhooks/456/def", schedules);
 
         Webhook webhook = Webhook.builder()
                 .id(id)
@@ -477,35 +444,14 @@ class WebhookServiceTest {
                 .schedules(schedules)
                 .build();
 
-        when(securityService.getUserId(eq(jwt)))
-                .thenReturn("123-456-789");
-
-        when(repository.findById(eq(id)))
-                .thenReturn(Optional.of(webhook));
-
-        when(repository.findByDiscordApiId(eq("123")))
-                .thenReturn(Optional.of(webhook));
-
-        // When & Then
-        assertThatThrownBy(() -> underTest.update(request, jwt, id))
-                .isInstanceOf(UnavailableDiscordApiIdException.class)
-                .hasMessage("Id in provided url is unavailable");
-    }
-
-    @Test
-    void GivenUrlWithUnavailableToken_WhenUpdate_ThenThrowsUnavailableTokenException() {
-        // Given
-        UUID scheduleId = UUID.randomUUID();
-        Set<UUID> schedules = Set.of(scheduleId);
-        String id = "id";
-
-        WebhookRequest request = new WebhookRequest(
-                "https://discord.com/api/webhooks/123/abc", schedules);
-
-        Webhook webhook = Webhook.builder()
-                .id(id)
-                .discordId("123")
+        Webhook otherWebhook = Webhook.builder()
+                .id("otherId")
+                .discordId("456")
                 .discordToken("abc")
+                .discordWebhook(new DiscordWebhook(
+                        "456",
+                        "def"
+                ))
                 .addedBy("123-456-789")
                 .schedules(schedules)
                 .build();
@@ -514,18 +460,15 @@ class WebhookServiceTest {
                 .thenReturn("123-456-789");
 
         when(repository.findById(eq(id)))
-                .thenReturn(Optional.of(webhook));
+                .thenReturn(Optional.of(otherWebhook));
 
-        when(repository.findByDiscordApiId(eq("123")))
-                .thenReturn(Optional.empty());
-
-        when(repository.findByToken(eq("abc")))
+        when(repository.findByDiscordWebhook(eq(new DiscordWebhook("456", "def"))))
                 .thenReturn(Optional.of(webhook));
 
         // When & Then
         assertThatThrownBy(() -> underTest.update(request, jwt, id))
-                .isInstanceOf(UnavailableTokenException.class)
-                .hasMessage("Token in provided url is unavailable");
+                .isInstanceOf(UnavailableDiscordWebhookException.class)
+                .hasMessage("Provided Discord webhook is not available");
     }
 
     @Test
@@ -559,11 +502,8 @@ class WebhookServiceTest {
         when(scheduleService.checkIfSchedulesExist(eq(Set.of(newSchedule))))
                 .thenReturn(false);
 
-        when(repository.findByDiscordApiId(eq("123")))
-                .thenReturn(Optional.empty());
-
-        when(repository.findByToken(eq("abc")))
-                .thenReturn(Optional.empty());
+        when(repository.findByDiscordWebhook(eq(new DiscordWebhook("123", "abc"))))
+                .thenReturn(Optional.of(webhook));
 
         // When & Then
         assertThatThrownBy(() -> underTest.update(request, jwt, id))
@@ -606,10 +546,7 @@ class WebhookServiceTest {
         when(scheduleService.checkIfSchedulesExist(eq(Set.of(newSchedule))))
                 .thenReturn(true);
 
-        when(repository.findByDiscordApiId(eq("1234")))
-                .thenReturn(Optional.empty());
-
-        when(repository.findByToken(eq("abcd")))
+        when(repository.findByDiscordWebhook(eq(new DiscordWebhook("1234", "abcd"))))
                 .thenReturn(Optional.empty());
 
         Webhook expectedToBeSaved = Webhook.builder()
@@ -617,6 +554,10 @@ class WebhookServiceTest {
                 .discordId("1234")
                 .discordToken("abcd")
                 .addedBy("123-456-789")
+                .discordWebhook(new DiscordWebhook(
+                        "1234",
+                        "abcd"
+                ))
                 .schedules(schedules)
                 .build();
 
@@ -678,10 +619,7 @@ class WebhookServiceTest {
         when(scheduleService.checkIfSchedulesExist(eq(Set.of(newSchedule))))
                 .thenReturn(true);
 
-        when(repository.findByDiscordApiId(eq("1234")))
-                .thenReturn(Optional.empty());
-
-        when(repository.findByToken(eq("abcd")))
+        when(repository.findByDiscordWebhook(eq(new DiscordWebhook("1234", "abcd"))))
                 .thenReturn(Optional.empty());
 
         Webhook expectedToBeSaved = Webhook.builder()
@@ -689,6 +627,10 @@ class WebhookServiceTest {
                 .discordId("1234")
                 .discordToken("abcd")
                 .addedBy("123-456-789")
+                .discordWebhook(new DiscordWebhook(
+                        "1234",
+                        "abcd"
+                ))
                 .schedules(schedules)
                 .build();
 

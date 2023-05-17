@@ -1,6 +1,7 @@
 package com.example.discordnotificationservice.webhook;
 
 import com.example.discordnotificationservice.ContainersEnvironment;
+import com.example.discordnotificationservice.discord.document.DiscordWebhook;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -197,5 +198,69 @@ class WebhookRepositoryTest extends ContainersEnvironment {
 
         assertThat(result1).hasSize(2);
         assertThat(result2).hasSize(1);
+    }
+
+    @Test
+    void GivenDiscordWebhookIdAndToken_FindByDiscordWebhook_ThenReturnsOptionalWithCorrectDocument() {
+        // Given
+        String discordWebhookId = "id1";
+        String discordWebhookToken = "token1";
+
+        DiscordWebhook discordWebhook = new DiscordWebhook(discordWebhookId, discordWebhookToken);
+
+        Webhook expected = underTest.save(
+                Webhook.builder()
+                        .discordId("123")
+                        .discordToken("123")
+                        .addedBy("123")
+                        .discordWebhook(new DiscordWebhook(
+                                discordWebhookId,
+                                discordWebhookToken
+                        ))
+                        .build()
+        );
+
+        underTest.save(
+                Webhook.builder()
+                        .discordId("1234")
+                        .discordToken("1234")
+                        .addedBy("1234")
+                        .discordWebhook(new DiscordWebhook(
+                                "id2",
+                                "token2"
+                        ))
+                        .build()
+        );
+
+        underTest.save(
+                Webhook.builder()
+                        .discordId("123")
+                        .discordToken("1234")
+                        .addedBy("1234")
+                        .discordWebhook(new DiscordWebhook(
+                                "id2",
+                                "token2"
+                        ))
+                        .build()
+        );
+
+        underTest.save(
+                Webhook.builder()
+                        .discordId("1234")
+                        .discordToken("123")
+                        .addedBy("1234")
+                        .discordWebhook(new DiscordWebhook(
+                                "id2",
+                                "token2"
+                        ))
+                        .build()
+        );
+
+        // When
+        Optional<Webhook> result = underTest.findByDiscordWebhook(discordWebhook);
+
+        // Then
+        assertThat(result).isPresent();
+        assertThat(result.get()).isEqualTo(expected);
     }
 }

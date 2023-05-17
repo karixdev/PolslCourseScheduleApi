@@ -1,5 +1,6 @@
 package com.example.discordnotificationservice.webhook;
 
+import com.example.discordnotificationservice.discord.document.DiscordWebhook;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -26,5 +27,10 @@ public interface WebhookRepository
     Page<Webhook> findByAddedBy(
             @Param("addedBy") String addedBy,
             Pageable pageable
+    );
+
+    @Query("{'discordWebhook': :#{#discordWebhook}}")
+    Optional<Webhook> findByDiscordWebhook(
+            @Param("discordWebhook") DiscordWebhook discordWebhook
     );
 }

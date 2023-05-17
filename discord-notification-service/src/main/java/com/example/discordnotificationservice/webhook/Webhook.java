@@ -1,5 +1,6 @@
 package com.example.discordnotificationservice.webhook;
 
+import com.example.discordnotificationservice.discord.document.DiscordWebhook;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
@@ -24,6 +25,8 @@ public class Webhook {
     private String discordId;
     @Indexed(unique = true)
     private String discordToken;
+
+    private DiscordWebhook discordWebhook;
 
     private String addedBy;
 

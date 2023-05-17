@@ -5,12 +5,12 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class WebhookDTOMapper {
-    public WebhookResponse map(Webhook discordWebhook) {
+    public WebhookResponse map(Webhook webhook) {
         return new WebhookResponse(
-                discordWebhook.getId(),
-                discordWebhook.getDiscordId(),
-                discordWebhook.getDiscordToken(),
-                discordWebhook.getSchedules()
+                webhook.getId(),
+                webhook.getDiscordId(),
+                webhook.getDiscordToken(),
+                webhook.getSchedules()
         );
     }
 }
