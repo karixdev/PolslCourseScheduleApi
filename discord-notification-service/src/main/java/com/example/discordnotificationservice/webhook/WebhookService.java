@@ -1,6 +1,6 @@
 package com.example.discordnotificationservice.webhook;
 
-import com.example.discordnotificationservice.discord.DiscordApiWebhooksClient;
+import com.example.discordnotificationservice.discord.DiscordWebhookClient;
 import com.example.discordnotificationservice.discord.document.DiscordWebhook;
 import com.example.discordnotificationservice.discord.dto.DiscordWebhookRequest;
 import com.example.discordnotificationservice.webhook.dto.WebhookRequest;
@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class WebhookService {
-    private final DiscordApiWebhooksClient discordApiWebhooksClient;
+    private final DiscordWebhookClient discordApiWebhooksClient;
     private final ScheduleService scheduleService;
     private final WebhookRepository repository;
     private final SecurityService securityService;

@@ -1,7 +1,7 @@
 package com.example.discordnotificationservice.webhook;
 
 
-import com.example.discordnotificationservice.discord.DiscordApiWebhooksClient;
+import com.example.discordnotificationservice.discord.DiscordWebhookClient;
 import com.example.discordnotificationservice.discord.document.DiscordWebhook;
 import com.example.discordnotificationservice.discord.dto.DiscordWebhookRequest;
 import com.example.discordnotificationservice.webhook.dto.WebhookRequest;
@@ -44,7 +44,7 @@ class WebhookServiceTest {
     WebhookRepository repository;
 
     @Mock
-    DiscordApiWebhooksClient discordApiWebhooksClient;
+    DiscordWebhookClient discordWebhookClient;
 
     @Mock
     SecurityService securityService;
@@ -158,7 +158,7 @@ class WebhookServiceTest {
         WebhookResponse result = underTest.create(request, jwt);
 
         // Then
-        verify(discordApiWebhooksClient).sendMessage(
+        verify(discordWebhookClient).sendMessage(
                 eq("123"),
                 eq("abc"),
                 eq(new DiscordWebhookRequest("Hello form PolslCourseApi!"))
@@ -547,7 +547,7 @@ class WebhookServiceTest {
         WebhookResponse result = underTest.update(request, jwt, id);
 
         // Then
-        verify(discordApiWebhooksClient).sendMessage(
+        verify(discordWebhookClient).sendMessage(
                 eq("1234"),
                 eq("abcd"),
                 eq(new DiscordWebhookRequest("Hello form PolslCourseApi!"))
@@ -615,7 +615,7 @@ class WebhookServiceTest {
         WebhookResponse result = underTest.update(request, jwt, id);
 
         // Then
-        verify(discordApiWebhooksClient).sendMessage(
+        verify(discordWebhookClient).sendMessage(
                 eq("1234"),
                 eq("abcd"),
                 eq(new DiscordWebhookRequest("Hello form PolslCourseApi!"))

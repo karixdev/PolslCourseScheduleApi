@@ -8,7 +8,7 @@ import org.springframework.web.service.annotation.HttpExchange;
 import org.springframework.web.service.annotation.PostExchange;
 
 @HttpExchange("/webhooks")
-public interface DiscordApiWebhooksClient {
+public interface DiscordWebhookClient {
     @PostExchange("/{id}/{token}")
     ResponseEntity<Void> sendMessage(
             @PathVariable(name = "id") String id,
