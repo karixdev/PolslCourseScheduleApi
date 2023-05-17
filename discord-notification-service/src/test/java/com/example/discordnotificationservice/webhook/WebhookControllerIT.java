@@ -5,7 +5,6 @@ import com.example.discordnotificationservice.discord.document.DiscordWebhook;
 import com.example.discordnotificationservice.security.SecurityService;
 import com.example.discordnotificationservice.testconfig.WebClientTestConfig;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -21,7 +20,10 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -94,8 +96,6 @@ public class WebhookControllerIT extends ContainersEnvironment {
 
         webhookRepository.save(
                 Webhook.builder()
-                        .discordId("discordApiId")
-                        .discordToken("otherToken")
                         .discordWebhook(new DiscordWebhook(
                                 "discordApiId",
                                 "token"
@@ -287,10 +287,11 @@ public class WebhookControllerIT extends ContainersEnvironment {
 
         Webhook result = resultList.get(0);
 
-        assertThat(result.getDiscordId())
-                .isEqualTo("discordApiId");
-        assertThat(result.getDiscordToken())
-                .isEqualTo("token");
+        assertThat(result.getDiscordWebhook())
+                .isEqualTo(new DiscordWebhook(
+                        "discordApiId",
+                        "token"
+                ));
         assertThat(result.getSchedules())
                 .isEqualTo(schedules);
     }
@@ -719,10 +720,11 @@ public class WebhookControllerIT extends ContainersEnvironment {
 
         Webhook resultWebhook = result.get(0);
 
-        assertThat(resultWebhook.getDiscordId())
-                .isEqualTo("discordApiId3");
-        assertThat(resultWebhook.getDiscordToken())
-                .isEqualTo("token3");
+        assertThat(resultWebhook.getDiscordWebhook())
+                .isEqualTo(new DiscordWebhook(
+                        "discordApiId3",
+                        "token3"
+                ));
 
         Set<UUID> expectedSchedules = new HashSet<>(WebhookBefore.getSchedules());
         expectedSchedules.add(newSchedule);
