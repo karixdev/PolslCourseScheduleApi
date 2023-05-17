@@ -18,8 +18,6 @@ class WebhookDTOMapperTest {
         UUID id = UUID.randomUUID();
         Webhook discordWebhook = new Webhook(
                 "12345",
-                "api123",
-                "token123",
                 new DiscordWebhook(
                         "discordId",
                         "token"

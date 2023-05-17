@@ -96,8 +96,6 @@ class WebhookServiceTest {
 
         Webhook webhook = Webhook.builder()
                 .id("111-222-333")
-                .discordId("456")
-                .discordToken("abc")
                 .addedBy("123-456-789")
                 .schedules(schedules)
                 .build();
@@ -132,16 +130,12 @@ class WebhookServiceTest {
 
         Webhook savedWebhook = Webhook.builder()
                 .id("111-222-333")
-                .discordId("123")
-                .discordToken("abc")
                 .addedBy(userId)
                 .schedules(schedules)
                 .build();
 
         when(repository.save(eq(
                 Webhook.builder()
-                        .discordId("123")
-                        .discordToken("abc")
                         .addedBy(userId)
                         .discordWebhook(new DiscordWebhook(
                                 "123",
@@ -182,8 +176,6 @@ class WebhookServiceTest {
 
         Webhook webhook = Webhook.builder()
                 .id("111-222-333")
-                .discordId("123")
-                .discordToken("abc")
                 .addedBy("userId")
                 .schedules(Set.of(UUID.randomUUID()))
                 .build();
@@ -225,8 +217,6 @@ class WebhookServiceTest {
 
         Webhook webhook = Webhook.builder()
                 .id("111-222-333")
-                .discordId("123")
-                .discordToken("abc")
                 .addedBy(userId)
                 .schedules(Set.of(UUID.randomUUID()))
                 .build();
@@ -282,8 +272,6 @@ class WebhookServiceTest {
 
         Webhook webhook = Webhook.builder()
                 .id("111-222-333")
-                .discordId("123")
-                .discordToken("abc")
                 .addedBy("userId")
                 .schedules(Set.of(UUID.randomUUID()))
                 .build();
@@ -309,8 +297,6 @@ class WebhookServiceTest {
 
         Webhook webhook = Webhook.builder()
                 .id("111-222-333")
-                .discordId("123")
-                .discordToken("abc")
                 .addedBy("userId")
                 .schedules(Set.of(UUID.randomUUID()))
                 .build();
@@ -338,8 +324,6 @@ class WebhookServiceTest {
 
         Webhook webhook = Webhook.builder()
                 .id("111-222-333")
-                .discordId("123")
-                .discordToken("abc")
                 .addedBy("userId")
                 .schedules(Set.of(UUID.randomUUID()))
                 .build();
@@ -380,8 +364,6 @@ class WebhookServiceTest {
 
         Webhook webhook = Webhook.builder()
                 .id("111-222-333")
-                .discordId("123")
-                .discordToken("abc")
                 .addedBy("userId")
                 .schedules(Set.of(UUID.randomUUID()))
                 .build();
@@ -408,8 +390,6 @@ class WebhookServiceTest {
 
         Webhook webhook = Webhook.builder()
                 .id(id)
-                .discordId("123")
-                .discordToken("abc")
                 .addedBy("123-456-789")
                 .schedules(Set.of(UUID.randomUUID()))
                 .build();
@@ -438,16 +418,12 @@ class WebhookServiceTest {
 
         Webhook webhook = Webhook.builder()
                 .id(id)
-                .discordId("123")
-                .discordToken("abc")
                 .addedBy("123-456-789")
                 .schedules(schedules)
                 .build();
 
         Webhook otherWebhook = Webhook.builder()
                 .id("otherId")
-                .discordId("456")
-                .discordToken("abc")
                 .discordWebhook(new DiscordWebhook(
                         "456",
                         "def"
@@ -487,8 +463,6 @@ class WebhookServiceTest {
 
         Webhook webhook = Webhook.builder()
                 .id(id)
-                .discordId("123")
-                .discordToken("abc")
                 .addedBy("123-456-789")
                 .schedules(Set.of(UUID.fromString("bb46a7d5-f267-4527-a00b-13c1172ac442")))
                 .build();
@@ -528,8 +502,6 @@ class WebhookServiceTest {
 
         Webhook webhook = Webhook.builder()
                 .id(id)
-                .discordId("123")
-                .discordToken("abc")
                 .addedBy("123-456-789")
                 .schedules(Set.of(oldSchedule))
                 .build();
@@ -551,8 +523,6 @@ class WebhookServiceTest {
 
         Webhook expectedToBeSaved = Webhook.builder()
                 .id(id)
-                .discordId("1234")
-                .discordToken("abcd")
                 .addedBy("123-456-789")
                 .discordWebhook(new DiscordWebhook(
                         "1234",
@@ -603,8 +573,6 @@ class WebhookServiceTest {
 
         Webhook webhook = Webhook.builder()
                 .id(id)
-                .discordId("123")
-                .discordToken("abc")
                 .addedBy("123-456-789")
                 .schedules(Set.of(oldSchedule))
                 .build();
@@ -623,8 +591,6 @@ class WebhookServiceTest {
 
         Webhook expectedToBeSaved = Webhook.builder()
                 .id(id)
-                .discordId("1234")
-                .discordToken("abcd")
                 .addedBy("123-456-789")
                 .discordWebhook(new DiscordWebhook(
                         "1234",

@@ -66,8 +66,6 @@ public class WebhookService {
 
         Webhook webhook = repository.save(
                 Webhook.builder()
-                        .discordId(discordWebhookId)
-                        .discordToken(discordWebhookToken)
                         .discordWebhook(discordWebhook)
                         .addedBy(jwt.getSubject())
                         .schedules(schedules)
@@ -176,8 +174,6 @@ public class WebhookService {
 
         sendWelcomeMessage(discordWebhookId, discordWebhookToken);
 
-        webhook.setDiscordId(discordWebhookId);
-        webhook.setDiscordToken(discordWebhookToken);
         webhook.setDiscordWebhook(discordWebhook);
         webhook.setSchedules(request.schedules());
 

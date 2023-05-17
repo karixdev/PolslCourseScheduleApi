@@ -21,11 +21,6 @@ public class Webhook {
     @Setter(AccessLevel.NONE)
     private String id;
 
-    @Indexed(unique = true)
-    private String discordId;
-    @Indexed(unique = true)
-    private String discordToken;
-
     private DiscordWebhook discordWebhook;
 
     private String addedBy;
