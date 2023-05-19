@@ -1,15 +1,16 @@
 package com.example.discordnotificationservice.webhook;
 
-import com.example.discordnotificationservice.discord.DiscordWebhookClient;
+import com.example.discordnotificationservice.discord.DiscordWebhookService;
 import com.example.discordnotificationservice.discord.document.DiscordWebhook;
-import com.example.discordnotificationservice.discord.dto.DiscordWebhookRequest;
-import com.example.discordnotificationservice.webhook.dto.WebhookRequest;
-import com.example.discordnotificationservice.webhook.dto.WebhookResponse;
-import com.example.discordnotificationservice.webhook.exception.*;
 import com.example.discordnotificationservice.schedule.ScheduleService;
 import com.example.discordnotificationservice.security.SecurityService;
 import com.example.discordnotificationservice.shared.exception.ForbiddenAccessException;
 import com.example.discordnotificationservice.shared.exception.ResourceNotFoundException;
+import com.example.discordnotificationservice.webhook.dto.WebhookRequest;
+import com.example.discordnotificationservice.webhook.dto.WebhookResponse;
+import com.example.discordnotificationservice.webhook.exception.InvalidDiscordWebhookUrlException;
+import com.example.discordnotificationservice.webhook.exception.NotExistingSchedulesException;
+import com.example.discordnotificationservice.webhook.exception.UnavailableDiscordWebhookException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -25,14 +26,11 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class WebhookService {
-    private final DiscordWebhookClient discordApiWebhooksClient;
     private final ScheduleService scheduleService;
     private final WebhookRepository repository;
     private final SecurityService securityService;
     private final WebhookDTOMapper mapper;
-
-    private static final String DISCORD_WEBHOOK_URL_PREFIX = "https://discord.com/api/webhooks/";
-    private static final String WELCOME_MESSAGE = "Hello form PolslCourseApi!";
+    private final DiscordWebhookService discordWebhookService;
 
     private static final int PAGE_SIZE = 10;
 
@@ -40,17 +38,11 @@ public class WebhookService {
     public WebhookResponse create(WebhookRequest request, Jwt jwt) {
         String discordWebhookUrl = request.url();
 
-        if (isNotValidDiscordWebhookUrl(discordWebhookUrl)) {
+        if (discordWebhookService.isNotValidDiscordWebhookUrl(discordWebhookUrl)) {
             throw new InvalidDiscordWebhookUrlException();
         }
 
-        String discordWebhookId = getDiscordApiIdFromUrl(discordWebhookUrl);
-        String discordWebhookToken = getTokenFromUrl(discordWebhookUrl);
-
-        DiscordWebhook discordWebhook = new DiscordWebhook(
-                discordWebhookId,
-                discordWebhookToken
-        );
+        DiscordWebhook discordWebhook = discordWebhookService.getDiscordWebhookFromUrl(discordWebhookUrl);
 
         if (isDiscordWebhookUnavailable(discordWebhook, null)) {
             throw new UnavailableDiscordWebhookException();
@@ -62,7 +54,7 @@ public class WebhookService {
             throw new NotExistingSchedulesException();
         }
 
-        sendWelcomeMessage(discordWebhookId, discordWebhookToken);
+        discordWebhookService.sendWelcomeMessage(discordWebhook);
 
         Webhook webhook = repository.save(
                 Webhook.builder()
@@ -73,35 +65,6 @@ public class WebhookService {
         );
 
         return mapper.map(webhook);
-    }
-
-    private boolean isNotValidDiscordWebhookUrl(String url) {
-        if (!url.startsWith(DISCORD_WEBHOOK_URL_PREFIX)) {
-            return true;
-        }
-
-        String[] parts = splitUrlIntoParts(url);
-
-        if (parts.length != 2) {
-            return true;
-        }
-
-        return parts[0].isEmpty() || parts[1].isEmpty();
-    }
-
-    public String[] splitUrlIntoParts(String url) {
-        int beginIdx = DISCORD_WEBHOOK_URL_PREFIX.length();
-        String afterPrefix = url.substring(beginIdx);
-
-        return afterPrefix.split("/");
-    }
-
-    private String getDiscordApiIdFromUrl(String url) {
-        return splitUrlIntoParts(url)[0];
-    }
-
-    private String getTokenFromUrl(String url) {
-        return splitUrlIntoParts(url)[1];
     }
 
     public Page<WebhookResponse> findAll(Jwt jwt, Integer page) {
@@ -147,17 +110,11 @@ public class WebhookService {
 
         String discordWebhookUrl = request.url();
 
-        if (isNotValidDiscordWebhookUrl(discordWebhookUrl)) {
+        if (discordWebhookService.isNotValidDiscordWebhookUrl(discordWebhookUrl)) {
             throw new InvalidDiscordWebhookUrlException();
         }
 
-        String discordWebhookId = getDiscordApiIdFromUrl(discordWebhookUrl);
-        String discordWebhookToken = getTokenFromUrl(discordWebhookUrl);
-
-        DiscordWebhook discordWebhook = new DiscordWebhook(
-                discordWebhookId,
-                discordWebhookToken
-        );
+        DiscordWebhook discordWebhook = discordWebhookService.getDiscordWebhookFromUrl(discordWebhookUrl);
 
         if (isDiscordWebhookUnavailable(discordWebhook, webhook.getId())) {
             throw new UnavailableDiscordWebhookException();
@@ -172,7 +129,7 @@ public class WebhookService {
             throw new NotExistingSchedulesException();
         }
 
-        sendWelcomeMessage(discordWebhookId, discordWebhookToken);
+        discordWebhookService.sendWelcomeMessage(discordWebhook);
 
         webhook.setDiscordWebhook(discordWebhook);
         webhook.setSchedules(request.schedules());
@@ -189,13 +146,5 @@ public class WebhookService {
 
     private boolean doesAnyScheduleDoNotExist(Set<UUID> schedules) {
         return !scheduleService.checkIfSchedulesExist(schedules);
-    }
-
-    private void sendWelcomeMessage(String discordApiId, String token) {
-        discordApiWebhooksClient.sendMessage(
-                discordApiId,
-                token,
-                new DiscordWebhookRequest(WELCOME_MESSAGE)
-        );
     }
 }
