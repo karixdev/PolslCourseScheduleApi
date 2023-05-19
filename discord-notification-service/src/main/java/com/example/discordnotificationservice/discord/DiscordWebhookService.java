@@ -4,6 +4,7 @@ import com.example.discordnotificationservice.discord.document.DiscordWebhook;
 import com.example.discordnotificationservice.discord.dto.DiscordWebhookRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
 @RequiredArgsConstructor
@@ -49,5 +50,15 @@ public class DiscordWebhookService {
                 discordWebhook.getToken(),
                 new DiscordWebhookRequest(WELCOME_MESSAGE)
         );
+    }
+
+    public String transformDiscordWebhookIntoUrl(DiscordWebhook discordWebhook) {
+        return UriComponentsBuilder
+                .fromUriString(DISCORD_WEBHOOK_URL_PREFIX)
+                .pathSegment(
+                        discordWebhook.getDiscordId(),
+                        discordWebhook.getToken()
+                )
+                .toUriString();
     }
 }

@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -79,5 +78,20 @@ class DiscordWebhookServiceTest {
                 eq("token"),
                 eq(new DiscordWebhookRequest("Hello form PolslCourseApi!"))
         );
+    }
+
+    @Test
+    void GivenDiscordWebhook_WhenTransformDiscordWebhookIntoUrl_ThenReturnsCorrectUrl() {
+        // Given
+        DiscordWebhook discordWebhook = new DiscordWebhook(
+                "discordId",
+                "token"
+        );
+
+        // When
+        String result = underTest.transformDiscordWebhookIntoUrl(discordWebhook);
+
+        // Then
+        assertThat(result).isEqualTo("https://discord.com/api/webhooks/discordId/token");
     }
 }
