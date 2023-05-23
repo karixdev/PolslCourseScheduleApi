@@ -9,6 +9,7 @@ import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -142,5 +143,52 @@ class WebhookRepositoryTest extends ContainersEnvironment {
         // Then
         assertThat(result).isPresent();
         assertThat(result.get()).isEqualTo(expected);
+    }
+
+    @Test
+    void GivenSchedule_WhenFindBySchedule_ThenReturnsCorrectList() {
+        // Given
+        UUID schedule1 = UUID.fromString("5c0db272-eb91-44d9-97bc-4a259a8a2703");
+        UUID schedule2 = UUID.fromString("a105e5f0-64ee-4e83-8c37-7db16240120e");
+        UUID schedule3 = UUID.fromString("fc8899d0-a1a2-4e58-9726-6e268c5d2740");
+
+        Webhook webhook1 = underTest.save(
+                Webhook.builder()
+                        .addedBy("1234")
+                        .discordWebhook(new DiscordWebhook(
+                                "id1",
+                                "token1"
+                        ))
+                        .schedules(Set.of(schedule1))
+                        .build()
+        );
+
+        Webhook webhook2 = underTest.save(
+                Webhook.builder()
+                        .addedBy("1234")
+                        .discordWebhook(new DiscordWebhook(
+                                "id2",
+                                "token2"
+                        ))
+                        .schedules(Set.of(schedule1, schedule2))
+                        .build()
+        );
+
+        underTest.save(
+                Webhook.builder()
+                        .addedBy("1234")
+                        .discordWebhook(new DiscordWebhook(
+                                "id3",
+                                "token3"
+                        ))
+                        .schedules(Set.of(schedule2, schedule3))
+                        .build()
+        );
+
+        // When
+        List<Webhook> result = underTest.findBySchedulesContaining(schedule1);
+
+        // Then
+        assertThat(result).containsExactly(webhook1, webhook2);
     }
 }

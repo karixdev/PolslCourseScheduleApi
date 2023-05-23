@@ -12,6 +12,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.testcontainers.containers.MongoDBContainer;
+import org.testcontainers.containers.RabbitMQContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.Collections;
@@ -30,10 +31,16 @@ public abstract class ContainersEnvironment {
                     .withRealmImportFile("keycloak/realm.json")
                     .withReuse(true);
 
+    static final RabbitMQContainer rabbitMQContainer =
+            new RabbitMQContainer("rabbitmq:3.11.7-management-alpine")
+                    .withUser("user", "password")
+                    .withReuse(true);
+
     @BeforeAll
     static void beforeAll() {
         mongoDBContainer.start();
         keycloakContainer.start();
+        rabbitMQContainer.start();
     }
 
     @DynamicPropertySource
@@ -48,6 +55,29 @@ public abstract class ContainersEnvironment {
         registry.add(
                 "spring.security.oauth2.resourceserver.jwt.issuer-uri",
                 () -> keycloakContainer.getAuthServerUrl() + "realms/polsl-course-api");
+    }
+
+    @DynamicPropertySource
+    static void overrideRabbitMQConnectionProperties(DynamicPropertyRegistry registry) {
+        registry.add(
+                "spring.rabbitmq.host",
+                rabbitMQContainer::getHost
+        );
+
+        registry.add(
+                "spring.rabbitmq.port",
+                rabbitMQContainer::getAmqpPort
+        );
+
+        registry.add(
+                "spring.rabbitmq.password",
+                rabbitMQContainer::getAdminPassword
+        );
+
+        registry.add(
+                "spring.rabbitmq.username",
+                rabbitMQContainer::getAdminUsername
+        );
     }
 
     private record KeyCloakToken(String accessToken) {

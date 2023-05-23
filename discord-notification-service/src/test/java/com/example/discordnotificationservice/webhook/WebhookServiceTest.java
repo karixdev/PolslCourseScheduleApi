@@ -1,17 +1,17 @@
 package com.example.discordnotificationservice.webhook;
 
 
-import com.example.discordnotificationservice.discord.DiscordWebhookClient;
 import com.example.discordnotificationservice.discord.DiscordWebhookService;
 import com.example.discordnotificationservice.discord.document.DiscordWebhook;
-import com.example.discordnotificationservice.discord.dto.DiscordWebhookRequest;
-import com.example.discordnotificationservice.webhook.dto.WebhookRequest;
-import com.example.discordnotificationservice.webhook.dto.WebhookResponse;
-import com.example.discordnotificationservice.webhook.exception.*;
 import com.example.discordnotificationservice.schedule.ScheduleService;
 import com.example.discordnotificationservice.security.SecurityService;
 import com.example.discordnotificationservice.shared.exception.ForbiddenAccessException;
 import com.example.discordnotificationservice.shared.exception.ResourceNotFoundException;
+import com.example.discordnotificationservice.webhook.dto.WebhookRequest;
+import com.example.discordnotificationservice.webhook.dto.WebhookResponse;
+import com.example.discordnotificationservice.webhook.exception.InvalidDiscordWebhookUrlException;
+import com.example.discordnotificationservice.webhook.exception.NotExistingSchedulesException;
+import com.example.discordnotificationservice.webhook.exception.UnavailableDiscordWebhookException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -43,9 +43,6 @@ class WebhookServiceTest {
 
     @Mock
     WebhookRepository repository;
-
-    @Mock
-    DiscordWebhookClient discordWebhookClient;
 
     @Mock
     SecurityService securityService;
@@ -671,5 +668,30 @@ class WebhookServiceTest {
         verify(discordWebhookService).sendWelcomeMessage(eq(discordWebhook));
 
         assertThat(result).isEqualTo(expectedResponse);
+    }
+
+    @Test
+    void GivenSchedule_WhenFindBySchedule_ThenReturnsListOfWebhooks() {
+        // Given
+        UUID scheduleId = UUID.randomUUID();
+
+        Webhook webhook = Webhook.builder()
+                .id("123")
+                .addedBy("123-456-789")
+                .schedules(Set.of(scheduleId))
+                .discordWebhook(new DiscordWebhook(
+                        "123",
+                        "abc"
+                ))
+                .build();
+
+        when(repository.findBySchedulesContaining(eq(scheduleId)))
+                .thenReturn(List.of(webhook));
+
+        // When
+        List<Webhook> result = underTest.findBySchedule(scheduleId);
+
+        // Then
+        assertThat(result).containsExactly(webhook);
     }
 }

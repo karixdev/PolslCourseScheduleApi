@@ -8,7 +8,9 @@ import org.springframework.data.mongodb.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public interface WebhookRepository
@@ -23,4 +25,7 @@ public interface WebhookRepository
     Optional<Webhook> findByDiscordWebhook(
             @Param("discordWebhook") DiscordWebhook discordWebhook
     );
+
+    @Query("{'schedules':  { '$in': [:#{#schedule}] }}")
+    List<Webhook> findBySchedulesContaining(@Param("schedule") UUID schedule);
 }

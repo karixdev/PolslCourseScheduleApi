@@ -20,6 +20,12 @@ spring:
         jwt:
           issuer-uri: http://localhost:8000/realms/polsl-course-api
 
+  rabbitmq:
+    password: password
+    username: user
+    host: localhost
+    port: 5672
+
 eureka:
   client:
     service-url:

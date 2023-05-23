@@ -18,6 +18,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -146,5 +147,9 @@ public class WebhookService {
 
     private boolean doesAnyScheduleDoNotExist(Set<UUID> schedules) {
         return !scheduleService.checkIfSchedulesExist(schedules);
+    }
+
+    public List<Webhook> findBySchedule(UUID schedule) {
+        return repository.findBySchedulesContaining(schedule);
     }
 }
