@@ -65,41 +65,6 @@ services:
     ports:
       - '8761:8761'
 
-  discord-webhooks-mongo:
-    container_name: 'discord-webhooks-mongo'
-    image: mongo:latest
-    restart: always
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: root
-      MONGO_INITDB_DATABASE: discord-webhooks-service
-    ports:
-      - '27017:27017'
-
-  schedule-service:
-    container_name: schedule-service
-    build:
-      context: schedule-service
-      dockerfile: Dockerfile
-    environment:
-      SPRING_PROFILES_ACTIVE: docker
-      RABBITMQ_PASSWORD: password
-      RABBITMQ_USERNAME: user
-      RABBITMQ_HOST: rabbitmq
-      EUREKA_NAME: discovery-server
-      EUREKA_PORT: 8761
-      POSTGRES_URL: schedule-service-postgres
-      POSTGRES_USERNAME: root
-      POSTGRES_PASSWORD: root
-      KEYCLOAK_URL: keycloak
-    ports:
-      - '8080:8080'
-    depends_on:
-      - rabbitmq
-      - schedule-service-postgres
-      - keycloak
-      - discovery-server
-
   api-gateway:
     container_name: api-gateway
     build:
