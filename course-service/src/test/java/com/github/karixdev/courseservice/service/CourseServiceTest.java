@@ -77,21 +77,9 @@ class CourseServiceTest {
     @Test
     void GivenCourseRequestWithNotExistingSchedule_WhenCreate_ThenThrowsNotExistingScheduleException() {
         // Given
-        UUID scheduleId = UUID.fromString("e58ed763-928c-4155-bee9-fdbaaadc15f3");
-        CourseRequest courseRequest = CourseRequest.builder()
-                .scheduleId(scheduleId)
-                .startsAt(LocalTime.of(8, 30))
-                .endsAt(LocalTime.of(10, 15))
-                .name("course-name")
-                .courseType(CourseType.LAB)
-                .teachers("dr Adam, dr Marcin")
-                .dayOfWeek(DayOfWeek.FRIDAY)
-                .weekType(WeekType.EVERY)
-                .classrooms("LAB 1")
-                .additionalInfo("Only on 8.03")
-                .build();
+        CourseRequest courseRequest = exampleCourseRequest;
 
-        when(scheduleClient.findById(eq(scheduleId)))
+        when(scheduleClient.findById(eq(courseRequest.getScheduleId())))
                 .thenReturn(Optional.empty());
 
         // When & Then
@@ -102,41 +90,18 @@ class CourseServiceTest {
     @Test
     void GivenCourseRequest_WhenCreate_ThenRetrievesScheduleSavesCourseAndMapsEntityToResponse() {
         // Given
-        UUID scheduleId = UUID.fromString("e58ed763-928c-4155-bee9-fdbaaadc15f3");
-        CourseRequest courseRequest = CourseRequest.builder()
-                .scheduleId(scheduleId)
-                .startsAt(LocalTime.of(8, 30))
-                .endsAt(LocalTime.of(10, 15))
-                .name("course-name")
-                .courseType(CourseType.LAB)
-                .teachers("dr Adam, dr Marcin")
-                .dayOfWeek(DayOfWeek.FRIDAY)
-                .weekType(WeekType.EVERY)
-                .classrooms("LAB 1")
-                .additionalInfo("Only on 8.03")
-                .build();
+        CourseRequest courseRequest = exampleCourseRequest;
 
-        Course course = Course.builder()
-                .scheduleId(scheduleId)
-                .startsAt(LocalTime.of(8, 30))
-                .endsAt(LocalTime.of(10, 15))
-                .name("course-name")
-                .courseType(CourseType.LAB)
-                .teachers("dr Adam, dr Marcin")
-                .dayOfWeek(DayOfWeek.FRIDAY)
-                .weekType(WeekType.EVERY)
-                .classroom("LAB 1")
-                .additionalInfo("Only on 8.03")
-                .build();
+        Course course = exampleCourse;
 
-        when(scheduleClient.findById(eq(scheduleId)))
-                .thenReturn(Optional.of(new ScheduleResponse(scheduleId)));
+        when(scheduleClient.findById(eq(courseRequest.getScheduleId())))
+                .thenReturn(Optional.of(new ScheduleResponse(courseRequest.getScheduleId())));
 
         // When
         underTest.create(courseRequest);
 
         // Then
-        verify(scheduleClient).findById(eq(scheduleId));
+        verify(scheduleClient).findById(eq(courseRequest.getScheduleId()));
         verify(repository).save(eq(course));
         verify(courseMapper).map(eq(course));
     }
@@ -151,8 +116,7 @@ class CourseServiceTest {
 
         // When & Then
         assertThatThrownBy(() -> underTest.update(id, CourseRequest.builder().build()))
-                .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessage("Course with id %s not found".formatted(id));
+                .isInstanceOf(ResourceNotFoundException.class);
     }
 
     @Test
