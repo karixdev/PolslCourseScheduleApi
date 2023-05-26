@@ -6,9 +6,7 @@ import com.github.karixdev.courseservice.entity.CourseType;
 import com.github.karixdev.courseservice.entity.WeekType;
 import com.github.karixdev.courseservice.repository.CourseRepository;
 import com.github.karixdev.courseservice.testconfig.WebClientTestConfig;
-import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +23,6 @@ import java.util.List;
 import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
@@ -289,5 +286,39 @@ public class CourseControllerIT extends ContainersEnvironment {
         assertThat(resultCourse.getWeekType()).isEqualTo(WeekType.EVERY);
         assertThat(resultCourse.getStartsAt()).isEqualTo(LocalTime.of(10, 30));
         assertThat(resultCourse.getEndsAt()).isEqualTo(LocalTime.of(12, 15));
+    }
+
+    @Test
+    void shouldNotDeleteNotExistingCourse() {
+        String token = getAdminToken();
+
+        webClient.delete().uri("/api/courses/11111111-1111-1111-1111-111111111111")
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void shouldDeleteCourse() {
+        String token = getAdminToken();
+
+        Course course = Course.builder()
+                .scheduleId(UUID.randomUUID())
+                .name("course-name")
+                .courseType(CourseType.INFO)
+                .dayOfWeek(DayOfWeek.FRIDAY)
+                .weekType(WeekType.EVERY)
+                .startsAt(LocalTime.of(8, 30))
+                .endsAt(LocalTime.of(10, 15))
+                .build();
+
+        courseRepository.save(course);
+
+        webClient.delete().uri("/api/courses/" + course.getId())
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus().isNoContent();
+
+        assertThat(courseRepository.findAll()).isEmpty();
     }
 }

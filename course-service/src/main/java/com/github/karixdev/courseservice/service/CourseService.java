@@ -82,4 +82,9 @@ public class CourseService {
 
         return mapper.map(course);
     }
+
+    @Transactional
+    public void delete(UUID id) {
+        repository.delete(findByIdOrElseThrow(id));
+    }
 }

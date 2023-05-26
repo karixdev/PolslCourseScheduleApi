@@ -10,15 +10,12 @@ import com.github.karixdev.courseservice.exception.NotExistingScheduleException;
 import com.github.karixdev.courseservice.exception.ResourceNotFoundException;
 import com.github.karixdev.courseservice.mapper.CourseMapper;
 import com.github.karixdev.courseservice.repository.CourseRepository;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
@@ -273,5 +270,33 @@ class CourseServiceTest {
         verify(scheduleClient, never()).findById(eq(course.getScheduleId()));
         verify(repository).save(eq(expectedCourse));
         verify(courseMapper).map(eq(expectedCourse));
+    }
+
+    @Test
+    void GivenNotExistingCourseId_WhenDelete_ThenThrowsResourceNotFoundExceptionWithProperMessage() {
+        // Given
+        UUID id = UUID.randomUUID();
+
+        when(repository.findById(eq(id)))
+                .thenReturn(Optional.empty());
+
+        // When & Then
+        assertThatThrownBy(() -> underTest.delete(id))
+                .isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test
+    void GivenExistingCourseId_WhenDelete_ThenShouldDeleteCourse() {
+        // Given
+        UUID id = exampleCourse.getId();
+
+        when(repository.findById(eq(id)))
+                .thenReturn(Optional.of(exampleCourse));
+
+        // When
+        underTest.delete(id);
+
+        // Then
+        verify(repository).delete(exampleCourse);
     }
 }
