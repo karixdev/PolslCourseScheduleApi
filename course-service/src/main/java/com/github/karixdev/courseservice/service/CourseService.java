@@ -1,8 +1,10 @@
 package com.github.karixdev.courseservice.service;
 
 import com.github.karixdev.courseservice.client.ScheduleClient;
+import com.github.karixdev.courseservice.comparator.CourseComparator;
 import com.github.karixdev.courseservice.dto.CourseRequest;
 import com.github.karixdev.courseservice.dto.CourseResponse;
+import com.github.karixdev.courseservice.dto.ScheduleResponse;
 import com.github.karixdev.courseservice.entity.Course;
 import com.github.karixdev.courseservice.exception.NotExistingScheduleException;
 import com.github.karixdev.courseservice.exception.ResourceNotFoundException;
@@ -12,6 +14,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -20,6 +23,7 @@ public class CourseService {
     private final CourseRepository repository;
     private final CourseMapper mapper;
     private final ScheduleClient scheduleClient;
+    private final CourseComparator courseComparator;
 
     @Transactional
     public CourseResponse create(CourseRequest request) {
@@ -86,5 +90,12 @@ public class CourseService {
     @Transactional
     public void delete(UUID id) {
         repository.delete(findByIdOrElseThrow(id));
+    }
+
+    public List<CourseResponse> findCoursesBySchedule(UUID scheduleId) {
+        return repository.findByScheduleId(scheduleId).stream()
+                .sorted(courseComparator)
+                .map(mapper::map)
+                .toList();
     }
 }

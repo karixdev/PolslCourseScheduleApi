@@ -321,4 +321,59 @@ public class CourseControllerIT extends ContainersEnvironment {
 
         assertThat(courseRepository.findAll()).isEmpty();
     }
+
+    @Test
+    void shouldRetrieveAllScheduleCoursesInCorrectOrder() {
+        UUID scheduleId = UUID.randomUUID();
+
+        Course course1 = Course.builder()
+                .scheduleId(scheduleId)
+                .name("course-name-1")
+                .courseType(CourseType.INFO)
+                .dayOfWeek(DayOfWeek.FRIDAY)
+                .weekType(WeekType.EVERY)
+                .startsAt(LocalTime.of(8, 30))
+                .endsAt(LocalTime.of(10, 15))
+                .build();
+
+        Course course2 = Course.builder()
+                .scheduleId(scheduleId)
+                .name("course-name-2")
+                .courseType(CourseType.LAB)
+                .dayOfWeek(DayOfWeek.TUESDAY)
+                .weekType(WeekType.EVERY)
+                .startsAt(LocalTime.of(10, 30))
+                .endsAt(LocalTime.of(12, 15))
+                .build();
+
+        Course course3 = Course.builder()
+                .scheduleId(scheduleId)
+                .name("course-name-3")
+                .courseType(CourseType.LECTURE)
+                .dayOfWeek(DayOfWeek.TUESDAY)
+                .weekType(WeekType.EVERY)
+                .startsAt(LocalTime.of(8, 30))
+                .endsAt(LocalTime.of(10, 15))
+                .build();
+
+        Course course4 = Course.builder()
+                .scheduleId(UUID.fromString("11111111-1111-1111-1111-111111111111"))
+                .name("course-name-4")
+                .courseType(CourseType.LECTURE)
+                .dayOfWeek(DayOfWeek.TUESDAY)
+                .weekType(WeekType.EVERY)
+                .startsAt(LocalTime.of(8, 30))
+                .endsAt(LocalTime.of(10, 15))
+                .build();
+
+        courseRepository.saveAll(List.of(course1, course2, course3, course4));
+
+        webClient.get().uri("/api/courses/schedule/" + scheduleId)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$[0].id").isEqualTo(course3.getId().toString())
+                .jsonPath("$[1].id").isEqualTo(course2.getId().toString())
+                .jsonPath("$[2].id").isEqualTo(course1.getId().toString());
+    }
 }

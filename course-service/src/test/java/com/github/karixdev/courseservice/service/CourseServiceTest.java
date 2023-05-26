@@ -1,6 +1,7 @@
 package com.github.karixdev.courseservice.service;
 
 import com.github.karixdev.courseservice.client.ScheduleClient;
+import com.github.karixdev.courseservice.comparator.CourseComparator;
 import com.github.karixdev.courseservice.dto.CourseRequest;
 import com.github.karixdev.courseservice.dto.ScheduleResponse;
 import com.github.karixdev.courseservice.entity.Course;
@@ -19,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -39,6 +41,9 @@ class CourseServiceTest {
 
     @Mock
     CourseMapper courseMapper;
+
+    @Mock
+    CourseComparator courseComparator;
 
     Course exampleCourse;
     CourseRequest exampleCourseRequest;
@@ -262,5 +267,51 @@ class CourseServiceTest {
 
         // Then
         verify(repository).delete(exampleCourse);
+    }
+
+    @Test
+    void GivenExistingScheduleId_WhenFindScheduleCourses_ThenComparesCoursesAndMapsThemIntoResponse() {
+        // Given
+        UUID scheduleId = UUID.randomUUID();
+
+        Course course1 = Course.builder()
+                .name("Calculus I")
+                .scheduleId(scheduleId)
+                .courseType(CourseType.PRACTICAL)
+                .dayOfWeek(DayOfWeek.FRIDAY)
+                .weekType(WeekType.ODD)
+                .startsAt(LocalTime.of(8, 30))
+                .endsAt(LocalTime.of(10, 15))
+                .build();
+
+        Course course2 = Course.builder()
+                .name("Physics")
+                .scheduleId(scheduleId)
+                .courseType(CourseType.LAB)
+                .dayOfWeek(DayOfWeek.MONDAY)
+                .weekType(WeekType.EVEN)
+                .startsAt(LocalTime.of(10, 30))
+                .endsAt(LocalTime.of(12, 15))
+                .build();
+
+        Course course3 = Course.builder()
+                .name("C++")
+                .scheduleId(scheduleId)
+                .courseType(CourseType.LECTURE)
+                .dayOfWeek(DayOfWeek.WEDNESDAY)
+                .weekType(WeekType.EVERY)
+                .startsAt(LocalTime.of(14, 30))
+                .endsAt(LocalTime.of(16, 15))
+                .build();
+
+        when(repository.findByScheduleId(eq(scheduleId)))
+                .thenReturn(List.of(course1, course2, course3));
+
+        // When
+        underTest.findCoursesBySchedule(scheduleId);
+
+        // Then
+        verify(courseComparator, times(2)).compare(any(), any());
+        verify(courseMapper, times(3)).map(any());
     }
 }

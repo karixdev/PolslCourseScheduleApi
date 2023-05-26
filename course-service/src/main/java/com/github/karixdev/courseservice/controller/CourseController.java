@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -24,6 +25,16 @@ public class CourseController {
         return new ResponseEntity<>(
                 service.create(courseRequest),
                 HttpStatus.CREATED
+        );
+    }
+
+    @GetMapping("/schedule/{scheduleId}")
+    ResponseEntity<List<CourseResponse>> findCoursesBySchedule(
+            @PathVariable(name = "scheduleId") UUID scheduleId
+    ) {
+        return new ResponseEntity<>(
+                service.findCoursesBySchedule(scheduleId),
+                HttpStatus.OK
         );
     }
 
