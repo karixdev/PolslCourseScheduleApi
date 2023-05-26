@@ -144,4 +144,150 @@ public class CourseControllerIT extends ContainersEnvironment {
         assertThat(course.getStartsAt()).isEqualTo(LocalTime.of(8, 30));
         assertThat(course.getEndsAt()).isEqualTo(LocalTime.of(10, 15));
     }
+
+    @Test
+    void shouldNotUpdateNotExistingCourse() {
+        String token = getAdminToken();
+
+        String payload = """
+                {
+                    "schedule_id": "11111111-1111-1111-1111-111111111111",
+                    "starts_at": "08:30",
+                    "ends_at": "10:15",
+                    "name": "course-name",
+                    "course_type": "LAB",
+                    "teachers": "dr Adam",
+                    "day_of_week": "FRIDAY",
+                    "week_type": "EVEN",
+                    "classrooms": "LAB 1",
+                    "additional_info": "Only on 3.08"
+                }
+                """;
+
+        webClient.put().uri("/api/courses/11111111-1111-1111-1111-111111111112")
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(payload)
+                .exchange()
+                .expectStatus().isNotFound();
+
+        assertThat(courseRepository.findAll()).isEmpty();
+    }
+
+    @Test
+    void shouldNotUpdateCourseForNotExistingSchedule() {
+        String token = getAdminToken();
+
+        stubFor(
+                get(urlPathEqualTo("/api/schedules/11111111-1111-1111-1111-111111111111"))
+                        .willReturn(aResponse().withStatus(404))
+        );
+
+        Course course = courseRepository.save(Course.builder()
+                .scheduleId(UUID.randomUUID())
+                .name("course-name")
+                .courseType(CourseType.INFO)
+                .dayOfWeek(DayOfWeek.FRIDAY)
+                .weekType(WeekType.EVERY)
+                .startsAt(LocalTime.of(8, 30))
+                .endsAt(LocalTime.of(10, 15))
+                .build());
+
+        String payload = """
+                {
+                    "schedule_id": "11111111-1111-1111-1111-111111111111",
+                    "starts_at": "08:30",
+                    "ends_at": "10:15",
+                    "name": "course-name",
+                    "course_type": "LAB",
+                    "teachers": "dr Adam",
+                    "day_of_week": "FRIDAY",
+                    "week_type": "EVEN",
+                    "classrooms": "LAB 1",
+                    "additional_info": "Only on 3.08"
+                }
+                """;
+
+        webClient.put().uri("/api/courses/" + course.getId())
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(payload)
+                .exchange()
+                .expectStatus().isBadRequest();
+
+        List<Course> results = courseRepository.findAll();
+
+        assertThat(results).hasSize(1);
+        assertThat(results.get(0)).isEqualTo(course);
+    }
+
+    @Test
+    void shouldUpdateCourse() {
+        String token = getAdminToken();
+
+        Course course = courseRepository.save(Course.builder()
+                .scheduleId(UUID.randomUUID())
+                .name("course-name")
+                .courseType(CourseType.INFO)
+                .dayOfWeek(DayOfWeek.FRIDAY)
+                .weekType(WeekType.EVERY)
+                .startsAt(LocalTime.of(8, 30))
+                .endsAt(LocalTime.of(10, 15))
+                .build());
+
+        stubFor(
+                get(urlPathEqualTo("/api/schedules/11111111-1111-1111-1111-111111111111"))
+                        .willReturn(ok()
+                                .withHeader(
+                                        "Content-Type",
+                                        "application/json"
+                                )
+                                .withBody("""
+                                        {
+                                            "id": "11111111-1111-1111-1111-111111111111"
+                                        }
+                                        """
+                                )
+                        )
+        );
+
+        String payload = """
+                {
+                    "schedule_id": "11111111-1111-1111-1111-111111111111",
+                    "starts_at": "10:30",
+                    "ends_at": "12:15",
+                    "name": "course-name-2",
+                    "course_type": "LECTURE",
+                    "teachers": "dr Marcin",
+                    "day_of_week": "MONDAY",
+                    "week_type": "EVERY",
+                    "classrooms": "LAB 3",
+                    "additional_info": null
+                }
+                """;
+
+        webClient.put().uri("/api/courses/" + course.getId())
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(payload)
+                .exchange()
+                .expectStatus().isOk();
+
+        List<Course> results = courseRepository.findAll();
+
+        assertThat(results).hasSize(1);
+
+        Course resultCourse = results.get(0);
+
+        assertThat(resultCourse.getScheduleId()).isEqualTo(UUID.fromString("11111111-1111-1111-1111-111111111111"));
+        assertThat(resultCourse.getName()).isEqualTo("course-name-2");
+        assertThat(resultCourse.getCourseType()).isEqualTo(CourseType.LECTURE);
+        assertThat(resultCourse.getTeachers()).isEqualTo("dr Marcin");
+        assertThat(resultCourse.getClassroom()).isEqualTo("LAB 3");
+        assertThat(resultCourse.getAdditionalInfo()).isNull();
+        assertThat(resultCourse.getDayOfWeek()).isEqualTo(DayOfWeek.MONDAY);
+        assertThat(resultCourse.getWeekType()).isEqualTo(WeekType.EVERY);
+        assertThat(resultCourse.getStartsAt()).isEqualTo(LocalTime.of(10, 30));
+        assertThat(resultCourse.getEndsAt()).isEqualTo(LocalTime.of(12, 15));
+    }
 }

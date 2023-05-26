@@ -7,10 +7,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/courses")
@@ -25,6 +24,17 @@ public class CourseController {
         return new ResponseEntity<>(
                 service.create(courseRequest),
                 HttpStatus.CREATED
+        );
+    }
+
+    @PutMapping("/{id}")
+    ResponseEntity<CourseResponse> update(
+            @PathVariable(name = "id") UUID id,
+            @Valid @RequestBody CourseRequest courseRequest
+    ) {
+        return new ResponseEntity<>(
+                service.update(id, courseRequest),
+                HttpStatus.OK
         );
     }
 }
