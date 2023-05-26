@@ -1,0 +1,43 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: course-service
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  datasource:
+    url: jdbc:postgresql://localhost:5434/course-service
+    username: root
+    password: root
+    driver-class-name: org.postgresql.Driver
+
+  rabbitmq:
+    password: password
+    username: user
+    host: localhost
+    port: 5672
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8000/realms/polsl-course-api
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+  instance:
+    hostname: localhost
+
+schedule-service:
+  base-url: http://schedule-service
