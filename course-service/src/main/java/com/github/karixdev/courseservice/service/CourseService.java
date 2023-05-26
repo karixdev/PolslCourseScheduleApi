@@ -98,4 +98,9 @@ public class CourseService {
                 .map(mapper::map)
                 .toList();
     }
+
+    @Transactional
+    public void handleScheduleDelete(UUID scheduleId) {
+        repository.deleteAll(repository.findByScheduleId(scheduleId));
+    }
 }

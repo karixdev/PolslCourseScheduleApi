@@ -314,4 +314,19 @@ class CourseServiceTest {
         verify(courseComparator, times(2)).compare(any(), any());
         verify(courseMapper, times(3)).map(any());
     }
+
+    @Test
+    void GivenScheduleId_WhenHandleScheduleDelete_ThenDeletesAllCourseWithProvidedScheduleId() {
+        // Given
+        UUID scheduleId = exampleCourse.getScheduleId();
+
+        when(repository.findByScheduleId(eq(scheduleId)))
+                .thenReturn(List.of(exampleCourse));
+
+        // When
+        underTest.handleScheduleDelete(scheduleId);
+
+        // Then
+        verify(repository).deleteAll(eq(List.of(exampleCourse)));
+    }
 }
