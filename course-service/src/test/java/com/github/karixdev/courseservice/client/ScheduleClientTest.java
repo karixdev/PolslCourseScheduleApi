@@ -2,7 +2,8 @@ package com.github.karixdev.courseservice.client;
 
 import com.github.karixdev.courseservice.ContainersEnvironment;
 import com.github.karixdev.courseservice.dto.ScheduleResponse;
-import com.github.karixdev.courseservice.exception.ScheduleServiceException;
+import com.github.karixdev.courseservice.exception.ScheduleServiceClientException;
+import com.github.karixdev.courseservice.exception.ScheduleServiceServerException;
 import com.github.karixdev.courseservice.testconfig.WebClientTestConfig;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import org.junit.jupiter.api.Test;
@@ -13,6 +14,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
@@ -35,7 +37,7 @@ public class ScheduleClientTest extends ContainersEnvironment {
     }
 
     @Test
-    void shouldThrowScheduleClientExceptionWhenReceivedErrorStatusCode() {
+    void shouldThrowScheduleServiceServerExceptionWhenReceivedErrorStatusCode() {
         UUID id = UUID.randomUUID();
 
         stubFor(
@@ -44,7 +46,20 @@ public class ScheduleClientTest extends ContainersEnvironment {
         );
 
         assertThatThrownBy(() -> underTest.findById(id))
-                .isInstanceOf(ScheduleServiceException.class);
+                .isInstanceOf(ScheduleServiceServerException.class);
+    }
+
+    @Test
+    void shouldThrowScheduleServiceClientExceptionWhenReceivedErrorStatusCode() {
+        UUID id = UUID.randomUUID();
+
+        stubFor(
+                get(urlPathEqualTo("/api/schedules/%s".formatted(id)))
+                        .willReturn(aResponse().withStatus(404))
+        );
+
+        assertThatThrownBy(() -> underTest.findById(id))
+                .isInstanceOf(ScheduleServiceClientException.class);
     }
 
     @Test
@@ -67,10 +82,9 @@ public class ScheduleClientTest extends ContainersEnvironment {
                         )
         );
 
-        ResponseEntity<ScheduleResponse> result = underTest.findById(id);
+        Optional<ScheduleResponse> result = underTest.findById(id);
 
-        assertThat(result.getStatusCode().value()).isEqualTo(200);
-        assertThat(result.getBody()).isNotNull();
-        assertThat(result.getBody().id()).isEqualTo(id);
+        assertThat(result).isPresent();
+        assertThat(result.get().id()).isEqualTo(id);
     }
 }
