@@ -18,31 +18,31 @@ import java.time.LocalTime;
 @NoArgsConstructor
 @SuperBuilder
 public class BaseCourseDTO {
-        @JsonProperty("starts_at")
+        @JsonProperty("startsAt")
         @NotNull
         private LocalTime startsAt;
-        @JsonProperty("ends_at")
+        @JsonProperty("endsAt")
         @NotNull
         private LocalTime endsAt;
         @JsonProperty("name")
         @NotNull
         private String name;
-        @JsonProperty("course_type")
+        @JsonProperty("courseType")
         @NotNull
         private CourseType courseType;
         @JsonProperty("teachers")
         @Nullable
         private String teachers;
-        @JsonProperty("day_of_week")
+        @JsonProperty("dayOfWeek")
         @NotNull
         private DayOfWeek dayOfWeek;
-        @JsonProperty("week_type")
+        @JsonProperty("weekType")
         @NotNull
         private WeekType weekType;
         @JsonProperty("classrooms")
         @Nullable
         private String classrooms;
-        @JsonProperty("additional_info")
+        @JsonProperty("additionalInfo")
         @Nullable
         private String additionalInfo;
 }

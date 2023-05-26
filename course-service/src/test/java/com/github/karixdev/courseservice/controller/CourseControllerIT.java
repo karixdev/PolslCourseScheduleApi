@@ -59,16 +59,16 @@ public class CourseControllerIT extends ContainersEnvironment {
 
         String payload = """
                 {
-                    "schedule_id": "11111111-1111-1111-1111-111111111111",
-                    "starts_at": "08:30",
-                    "ends_at": "10:15",
+                    "scheduleId": "11111111-1111-1111-1111-111111111111",
+                    "startsAt": "08:30",
+                    "endsAt": "10:15",
                     "name": "course-name",
-                    "course_type": "LAB",
+                    "courseType": "LAB",
                     "teachers": "dr Adam",
-                    "day_of_week": "FRIDAY",
-                    "week_type": "EVEN",
+                    "dayOfWeek": "FRIDAY",
+                    "weekType": "EVEN",
                     "classrooms": "LAB 1",
-                    "additional_info": "Only on 3.08"
+                    "additionalInfo": "Only on 3.08"
                 }
                 """;
 
@@ -104,16 +104,16 @@ public class CourseControllerIT extends ContainersEnvironment {
 
         String payload = """
                 {
-                    "schedule_id": "11111111-1111-1111-1111-111111111111",
-                    "starts_at": "08:30",
-                    "ends_at": "10:15",
+                    "scheduleId": "11111111-1111-1111-1111-111111111111",
+                    "startsAt": "08:30",
+                    "endsAt": "10:15",
                     "name": "course-name",
-                    "course_type": "LAB",
+                    "courseType": "LAB",
                     "teachers": "dr Adam",
-                    "day_of_week": "FRIDAY",
-                    "week_type": "EVEN",
+                    "dayOfWeek": "FRIDAY",
+                    "weekType": "EVEN",
                     "classrooms": "LAB 1",
-                    "additional_info": "Only on 3.08"
+                    "additionalInfo": "Only on 3.08"
                 }
                 """;
 
@@ -148,16 +148,16 @@ public class CourseControllerIT extends ContainersEnvironment {
 
         String payload = """
                 {
-                    "schedule_id": "11111111-1111-1111-1111-111111111111",
-                    "starts_at": "08:30",
-                    "ends_at": "10:15",
+                    "scheduleId": "11111111-1111-1111-1111-111111111111",
+                    "startsAt": "08:30",
+                    "endsAt": "10:15",
                     "name": "course-name",
-                    "course_type": "LAB",
+                    "courseType": "LAB",
                     "teachers": "dr Adam",
-                    "day_of_week": "FRIDAY",
-                    "week_type": "EVEN",
+                    "dayOfWeek": "FRIDAY",
+                    "weekType": "EVEN",
                     "classrooms": "LAB 1",
-                    "additional_info": "Only on 3.08"
+                    "additionalInfo": "Only on 3.08"
                 }
                 """;
 
@@ -192,16 +192,16 @@ public class CourseControllerIT extends ContainersEnvironment {
 
         String payload = """
                 {
-                    "schedule_id": "11111111-1111-1111-1111-111111111111",
-                    "starts_at": "08:30",
-                    "ends_at": "10:15",
+                    "scheduleId": "11111111-1111-1111-1111-111111111111",
+                    "startsAt": "08:30",
+                    "endsAt": "10:15",
                     "name": "course-name",
-                    "course_type": "LAB",
+                    "courseType": "LAB",
                     "teachers": "dr Adam",
-                    "day_of_week": "FRIDAY",
-                    "week_type": "EVEN",
+                    "dayOfWeek": "FRIDAY",
+                    "weekType": "EVEN",
                     "classrooms": "LAB 1",
-                    "additional_info": "Only on 3.08"
+                    "additionalInfo": "Only on 3.08"
                 }
                 """;
 
@@ -250,16 +250,16 @@ public class CourseControllerIT extends ContainersEnvironment {
 
         String payload = """
                 {
-                    "schedule_id": "11111111-1111-1111-1111-111111111111",
-                    "starts_at": "10:30",
-                    "ends_at": "12:15",
+                    "scheduleId": "11111111-1111-1111-1111-111111111111",
+                    "startsAt": "10:30",
+                    "endsAt": "12:15",
                     "name": "course-name-2",
-                    "course_type": "LECTURE",
+                    "courseType": "LECTURE",
                     "teachers": "dr Marcin",
-                    "day_of_week": "MONDAY",
-                    "week_type": "EVERY",
+                    "dayOfWeek": "MONDAY",
+                    "weekType": "EVERY",
                     "classrooms": "LAB 3",
-                    "additional_info": null
+                    "additionalInfo": null
                 }
                 """;
 

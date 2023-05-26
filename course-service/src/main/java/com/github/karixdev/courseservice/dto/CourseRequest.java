@@ -16,7 +16,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CourseRequest extends BaseCourseDTO {
-    @JsonProperty("schedule_id")
+    @JsonProperty("scheduleId")
     @NotNull
     private UUID scheduleId;
 }

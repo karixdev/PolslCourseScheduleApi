@@ -17,6 +17,6 @@ import java.util.UUID;
 public class CourseResponse extends BaseCourseDTO {
     @JsonProperty("id")
     private UUID id;
-    @JsonProperty("schedule_id")
+    @JsonProperty("scheduleId")
     private UUID scheduleId;
 }
