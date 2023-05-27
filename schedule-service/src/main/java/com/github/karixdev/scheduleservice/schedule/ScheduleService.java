@@ -1,8 +1,5 @@
 package com.github.karixdev.scheduleservice.schedule;
 
-import com.github.karixdev.scheduleservice.course.CourseComparator;
-import com.github.karixdev.scheduleservice.course.CourseMapper;
-import com.github.karixdev.scheduleservice.course.dto.CourseResponse;
 import com.github.karixdev.scheduleservice.schedule.dto.ScheduleRequest;
 import com.github.karixdev.scheduleservice.schedule.dto.ScheduleResponse;
 import com.github.karixdev.scheduleservice.schedule.exception.ScheduleNameUnavailableException;
@@ -11,16 +8,16 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class ScheduleService {
     private final ScheduleRepository repository;
     private final ScheduleProducer producer;
-    private final CourseComparator courseComparator;
-    private final CourseMapper courseMapper;
-
     @Transactional
     public ScheduleResponse create(ScheduleRequest scheduleRequest) {
         if (repository.findByName(scheduleRequest.name()).isPresent()) {
@@ -78,13 +75,7 @@ public class ScheduleService {
     }
 
     public Schedule findByIdOrElseThrow(UUID id, boolean eagerLoad) {
-        Optional<Schedule> optionalSchedule;
-
-        if (eagerLoad) {
-            optionalSchedule = repository.findByIdWithCourses(id);
-        } else {
-            optionalSchedule = repository.findById(id);
-        }
+        Optional<Schedule> optionalSchedule = repository.findById(id);
 
         return optionalSchedule.orElseThrow(() -> {
             throw new ResourceNotFoundException(
@@ -140,14 +131,5 @@ public class ScheduleService {
     public void requestScheduleCoursesUpdateForAll() {
         repository.findAll()
                 .forEach(producer::sendScheduleUpdateRequest);
-    }
-
-    public List<CourseResponse> findScheduleCourses(UUID id) {
-        Schedule schedule = findByIdOrElseThrow(id, true);
-
-        return schedule.getCourses().stream()
-                .sorted(courseComparator)
-                .map(courseMapper::map)
-                .toList();
     }
 }

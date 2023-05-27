@@ -1,6 +1,5 @@
 package com.github.karixdev.scheduleservice.schedule;
 
-import com.github.karixdev.scheduleservice.course.*;
 import com.github.karixdev.scheduleservice.schedule.dto.ScheduleRequest;
 import com.github.karixdev.scheduleservice.schedule.dto.ScheduleResponse;
 import com.github.karixdev.scheduleservice.schedule.exception.ScheduleNameUnavailableException;
@@ -12,8 +11,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.DayOfWeek;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -35,12 +32,6 @@ public class ScheduleServiceTest {
 
     @Mock
     ScheduleProducer producer;
-
-    @Mock
-    CourseComparator courseComparator;
-
-    @Mock
-    CourseMapper courseMapper;
 
     Schedule schedule;
 
@@ -334,65 +325,6 @@ public class ScheduleServiceTest {
 
         // Then
         verify(producer).sendScheduleUpdateRequest(schedule);
-    }
-
-    @Test
-    void GivenNotExistingScheduleId_WhenFindScheduleCourses_ThenThrowsResourceNotFoundExceptionWithProperMessage() {
-        // Given
-        UUID id = UUID.randomUUID();
-
-        when(repository.findByIdWithCourses(eq(id)))
-                .thenReturn(Optional.empty());
-
-        // When & Then
-        assertThatThrownBy(() -> underTest.findScheduleCourses(id))
-                .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessage("Schedule with id %s not found".formatted(id));
-    }
-
-    @Test
-    void GivenExistingScheduleId_WhenFindScheduleCourses_ThenComparesCoursesAndMapsThemIntoResponse() {
-        // Given
-        UUID id = UUID.randomUUID();
-
-        Course course1 = Course.builder()
-                .name("Calculus I")
-                .courseType(CourseType.PRACTICAL)
-                .dayOfWeek(DayOfWeek.FRIDAY)
-                .weekType(WeekType.ODD)
-                .startsAt(LocalTime.of(8, 30))
-                .endsAt(LocalTime.of(10, 15))
-                .build();
-
-        Course course2 = Course.builder()
-                .name("Physics")
-                .courseType(CourseType.LAB)
-                .dayOfWeek(DayOfWeek.MONDAY)
-                .weekType(WeekType.EVEN)
-                .startsAt(LocalTime.of(10, 30))
-                .endsAt(LocalTime.of(12, 15))
-                .build();
-
-        Course course3 = Course.builder()
-                .name("C++")
-                .courseType(CourseType.LECTURE)
-                .dayOfWeek(DayOfWeek.WEDNESDAY)
-                .weekType(WeekType.EVERY)
-                .startsAt(LocalTime.of(14, 30))
-                .endsAt(LocalTime.of(16, 15))
-                .build();
-
-        schedule.setCourses(Set.of(course1, course2, course3));
-
-        when(repository.findByIdWithCourses(eq(id)))
-                .thenReturn(Optional.of(schedule));
-
-        // When
-        underTest.findScheduleCourses(id);
-
-        // Then
-        verify(courseComparator, times(2)).compare(any(), any());
-        verify(courseMapper, times(3)).map(any());
     }
 
     @Test

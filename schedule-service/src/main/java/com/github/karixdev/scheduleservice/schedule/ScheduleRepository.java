@@ -24,12 +24,4 @@ public interface ScheduleRepository extends JpaRepository<Schedule, UUID> {
             ORDER BY schedule.semester, schedule.groupNumber ASC
             """)
     List<Schedule> findAllOrderBySemesterAndGroupNumberAsc();
-
-    @Query("""
-            SELECT schedule
-            FROM Schedule schedule
-            LEFT JOIN FETCH schedule.courses
-            WHERE schedule.id = :id
-            """)
-    Optional<Schedule> findByIdWithCourses(@Param("id") UUID id);
 }
