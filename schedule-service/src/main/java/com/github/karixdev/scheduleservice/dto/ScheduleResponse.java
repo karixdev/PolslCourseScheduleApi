@@ -11,6 +11,6 @@ public record ScheduleResponse(
         Integer semester,
         @JsonProperty("name")
         String name,
-        @JsonProperty("group_number")
+        @JsonProperty("groupNumber")
         Integer groupNumber
 ) {}

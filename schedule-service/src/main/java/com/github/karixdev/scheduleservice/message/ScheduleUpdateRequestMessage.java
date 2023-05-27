@@ -9,7 +9,7 @@ public record ScheduleUpdateRequestMessage(
         UUID id,
         @JsonProperty("type")
         Integer type,
-        @JsonProperty("plan_polsl_id")
+        @JsonProperty("planPolslId")
         Integer planPolslId,
         @JsonProperty("wd")
         Integer wd

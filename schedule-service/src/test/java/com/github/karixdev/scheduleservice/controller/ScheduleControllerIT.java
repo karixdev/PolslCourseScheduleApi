@@ -56,10 +56,10 @@ public class ScheduleControllerIT extends ContainersEnvironment {
         String payload = """
                 {
                     "type": 1,
-                    "plan_polsl_id": 1999,
+                    "planPolslId": 1999,
                     "semester": 2,
                     "name": "schedule-name",
-                    "group_number": 1,
+                    "groupNumber": 1,
                     "wd": 0
                 }
                 """;
@@ -90,10 +90,10 @@ public class ScheduleControllerIT extends ContainersEnvironment {
         String payload = """
                 {
                     "type": 1,
-                    "plan_polsl_id": 1999,
+                    "planPolslId": 1999,
                     "semester": 2,
                     "name": "schedule-name",
-                    "group_number": 1,
+                    "groupNumber": 1,
                     "wd": 0
                 }
                 """;
@@ -116,10 +116,10 @@ public class ScheduleControllerIT extends ContainersEnvironment {
         String payload = """
                 {
                     "type": 1,
-                    "plan_polsl_id": 1999,
+                    "planPolslId": 1999,
                     "semester": 2,
                     "name": "available-name",
-                    "group_number": 1,
+                    "groupNumber": 1,
                     "wd": 0
                 }
                 """;
@@ -134,7 +134,7 @@ public class ScheduleControllerIT extends ContainersEnvironment {
                 .jsonPath("$.id").isNotEmpty()
                 .jsonPath("$.semester").isEqualTo(2)
                 .jsonPath("$.name").isEqualTo("available-name")
-                .jsonPath("$.group_number").isEqualTo(1);
+                .jsonPath("$.groupNumber").isEqualTo(1);
 
         List<Schedule> schedules = scheduleRepository.findAll();
 
@@ -202,11 +202,11 @@ public class ScheduleControllerIT extends ContainersEnvironment {
                 .expectBody()
                 .jsonPath("$.*").isArray()
                 .jsonPath("$[0].semester").isEqualTo(1)
-                .jsonPath("$[0].group_number").isEqualTo(1)
+                .jsonPath("$[0].groupNumber").isEqualTo(1)
                 .jsonPath("$[1].semester").isEqualTo(1)
-                .jsonPath("$[1].group_number").isEqualTo(2)
+                .jsonPath("$[1].groupNumber").isEqualTo(2)
                 .jsonPath("$[2].semester").isEqualTo(2)
-                .jsonPath("$[2].group_number").isEqualTo(1);
+                .jsonPath("$[2].groupNumber").isEqualTo(1);
     }
 
     @Test
@@ -299,7 +299,7 @@ public class ScheduleControllerIT extends ContainersEnvironment {
                 .jsonPath("$.id").isEqualTo(schedule.getId().toString())
                 .jsonPath("$.semester").isEqualTo(1)
                 .jsonPath("$.name").isEqualTo("schedule1")
-                .jsonPath("$.group_number").isEqualTo(2);
+                .jsonPath("$.groupNumber").isEqualTo(2);
     }
 
     @Test
@@ -310,10 +310,10 @@ public class ScheduleControllerIT extends ContainersEnvironment {
         String payload = """
                 {
                     "type": 1,
-                    "plan_polsl_id": 1999,
+                    "planPolslId": 1999,
                     "semester": 2,
                     "name": "schedule-name",
-                    "group_number": 1,
+                    "groupNumber": 1,
                     "wd": 0
                 }
                 """;
@@ -334,10 +334,10 @@ public class ScheduleControllerIT extends ContainersEnvironment {
         String payload = """
                 {
                     "type": 1,
-                    "plan_polsl_id": 1999,
+                    "planPolslId": 1999,
                     "semester": 2,
                     "name": "schedule-name",
-                    "group_number": 1,
+                    "groupNumber": 1,
                     "wd": 0
                 }
                 """;
@@ -375,10 +375,10 @@ public class ScheduleControllerIT extends ContainersEnvironment {
         String payload = """
                 {
                     "type": 1,
-                    "plan_polsl_id": 1999,
+                    "planPolslId": 1999,
                     "semester": 2,
                     "name": "schedule2",
-                    "group_number": 1
+                    "groupNumber": 1
                 }
                 """;
 
@@ -415,10 +415,10 @@ public class ScheduleControllerIT extends ContainersEnvironment {
         String payload = """
                 {
                     "type": 2,
-                    "plan_polsl_id": 1999,
+                    "planPolslId": 1999,
                     "semester": 5,
                     "name": "schedule3",
-                    "group_number": 7,
+                    "groupNumber": 7,
                     "wd": 0
                 }
                 """;
@@ -433,7 +433,7 @@ public class ScheduleControllerIT extends ContainersEnvironment {
                 .jsonPath("$.id").isEqualTo(schedule.getId().toString())
                 .jsonPath("$.semester").isEqualTo(5)
                 .jsonPath("$.name").isEqualTo("schedule3")
-                .jsonPath("$.group_number").isEqualTo(7);
+                .jsonPath("$.groupNumber").isEqualTo(7);
 
         Optional<Schedule> optionalSchedule =
                 scheduleRepository.findById(schedule.getId());

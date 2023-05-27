@@ -11,7 +11,7 @@ public record ScheduleRequest(
         @NotNull
         @PositiveOrZero
         Integer type,
-        @JsonProperty("plan_polsl_id")
+        @JsonProperty("planPolslId")
         @NotNull
         @Positive
         Integer planPolslId,
@@ -22,11 +22,10 @@ public record ScheduleRequest(
         @JsonProperty("name")
         @NotBlank
         String name,
-        @JsonProperty("group_number")
+        @JsonProperty("groupNumber")
         @NotNull
         @Positive
         Integer groupNumber,
-
         @JsonProperty("wd")
         @NotNull
         @PositiveOrZero

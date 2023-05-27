@@ -2,7 +2,6 @@ package com.github.karixdev.scheduleservice.exception.handler;
 
 import com.github.karixdev.scheduleservice.dto.ValidationErrorResponse;
 import com.github.karixdev.scheduleservice.exception.ValidationException;
-import com.github.karixdev.scheduleservice.util.NameCaseConverter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -25,7 +24,7 @@ public class ValidationExceptionHandler {
                 .stream()
                 .filter(error -> error.getDefaultMessage() != null)
                 .collect(Collectors.toMap(
-                        error -> NameCaseConverter.camelToSnake(error.getField()),
+                        FieldError::getField,
                         FieldError::getDefaultMessage
                 ));
 

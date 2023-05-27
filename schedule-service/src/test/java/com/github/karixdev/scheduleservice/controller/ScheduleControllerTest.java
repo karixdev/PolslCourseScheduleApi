@@ -69,10 +69,10 @@ public class ScheduleControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpectAll(
                         jsonPath("$.constraints.type").isNotEmpty(),
-                        jsonPath("$.constraints.plan_polsl_id").isNotEmpty(),
+                        jsonPath("$.constraints.planPolslId").isNotEmpty(),
                         jsonPath("$.constraints.semester").isNotEmpty(),
                         jsonPath("$.constraints.name").isNotEmpty(),
-                        jsonPath("$.constraints.group_number").isNotEmpty(),
+                        jsonPath("$.constraints.groupNumber").isNotEmpty(),
                         jsonPath("$.message").value("Validation Failed")
                 );
     }
@@ -129,10 +129,10 @@ public class ScheduleControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpectAll(
                         jsonPath("$.constraints.type").isNotEmpty(),
-                        jsonPath("$.constraints.plan_polsl_id").isNotEmpty(),
+                        jsonPath("$.constraints.planPolslId").isNotEmpty(),
                         jsonPath("$.constraints.semester").isNotEmpty(),
                         jsonPath("$.constraints.name").isNotEmpty(),
-                        jsonPath("$.constraints.group_number").isNotEmpty(),
+                        jsonPath("$.constraints.groupNumber").isNotEmpty(),
                         jsonPath("$.message").value("Validation Failed")
                 );
     }
