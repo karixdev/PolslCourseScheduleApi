@@ -10,6 +10,7 @@ import com.github.karixdev.courseservice.entity.WeekType;
 import com.github.karixdev.courseservice.exception.NotExistingScheduleException;
 import com.github.karixdev.courseservice.exception.ResourceNotFoundException;
 import com.github.karixdev.courseservice.mapper.CourseMapper;
+import com.github.karixdev.courseservice.producer.CourseEventProducer;
 import com.github.karixdev.courseservice.repository.CourseRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,6 +46,9 @@ class CourseServiceTest {
 
     @Mock
     CourseComparator courseComparator;
+
+    @Mock
+    CourseEventProducer producer;
 
     Course exampleCourse;
     CourseRequest exampleCourseRequest;
@@ -94,7 +98,7 @@ class CourseServiceTest {
     }
 
     @Test
-    void GivenCourseRequest_WhenCreate_ThenRetrievesScheduleSavesCourseAndMapsEntityToResponse() {
+    void GivenCourseRequest_WhenCreate_ThenRetrievesScheduleSavesCourseAndProducesCoursesMessageAndMapsEntityToResponse() {
         // Given
         CourseRequest courseRequest = exampleCourseRequest;
 
@@ -110,6 +114,8 @@ class CourseServiceTest {
         verify(scheduleClient).findById(eq(courseRequest.getScheduleId()));
         verify(repository).save(eq(course));
         verify(courseMapper).map(eq(course));
+        verify(producer).produceCoursesUpdate(eq(course.getScheduleId()));
+
     }
 
     @Test
@@ -151,7 +157,7 @@ class CourseServiceTest {
     }
 
     @Test
-    void GivenExistingCourseWithNewScheduleId_WhenUpdate_ThenVerifiesScheduleExistenceUpdatesCourseAndMapsItIntoResponse() {
+    void GivenExistingCourseWithNewScheduleId_WhenUpdate_ThenVerifiesScheduleExistenceUpdatesCourseAndProducesCoursesMessageAndMapsItIntoResponse() {
         // Given
         Course course = exampleCourse;
         UUID id = course.getId();
@@ -195,6 +201,8 @@ class CourseServiceTest {
         // Then
         verify(repository).save(eq(expectedCourse));
         verify(courseMapper).map(eq(expectedCourse));
+        verify(producer).produceCoursesUpdate(eq(expectedCourse.getScheduleId()));
+
     }
 
     @Test
@@ -256,7 +264,7 @@ class CourseServiceTest {
     }
 
     @Test
-    void GivenExistingCourseId_WhenDelete_ThenShouldDeleteCourse() {
+    void GivenExistingCourseId_WhenDelete_ThenShouldDeleteCourseAndProducesCoursesMessage() {
         // Given
         UUID id = exampleCourse.getId();
 
@@ -268,6 +276,7 @@ class CourseServiceTest {
 
         // Then
         verify(repository).delete(exampleCourse);
+        verify(producer).produceCoursesUpdate(eq(exampleCourse.getScheduleId()));
     }
 
     @Test
@@ -332,7 +341,7 @@ class CourseServiceTest {
     }
 
     @Test
-    void GivenScheduleAndSetOfRetrievedCourses_WhenUpdateScheduleCourses_ThenSavesAndDeletesProperCourses() {
+    void GivenScheduleAndSetOfRetrievedCourses_WhenUpdateScheduleCourses_ThenSavesAndDeletesProperCoursesAndProducesCoursesMessageWhereThereIsChangeInCourses() {
         // Given
         UUID scheduleId = UUID.randomUUID();
 
@@ -384,5 +393,35 @@ class CourseServiceTest {
         // Then
         verify(repository).deleteAll(Set.of(course3));
         verify(repository).saveAll(Set.of(course1));
+        verify(producer).produceCoursesUpdate(eq(scheduleId));
+    }
+
+    @Test
+    void GivenScheduleAndSetOfRetrievedCourses_WhenUpdateScheduleCourses_ThenSavesAndDeletesProperCoursesAndDoesNotProduceCoursesMessageWhereThereIsNoChangeInCourses() {
+        // Given
+        UUID scheduleId = UUID.randomUUID();
+
+        Course course1 = Course.builder()
+                .name("Calculus I")
+                .scheduleId(scheduleId)
+                .courseType(CourseType.PRACTICAL)
+                .teachers("dr. Adam")
+                .classroom("314MS")
+                .dayOfWeek(DayOfWeek.FRIDAY)
+                .weekType(WeekType.ODD)
+                .startsAt(LocalTime.of(8, 30))
+                .endsAt(LocalTime.of(10, 15))
+                .build();
+
+        Set<Course> retrievedCourses = Set.of(course1);
+
+        when(repository.findByScheduleId(eq(scheduleId)))
+                .thenReturn(List.of(course1));
+
+        // When
+        underTest.handleMappedCourses(scheduleId, retrievedCourses);
+
+        // Then
+        verify(producer, never()).produceCoursesUpdate(eq(scheduleId));
     }
 }

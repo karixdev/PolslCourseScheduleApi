@@ -2,14 +2,13 @@ package com.github.karixdev.courseservice.service;
 
 import com.github.karixdev.courseservice.client.ScheduleClient;
 import com.github.karixdev.courseservice.comparator.CourseComparator;
-import com.github.karixdev.courseservice.dto.BaseCourseDTO;
 import com.github.karixdev.courseservice.dto.CourseRequest;
 import com.github.karixdev.courseservice.dto.CourseResponse;
-import com.github.karixdev.courseservice.dto.ScheduleResponse;
 import com.github.karixdev.courseservice.entity.Course;
 import com.github.karixdev.courseservice.exception.NotExistingScheduleException;
 import com.github.karixdev.courseservice.exception.ResourceNotFoundException;
 import com.github.karixdev.courseservice.mapper.CourseMapper;
+import com.github.karixdev.courseservice.producer.CourseEventProducer;
 import com.github.karixdev.courseservice.repository.CourseRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +27,7 @@ public class CourseService {
     private final CourseMapper mapper;
     private final ScheduleClient scheduleClient;
     private final CourseComparator courseComparator;
+    private final CourseEventProducer producer;
 
     @Transactional
     public CourseResponse create(CourseRequest request) {
@@ -50,6 +50,8 @@ public class CourseService {
                 .build();
 
         repository.save(course);
+
+        producer.produceCoursesUpdate(scheduleId);
 
         return mapper.map(course);
     }
@@ -88,12 +90,18 @@ public class CourseService {
 
         repository.save(course);
 
+        producer.produceCoursesUpdate(newScheduleId);
+
         return mapper.map(course);
     }
 
     @Transactional
     public void delete(UUID id) {
-        repository.delete(findByIdOrElseThrow(id));
+        Course course = findByIdOrElseThrow(id);
+
+        producer.produceCoursesUpdate(course.getScheduleId());
+
+        repository.delete(course);
     }
 
     public List<CourseResponse> findCoursesBySchedule(UUID scheduleId) {
@@ -114,7 +122,7 @@ public class CourseService {
 
         Set<Course> coursesToSave = retrievedCourses.stream()
                 .filter(retrievedCourse -> currentCourses.stream()
-                        .noneMatch(currentCourse -> hasSameParameters(
+                        .noneMatch(currentCourse -> haveSameParameters(
                                 retrievedCourse,
                                 currentCourse)
                         ))
@@ -122,7 +130,7 @@ public class CourseService {
 
         Set<Course> coursesToDelete = currentCourses.stream()
                 .filter(currentCourse -> retrievedCourses.stream()
-                        .noneMatch(retrievedCourse -> hasSameParameters(
+                        .noneMatch(retrievedCourse -> haveSameParameters(
                                 retrievedCourse,
                                 currentCourse)
                         ))
@@ -130,9 +138,13 @@ public class CourseService {
 
         repository.deleteAll(coursesToDelete);
         repository.saveAll(coursesToSave);
+
+        if (!coursesToDelete.isEmpty() || !coursesToSave.isEmpty()) {
+            producer.produceCoursesUpdate(scheduleId);
+        }
     }
 
-    private boolean hasSameParameters(Course course1, Course course2) {
+    private boolean haveSameParameters(Course course1, Course course2) {
         return Objects.equals(course1.getName(), course2.getName()) &&
                 course1.getCourseType() == course2.getCourseType() &&
                 Objects.equals(course1.getTeachers(), course2.getTeachers()) &&

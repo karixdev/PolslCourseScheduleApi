@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
 
 import static com.github.karixdev.courseservice.props.ScheduleMQProperties.*;
 import static com.github.karixdev.courseservice.props.MappedCoursesMQProperties.*;
+import static com.github.karixdev.courseservice.props.CourseEventMQProperties.*;
 
 @Configuration
 public class MQConfig {
@@ -67,5 +68,23 @@ public class MQConfig {
                 .bind(domainCourseQueue())
                 .to(domainCourseExchange())
                 .with(DOMAIN_COURSE_ROUTING_KEY);
+    }
+
+    @Bean
+    TopicExchange coursesUpdateExchange() {
+        return new TopicExchange(COURSES_UPDATE_EXCHANGE);
+    }
+
+    @Bean
+    Queue coursesUpdateQueue() {
+        return new Queue(COURSES_UPDATE_QUEUE);
+    }
+
+    @Bean
+    Binding coursesUpdateBinding() {
+        return BindingBuilder
+                .bind(coursesUpdateQueue())
+                .to(coursesUpdateExchange())
+                .with(COURSES_UPDATE_ROUTING_KEY);
     }
 }
