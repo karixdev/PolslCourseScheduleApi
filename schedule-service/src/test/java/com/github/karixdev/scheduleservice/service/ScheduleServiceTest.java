@@ -1,13 +1,13 @@
 package com.github.karixdev.scheduleservice.service;
 
-import com.github.karixdev.scheduleservice.entity.Schedule;
 import com.github.karixdev.scheduleservice.dto.ScheduleRequest;
 import com.github.karixdev.scheduleservice.dto.ScheduleResponse;
-import com.github.karixdev.scheduleservice.exception.ScheduleNameUnavailableException;
-import com.github.karixdev.scheduleservice.producer.ScheduleProducer;
-import com.github.karixdev.scheduleservice.repository.ScheduleRepository;
-import com.github.karixdev.scheduleservice.service.ScheduleService;
+import com.github.karixdev.scheduleservice.entity.Schedule;
 import com.github.karixdev.scheduleservice.exception.ResourceNotFoundException;
+import com.github.karixdev.scheduleservice.exception.ScheduleNameUnavailableException;
+import com.github.karixdev.scheduleservice.message.ScheduleEventType;
+import com.github.karixdev.scheduleservice.producer.ScheduleEventProducer;
+import com.github.karixdev.scheduleservice.repository.ScheduleRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,9 +22,9 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class ScheduleServiceTest {
@@ -35,7 +35,7 @@ public class ScheduleServiceTest {
     ScheduleRepository repository;
 
     @Mock
-    ScheduleProducer producer;
+    ScheduleEventProducer producer;
 
     Schedule schedule;
 
@@ -70,12 +70,10 @@ public class ScheduleServiceTest {
         assertThatThrownBy(() -> underTest.create(scheduleRequest))
                 .isInstanceOf(ScheduleNameUnavailableException.class)
                 .hasMessage("name schedule is unavailable");
-
-        verify(producer, never()).sendScheduleUpdateRequest(any());
     }
 
     @Test
-    void GivenValidScheduleRequest_WhenCreate_ThenSavesScheduleAndReturnsProperScheduleResponse() {
+    void GivenValidScheduleRequest_WhenCreate_ThenSavesScheduleAndProducesScheduleCreationEventAndReturnsProperScheduleResponse() {
         // Given
         ScheduleRequest scheduleRequest = new ScheduleRequest(
                 1,
@@ -122,7 +120,10 @@ public class ScheduleServiceTest {
         assertThat(result.id())
                 .isEqualTo(savedSchedule.getId());
 
-        verify(producer).sendScheduleUpdateRequest(eq(savedSchedule));
+        verify(producer).produceScheduleEventMessage(
+                eq(savedSchedule.getId()),
+                eq(ScheduleEventType.CREATE)
+        );
     }
 
     @Test
@@ -183,8 +184,6 @@ public class ScheduleServiceTest {
                         "Schedule with id %s not found",
                         id
                 ));
-
-        verify(producer, never()).sendScheduleUpdateRequest(any());
     }
 
     @Test
@@ -217,8 +216,6 @@ public class ScheduleServiceTest {
         assertThatThrownBy(() -> underTest.update(id, scheduleRequest))
                 .isInstanceOf(ScheduleNameUnavailableException.class)
                 .hasMessage("name schedule-name is unavailable");
-
-        verify(producer, never()).sendScheduleUpdateRequest(any());
     }
 
     @Test
@@ -264,7 +261,10 @@ public class ScheduleServiceTest {
         assertThat(result.groupNumber())
                 .isEqualTo(scheduleRequest.groupNumber());
 
-        verify(producer).sendScheduleUpdateRequest(eq(schedule));
+        verify(producer).produceScheduleEventMessage(
+                eq(schedule.getId()),
+                eq(ScheduleEventType.UPDATE)
+        );
     }
 
     @Test
@@ -285,7 +285,7 @@ public class ScheduleServiceTest {
     }
 
     @Test
-    void GivenExistingScheduleId_WhenDelete_ThenDeletesSchedule() {
+    void GivenExistingScheduleId_WhenDelete_ThenDeletesScheduleAndSendScheduleDeletionMessage() {
         // Given
         UUID id = schedule.getId();
 
@@ -297,6 +297,11 @@ public class ScheduleServiceTest {
 
         // Then
         verify(repository).delete(eq(schedule));
+
+        verify(producer).produceScheduleEventMessage(
+                eq(schedule.getId()),
+                eq(ScheduleEventType.DELETE)
+        );
     }
 
     @Test
@@ -328,7 +333,10 @@ public class ScheduleServiceTest {
         underTest.requestScheduleCoursesUpdate(id);
 
         // Then
-        verify(producer).sendScheduleUpdateRequest(schedule);
+        verify(producer).produceScheduleEventMessage(
+                eq(schedule.getId()),
+                eq(ScheduleEventType.UPDATE)
+        );
     }
 
     @Test

@@ -12,33 +12,46 @@ import static com.github.karixdev.scheduleservice.props.ScheduleMQProperties.*;
 @Configuration
 public class ScheduleMQConfig {
     @Bean
-    TopicExchange topic() {
-        return new TopicExchange(SCHEDULE_TOPIC);
+    TopicExchange scheduleEventsExchange() {
+        return new TopicExchange(SCHEDULE_EXCHANGE);
     }
 
     @Bean
-    Queue scheduleUpdateRequestQueue() {
-        return new Queue(SCHEDULE_UPDATE_REQUEST_QUEUE);
+    Queue scheduleCreateQueue() {
+        return new Queue(SCHEDULE_CREATE_QUEUE);
     }
 
     @Bean
-    Binding scheduleUpdateRequestBinding() {
+    Binding scheduleCreateBinding() {
         return BindingBuilder
-                .bind(scheduleUpdateRequestQueue())
-                .to(topic())
-                .with(SCHEDULE_UPDATE_REQUEST_ROUTING_KEY);
+                .bind(scheduleCreateQueue())
+                .to(scheduleEventsExchange())
+                .with(SCHEDULE_CREATE_ROUTING_KEY);
     }
 
     @Bean
-    Queue scheduleUpdateResponseQueue() {
-        return new Queue(SCHEDULE_UPDATE_RESPONSE_QUEUE);
+    Queue scheduleUpdateQueue() {
+        return new Queue(SCHEDULE_UPDATE_QUEUE);
     }
 
     @Bean
-    Binding scheduleUpdateResponseBinding() {
+    Binding scheduleUpdateBinding() {
         return BindingBuilder
-                .bind(scheduleUpdateResponseQueue())
-                .to(topic())
-                .with(SCHEDULE_UPDATE_RESPONSE_ROUTING_KEY);
+                .bind(scheduleUpdateQueue())
+                .to(scheduleEventsExchange())
+                .with(SCHEDULE_UPDATE_ROUTING_KEY);
+    }
+
+    @Bean
+    Queue scheduleDeleteQueue() {
+        return new Queue(SCHEDULE_DELETE_QUEUE);
+    }
+
+    @Bean
+    Binding scheduleDeleteBinding() {
+        return BindingBuilder
+                .bind(scheduleDeleteQueue())
+                .to(scheduleEventsExchange())
+                .with(SCHEDULE_DELETE_ROUTING_KEY);
     }
 }

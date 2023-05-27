@@ -1,12 +1,13 @@
 package com.github.karixdev.scheduleservice.service;
 
-import com.github.karixdev.scheduleservice.entity.Schedule;
-import com.github.karixdev.scheduleservice.producer.ScheduleProducer;
-import com.github.karixdev.scheduleservice.repository.ScheduleRepository;
 import com.github.karixdev.scheduleservice.dto.ScheduleRequest;
 import com.github.karixdev.scheduleservice.dto.ScheduleResponse;
-import com.github.karixdev.scheduleservice.exception.ScheduleNameUnavailableException;
+import com.github.karixdev.scheduleservice.entity.Schedule;
 import com.github.karixdev.scheduleservice.exception.ResourceNotFoundException;
+import com.github.karixdev.scheduleservice.exception.ScheduleNameUnavailableException;
+import com.github.karixdev.scheduleservice.message.ScheduleEventType;
+import com.github.karixdev.scheduleservice.producer.ScheduleEventProducer;
+import com.github.karixdev.scheduleservice.repository.ScheduleRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,7 +21,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ScheduleService {
     private final ScheduleRepository repository;
-    private final ScheduleProducer producer;
+    private final ScheduleEventProducer producer;
+
     @Transactional
     public ScheduleResponse create(ScheduleRequest scheduleRequest) {
         if (repository.findByName(scheduleRequest.name()).isPresent()) {
@@ -37,7 +39,10 @@ public class ScheduleService {
                 .wd(scheduleRequest.wd())
                 .build());
 
-        producer.sendScheduleUpdateRequest(schedule);
+        producer.produceScheduleEventMessage(
+                schedule.getId(),
+                ScheduleEventType.CREATE
+        );
 
         return new ScheduleResponse(
                 schedule.getId(),
@@ -109,7 +114,10 @@ public class ScheduleService {
 
         repository.save(schedule);
 
-        producer.sendScheduleUpdateRequest(schedule);
+        producer.produceScheduleEventMessage(
+                schedule.getId(),
+                ScheduleEventType.UPDATE
+        );
 
         return new ScheduleResponse(
                 schedule.getId(),
@@ -123,16 +131,28 @@ public class ScheduleService {
         Schedule schedule = findByIdOrElseThrow(id, false);
 
         repository.delete(schedule);
+
+        producer.produceScheduleEventMessage(
+                schedule.getId(),
+                ScheduleEventType.DELETE
+        );
     }
 
     public void requestScheduleCoursesUpdate(UUID id) {
         Schedule schedule = findByIdOrElseThrow(id, false);
 
-        producer.sendScheduleUpdateRequest(schedule);
+        producer.produceScheduleEventMessage(
+                schedule.getId(),
+                ScheduleEventType.UPDATE
+        );
+
     }
 
     public void requestScheduleCoursesUpdateForAll() {
-        repository.findAll()
-                .forEach(producer::sendScheduleUpdateRequest);
+        repository.findAll().forEach(schedule ->
+                producer.produceScheduleEventMessage(
+                        schedule.getId(),
+                        ScheduleEventType.UPDATE
+                ));
     }
 }

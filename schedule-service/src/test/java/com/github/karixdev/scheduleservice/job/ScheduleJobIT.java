@@ -17,8 +17,7 @@ import org.springframework.test.context.DynamicPropertySource;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import static com.github.karixdev.scheduleservice.props.ScheduleMQProperties.SCHEDULE_UPDATE_REQUEST_QUEUE;
-import static com.github.karixdev.scheduleservice.props.ScheduleMQProperties.SCHEDULE_UPDATE_RESPONSE_QUEUE;
+import static com.github.karixdev.scheduleservice.props.ScheduleMQProperties.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
@@ -46,8 +45,7 @@ public class ScheduleJobIT extends ContainersEnvironment {
 
     @BeforeEach
     void setUp() {
-        rabbitAdmin.purgeQueue(SCHEDULE_UPDATE_RESPONSE_QUEUE, true);
-        rabbitAdmin.purgeQueue(SCHEDULE_UPDATE_REQUEST_QUEUE, true);
+        rabbitAdmin.purgeQueue(SCHEDULE_UPDATE_QUEUE, true);
     }
 
     @AfterEach
@@ -87,7 +85,7 @@ public class ScheduleJobIT extends ContainersEnvironment {
         await().atMost(40, TimeUnit.SECONDS)
                 .untilAsserted(() -> {
                     int count = (int) rabbitAdmin
-                            .getQueueProperties(SCHEDULE_UPDATE_REQUEST_QUEUE)
+                            .getQueueProperties(SCHEDULE_UPDATE_QUEUE)
                             .get("QUEUE_MESSAGE_COUNT");
 
                     assertThat(count).isEqualTo(3);

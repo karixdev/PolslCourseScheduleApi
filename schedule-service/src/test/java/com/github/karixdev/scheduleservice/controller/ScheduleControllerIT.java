@@ -2,7 +2,7 @@ package com.github.karixdev.scheduleservice.controller;
 
 import com.github.karixdev.scheduleservice.ContainersEnvironment;
 import com.github.karixdev.scheduleservice.entity.Schedule;
-import com.github.karixdev.scheduleservice.message.ScheduleUpdateRequestMessage;
+import com.github.karixdev.scheduleservice.message.ScheduleEventMessage;
 import com.github.karixdev.scheduleservice.repository.ScheduleRepository;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
@@ -21,8 +21,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import static com.github.karixdev.scheduleservice.props.ScheduleMQProperties.SCHEDULE_UPDATE_REQUEST_QUEUE;
-import static com.github.karixdev.scheduleservice.props.ScheduleMQProperties.SCHEDULE_UPDATE_RESPONSE_QUEUE;
+import static com.github.karixdev.scheduleservice.props.ScheduleMQProperties.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
@@ -45,8 +44,9 @@ public class ScheduleControllerIT extends ContainersEnvironment {
     void tearDown() {
         scheduleRepository.deleteAll();
 
-        rabbitAdmin.purgeQueue(SCHEDULE_UPDATE_RESPONSE_QUEUE, true);
-        rabbitAdmin.purgeQueue(SCHEDULE_UPDATE_REQUEST_QUEUE, true);
+        rabbitAdmin.purgeQueue(SCHEDULE_CREATE_QUEUE, true);
+        rabbitAdmin.purgeQueue(SCHEDULE_UPDATE_QUEUE, true);
+        rabbitAdmin.purgeQueue(SCHEDULE_DELETE_QUEUE, true);
     }
 
     @Test
@@ -154,15 +154,10 @@ public class ScheduleControllerIT extends ContainersEnvironment {
         assertThat(schedule.getGroupNumber())
                 .isEqualTo(1);
 
-        var expectedMsg = new ScheduleUpdateRequestMessage(
-                schedule.getId(),
-                schedule.getType(),
-                schedule.getPlanPolslId(),
-                schedule.getWd()
-        );
+        ScheduleEventMessage expectedMsg = new ScheduleEventMessage(schedule.getId());
 
         await().atMost(30, TimeUnit.SECONDS)
-                .untilAsserted(() -> assertThat(getScheduleUpdateRequestMessage())
+                .untilAsserted(() -> assertThat(getMessage(SCHEDULE_CREATE_QUEUE))
                         .isEqualTo(expectedMsg)
                 );
     }
@@ -442,15 +437,10 @@ public class ScheduleControllerIT extends ContainersEnvironment {
 
         schedule = optionalSchedule.get();
 
-        var expectedMsg = new ScheduleUpdateRequestMessage(
-                schedule.getId(),
-                schedule.getType(),
-                schedule.getPlanPolslId(),
-                schedule.getWd()
-        );
+        ScheduleEventMessage expectedMsg = new ScheduleEventMessage(schedule.getId());
 
         await().atMost(30, TimeUnit.SECONDS)
-                .untilAsserted(() -> assertThat(getScheduleUpdateRequestMessage())
+                .untilAsserted(() -> assertThat(getMessage(SCHEDULE_UPDATE_QUEUE))
                         .isEqualTo(expectedMsg)
                 );
     }
@@ -510,6 +500,13 @@ public class ScheduleControllerIT extends ContainersEnvironment {
                 .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus().isNoContent();
+
+        ScheduleEventMessage expectedMsg = new ScheduleEventMessage(schedule.getId());
+
+        await().atMost(30, TimeUnit.SECONDS)
+                .untilAsserted(() -> assertThat(getMessage(SCHEDULE_DELETE_QUEUE))
+                        .isEqualTo(expectedMsg)
+                );
     }
 
     @Test
@@ -549,27 +546,22 @@ public class ScheduleControllerIT extends ContainersEnvironment {
                 .exchange()
                 .expectStatus().isNoContent();
 
-        var expectedMsg = new ScheduleUpdateRequestMessage(
-                schedule.getId(),
-                schedule.getType(),
-                schedule.getPlanPolslId(),
-                schedule.getWd()
-        );
+        ScheduleEventMessage expectedMsg = new ScheduleEventMessage(schedule.getId());
 
         await().atMost(30, TimeUnit.SECONDS)
-                .untilAsserted(() -> assertThat(getScheduleUpdateRequestMessage())
+                .untilAsserted(() -> assertThat(getMessage(SCHEDULE_UPDATE_QUEUE))
                         .isEqualTo(expectedMsg)
                 );
     }
 
-    private ScheduleUpdateRequestMessage getScheduleUpdateRequestMessage() {
-        var typeReference = new ParameterizedTypeReference<ScheduleUpdateRequestMessage>() {
+    private ScheduleEventMessage getMessage(String queue) {
+        var typeReference = new ParameterizedTypeReference<ScheduleEventMessage>() {
             @Override
             public @NotNull Type getType() {
                 return super.getType();
             }
         };
 
-        return rabbitTemplate.receiveAndConvert(SCHEDULE_UPDATE_REQUEST_QUEUE, typeReference);
+        return rabbitTemplate.receiveAndConvert(queue, typeReference);
     }
 }
