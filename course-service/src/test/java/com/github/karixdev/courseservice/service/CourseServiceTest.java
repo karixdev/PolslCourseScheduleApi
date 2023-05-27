@@ -22,6 +22,7 @@ import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -328,5 +329,60 @@ class CourseServiceTest {
 
         // Then
         verify(repository).deleteAll(eq(List.of(exampleCourse)));
+    }
+
+    @Test
+    void GivenScheduleAndSetOfRetrievedCourses_WhenUpdateScheduleCourses_ThenSavesAndDeletesProperCourses() {
+        // Given
+        UUID scheduleId = UUID.randomUUID();
+
+        Course course1 = Course.builder()
+                .name("Calculus I")
+                .scheduleId(scheduleId)
+                .courseType(CourseType.PRACTICAL)
+                .teachers("dr. Adam")
+                .classroom("314MS")
+                .dayOfWeek(DayOfWeek.FRIDAY)
+                .weekType(WeekType.ODD)
+                .startsAt(LocalTime.of(8, 30))
+                .endsAt(LocalTime.of(10, 15))
+                .build();
+
+        Course course2 = Course.builder()
+                .name("Physics")
+                .scheduleId(scheduleId)
+                .courseType(CourseType.LAB)
+                .teachers("dr. Max")
+                .classroom("408MS")
+                .dayOfWeek(DayOfWeek.MONDAY)
+                .weekType(WeekType.EVEN)
+                .startsAt(LocalTime.of(10, 30))
+                .endsAt(LocalTime.of(12, 15))
+                .build();
+
+        Course course3 = Course.builder()
+                .name("C++")
+                .scheduleId(scheduleId)
+                .courseType(CourseType.LECTURE)
+                .teachers("dr. Henryk")
+                .classroom("CEK Room C")
+                .additionalInfo("contact teacher")
+                .dayOfWeek(DayOfWeek.WEDNESDAY)
+                .weekType(WeekType.EVERY)
+                .startsAt(LocalTime.of(14, 30))
+                .endsAt(LocalTime.of(16, 15))
+                .build();
+
+        Set<Course> retrievedCourses = Set.of(course1, course2);
+
+        when(repository.findByScheduleId(eq(scheduleId)))
+                .thenReturn(List.of(course2, course3));
+
+        // When
+        underTest.handleMappedCourses(scheduleId, retrievedCourses);
+
+        // Then
+        verify(repository).deleteAll(Set.of(course3));
+        verify(repository).saveAll(Set.of(course1));
     }
 }

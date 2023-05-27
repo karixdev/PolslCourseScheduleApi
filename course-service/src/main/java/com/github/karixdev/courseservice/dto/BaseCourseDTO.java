@@ -1,6 +1,10 @@
 package com.github.karixdev.courseservice.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.github.karixdev.courseservice.dto.serialization.LocalTimeDeserializer;
+import com.github.karixdev.courseservice.dto.serialization.LocalTimeSerializer;
 import com.github.karixdev.courseservice.entity.CourseType;
 import com.github.karixdev.courseservice.entity.WeekType;
 import jakarta.annotation.Nullable;
@@ -19,9 +23,13 @@ import java.time.LocalTime;
 @SuperBuilder
 public class BaseCourseDTO {
         @JsonProperty("startsAt")
+        @JsonSerialize(using = LocalTimeSerializer.class)
+        @JsonDeserialize(using = LocalTimeDeserializer.class)
         @NotNull
         private LocalTime startsAt;
         @JsonProperty("endsAt")
+        @JsonSerialize(using = LocalTimeSerializer.class)
+        @JsonDeserialize(using = LocalTimeDeserializer.class)
         @NotNull
         private LocalTime endsAt;
         @JsonProperty("name")

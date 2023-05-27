@@ -2,6 +2,7 @@ package com.github.karixdev.courseservice.service;
 
 import com.github.karixdev.courseservice.client.ScheduleClient;
 import com.github.karixdev.courseservice.comparator.CourseComparator;
+import com.github.karixdev.courseservice.dto.BaseCourseDTO;
 import com.github.karixdev.courseservice.dto.CourseRequest;
 import com.github.karixdev.courseservice.dto.CourseResponse;
 import com.github.karixdev.courseservice.dto.ScheduleResponse;
@@ -15,7 +16,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -66,7 +70,7 @@ public class CourseService {
 
         UUID newScheduleId = request.getScheduleId();
         if (!course.getScheduleId().equals(request.getScheduleId())
-            && !doesScheduleExist(newScheduleId)
+                && !doesScheduleExist(newScheduleId)
         ) {
             throw new NotExistingScheduleException(newScheduleId);
         }
@@ -102,5 +106,41 @@ public class CourseService {
     @Transactional
     public void handleScheduleDelete(UUID scheduleId) {
         repository.deleteAll(repository.findByScheduleId(scheduleId));
+    }
+
+    @Transactional
+    public void handleMappedCourses(UUID scheduleId, Set<Course> retrievedCourses) {
+        List<Course> currentCourses = repository.findByScheduleId(scheduleId);
+
+        Set<Course> coursesToSave = retrievedCourses.stream()
+                .filter(retrievedCourse -> currentCourses.stream()
+                        .noneMatch(currentCourse -> hasSameParameters(
+                                retrievedCourse,
+                                currentCourse)
+                        ))
+                .collect(Collectors.toSet());
+
+        Set<Course> coursesToDelete = currentCourses.stream()
+                .filter(currentCourse -> retrievedCourses.stream()
+                        .noneMatch(retrievedCourse -> hasSameParameters(
+                                retrievedCourse,
+                                currentCourse)
+                        ))
+                .collect(Collectors.toSet());
+
+        repository.deleteAll(coursesToDelete);
+        repository.saveAll(coursesToSave);
+    }
+
+    private boolean hasSameParameters(Course course1, Course course2) {
+        return Objects.equals(course1.getName(), course2.getName()) &&
+                course1.getCourseType() == course2.getCourseType() &&
+                Objects.equals(course1.getTeachers(), course2.getTeachers()) &&
+                Objects.equals(course1.getClassroom(), course2.getClassroom()) &&
+                Objects.equals(course1.getAdditionalInfo(), course2.getAdditionalInfo()) &&
+                course1.getDayOfWeek() == course2.getDayOfWeek() &&
+                course1.getWeekType() == course2.getWeekType() &&
+                Objects.equals(course1.getStartsAt(), course2.getStartsAt()) &&
+                Objects.equals(course1.getEndsAt(), course2.getEndsAt());
     }
 }
