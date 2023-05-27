@@ -36,6 +36,8 @@ public class CourseService {
             throw new NotExistingScheduleException(scheduleId);
         }
 
+        System.out.println(1);
+
         Course course = Course.builder()
                 .startsAt(request.getStartsAt())
                 .endsAt(request.getEndsAt())
@@ -51,7 +53,13 @@ public class CourseService {
 
         repository.save(course);
 
+        System.out.println(2);
+
         producer.produceCoursesUpdate(scheduleId);
+
+        System.out.println(4);
+
+        System.out.println(course);
 
         return mapper.map(course);
     }
