@@ -26,7 +26,7 @@ import static org.awaitility.Awaitility.await;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
-class CourseMessageConsumerIT extends ContainersEnvironment {
+class DomainCourseConsumerIT extends ContainersEnvironment {
     @Autowired
     RabbitTemplate rabbitTemplate;
 

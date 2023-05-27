@@ -15,7 +15,7 @@ import static com.github.karixdev.courseservice.props.MappedCoursesMQProperties.
 
 @Component
 @RequiredArgsConstructor
-public class CourseMessageConsumer {
+public class DomainCourseConsumer {
     private final CourseMapper courseMapper;
     private final CourseService courseService;
 
