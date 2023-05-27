@@ -10,5 +10,5 @@ public class ScheduleMQProperties {
     public static final String SCHEDULE_UPDATE_ROUTING_KEY = "schedule.update";
 
     public static final String SCHEDULE_DELETE_QUEUE = "schedule.delete";
-    public static final String SCHEDULE_DELETE_ROUTING_KEY = "schedule.update";
+    public static final String SCHEDULE_DELETE_ROUTING_KEY = "schedule.delete";
 }

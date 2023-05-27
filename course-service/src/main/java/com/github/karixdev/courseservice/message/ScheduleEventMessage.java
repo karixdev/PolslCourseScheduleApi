@@ -5,6 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.UUID;
 
 public record ScheduleEventMessage(
-        @JsonProperty("id")
+        @JsonProperty("scheduleId")
         UUID id
 ) {}

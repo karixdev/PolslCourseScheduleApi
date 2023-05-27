@@ -127,6 +127,7 @@ public class ScheduleService {
         );
     }
 
+    @Transactional
     public void delete(UUID id) {
         Schedule schedule = findByIdOrElseThrow(id, false);
 
