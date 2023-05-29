@@ -2,16 +2,20 @@ package com.github.karixdev.discordservice.client;
 
 import com.github.karixdev.discordservice.ContainersEnvironment;
 import com.github.karixdev.discordservice.dto.DiscordWebhookRequest;
+import com.github.karixdev.discordservice.exception.DiscordClientException;
+import com.github.karixdev.discordservice.exception.DiscordServerException;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
@@ -28,13 +32,45 @@ class DiscordWebhookClientTest extends ContainersEnvironment {
     }
 
     @Test
+    void shouldThrowDiscordServerExceptionWhen5xxIsReturned() {
+        stubFor(
+                post(urlPathEqualTo("/webhooks/%s/%s".formatted("123", "token")))
+                        .willReturn(serverError())
+        );
+
+        assertThatThrownBy(() -> underTest.sendMessage(
+                "123",
+                "token",
+                new DiscordWebhookRequest(
+                        "Message"
+                )
+        )).isInstanceOf(DiscordServerException.class);
+    }
+
+    @Test
+    void shouldThrowDiscordClientExceptionWhen4xxIsReturned() {
+        stubFor(
+                post(urlPathEqualTo("/webhooks/%s/%s".formatted("123", "token")))
+                        .willReturn(badRequest())
+        );
+
+        assertThatThrownBy(() -> underTest.sendMessage(
+                "123",
+                "token",
+                new DiscordWebhookRequest(
+                        "Message"
+                )
+        )).isInstanceOf(DiscordClientException.class);
+    }
+
+    @Test
     void shouldReturnNoContentResponseStatusWhenSendMessage() {
         stubFor(
                 post(urlPathEqualTo("/webhooks/%s/%s".formatted("123", "token")))
                         .willReturn(noContent())
         );
 
-        var result = underTest.sendMessage(
+        ResponseEntity<Void> result = underTest.sendMessage(
                 "123",
                 "token",
                 new DiscordWebhookRequest(
