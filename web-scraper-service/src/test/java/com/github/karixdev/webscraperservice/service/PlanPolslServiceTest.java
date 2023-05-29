@@ -6,7 +6,6 @@ import com.github.karixdev.webscraperservice.model.CourseCell;
 import com.github.karixdev.webscraperservice.model.PlanPolslResponse;
 import com.github.karixdev.webscraperservice.model.TimeCell;
 import com.github.karixdev.webscraperservice.props.PlanPolslClientProperties;
-import com.github.karixdev.webscraperservice.service.PlanPolslService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

@@ -1,7 +1,6 @@
 package com.github.karixdev.webscraperservice.client;
 
 import com.github.karixdev.webscraperservice.ContainersEnvironment;
-import com.github.karixdev.webscraperservice.client.PlanPolslClient;
 import com.github.karixdev.webscraperservice.exception.PlanPolslUnavailableException;
 import com.github.karixdev.webscraperservice.props.PlanPolslClientProperties;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;

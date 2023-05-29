@@ -4,7 +4,7 @@ import com.github.karixdev.webscraperservice.model.CourseCell;
 import com.github.karixdev.webscraperservice.model.Link;
 import com.github.karixdev.webscraperservice.model.PlanPolslResponse;
 import com.github.karixdev.webscraperservice.model.TimeCell;
-import com.github.karixdev.webscraperservice.props.PlanPolslAdapterProperties;
+import com.github.karixdev.webscraperservice.props.PlanPolslMapperProperties;
 import com.github.karixdev.webscraperservice.service.HtmlElementService;
 import lombok.RequiredArgsConstructor;
 import org.jsoup.nodes.Document;
@@ -30,7 +30,7 @@ public class PlanPolslResponseMapper {
     }
 
     private Set<TimeCell> getTimeCells(Document document) {
-        return document.getElementsByClass(PlanPolslAdapterProperties.TIME_CELL_CLASS)
+        return document.getElementsByClass(PlanPolslMapperProperties.TIME_CELL_CLASS)
                 .stream()
                 .map(element -> new TimeCell(element.text()))
                 .filter(this::isValidTimeCell)
@@ -52,7 +52,7 @@ public class PlanPolslResponseMapper {
     }
 
     private Set<CourseCell> getCourseCells(Document document) {
-        return document.getElementsByClass(PlanPolslAdapterProperties.COURSE_CELL_CLASS)
+        return document.getElementsByClass(PlanPolslMapperProperties.COURSE_CELL_CLASS)
                 .stream()
                 .map(this::getCourseCell)
                 .filter(this::isValidCourseCell)

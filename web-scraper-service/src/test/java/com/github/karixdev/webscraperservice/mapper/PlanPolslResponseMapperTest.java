@@ -1,6 +1,5 @@
 package com.github.karixdev.webscraperservice.mapper;
 
-import com.github.karixdev.webscraperservice.mapper.PlanPolslResponseMapper;
 import com.github.karixdev.webscraperservice.model.CourseCell;
 import com.github.karixdev.webscraperservice.model.Link;
 import com.github.karixdev.webscraperservice.model.PlanPolslResponse;
