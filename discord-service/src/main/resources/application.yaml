@@ -1,1 +1,20 @@
+server:
+  port: 8085
 
+spring:
+  application:
+    name: discord-service
+
+  rabbitmq:
+    password: password
+    username: user
+    host: localhost
+    port: 5672
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+
+discord-api:
+  base-url: https://discord.com/api
