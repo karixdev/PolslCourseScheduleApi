@@ -43,11 +43,12 @@ public class ScheduleServiceTest {
     void setUp() {
         schedule = Schedule.builder()
                 .id(UUID.randomUUID())
-                .type(0)
+                .type(1)
                 .planPolslId(1)
-                .semester(2)
-                .groupNumber(3)
+                .semester(1)
+                .groupNumber(1)
                 .name("schedule")
+                .wd(4)
                 .build();
     }
 
@@ -121,7 +122,7 @@ public class ScheduleServiceTest {
                 .isEqualTo(savedSchedule.getId());
 
         verify(producer).produceScheduleEventMessage(
-                eq(savedSchedule.getId()),
+                eq(schedule),
                 eq(ScheduleEventType.CREATE)
         );
     }
@@ -262,7 +263,7 @@ public class ScheduleServiceTest {
                 .isEqualTo(scheduleRequest.groupNumber());
 
         verify(producer).produceScheduleEventMessage(
-                eq(schedule.getId()),
+                eq(schedule),
                 eq(ScheduleEventType.UPDATE)
         );
     }
@@ -299,7 +300,7 @@ public class ScheduleServiceTest {
         verify(repository).delete(eq(schedule));
 
         verify(producer).produceScheduleEventMessage(
-                eq(schedule.getId()),
+                eq(schedule),
                 eq(ScheduleEventType.DELETE)
         );
     }
@@ -334,7 +335,7 @@ public class ScheduleServiceTest {
 
         // Then
         verify(producer).produceScheduleEventMessage(
-                eq(schedule.getId()),
+                eq(schedule),
                 eq(ScheduleEventType.UPDATE)
         );
     }

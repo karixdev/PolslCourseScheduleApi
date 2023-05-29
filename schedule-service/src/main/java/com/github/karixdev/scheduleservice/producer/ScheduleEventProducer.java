@@ -1,5 +1,6 @@
 package com.github.karixdev.scheduleservice.producer;
 
+import com.github.karixdev.scheduleservice.entity.Schedule;
 import com.github.karixdev.scheduleservice.message.ScheduleEventMessage;
 import com.github.karixdev.scheduleservice.message.ScheduleEventType;
 import lombok.RequiredArgsConstructor;
@@ -15,14 +16,19 @@ import static com.github.karixdev.scheduleservice.props.ScheduleMQProperties.*;
 public class ScheduleEventProducer {
     private final RabbitTemplate rabbitTemplate;
 
-    public void produceScheduleEventMessage(UUID scheduleId, ScheduleEventType eventType) {
+    public void produceScheduleEventMessage(Schedule schedule, ScheduleEventType eventType) {
         String routingKey = switch (eventType) {
             case CREATE -> SCHEDULE_CREATE_ROUTING_KEY;
             case UPDATE -> SCHEDULE_UPDATE_ROUTING_KEY;
             case DELETE -> SCHEDULE_DELETE_ROUTING_KEY;
         };
 
-        ScheduleEventMessage message = new ScheduleEventMessage(scheduleId);
+        ScheduleEventMessage message = new ScheduleEventMessage(
+                schedule.getId(),
+                schedule.getType(),
+                schedule.getPlanPolslId(),
+                schedule.getWd()
+        );
 
         rabbitTemplate.convertAndSend(
                 SCHEDULE_EXCHANGE,

@@ -40,7 +40,7 @@ public class ScheduleService {
                 .build());
 
         producer.produceScheduleEventMessage(
-                schedule.getId(),
+                schedule,
                 ScheduleEventType.CREATE
         );
 
@@ -115,7 +115,7 @@ public class ScheduleService {
         repository.save(schedule);
 
         producer.produceScheduleEventMessage(
-                schedule.getId(),
+                schedule,
                 ScheduleEventType.UPDATE
         );
 
@@ -134,7 +134,7 @@ public class ScheduleService {
         repository.delete(schedule);
 
         producer.produceScheduleEventMessage(
-                schedule.getId(),
+                schedule,
                 ScheduleEventType.DELETE
         );
     }
@@ -143,7 +143,7 @@ public class ScheduleService {
         Schedule schedule = findByIdOrElseThrow(id, false);
 
         producer.produceScheduleEventMessage(
-                schedule.getId(),
+                schedule,
                 ScheduleEventType.UPDATE
         );
 
@@ -152,7 +152,7 @@ public class ScheduleService {
     public void requestScheduleCoursesUpdateForAll() {
         repository.findAll().forEach(schedule ->
                 producer.produceScheduleEventMessage(
-                        schedule.getId(),
+                        schedule,
                         ScheduleEventType.UPDATE
                 ));
     }

@@ -154,7 +154,12 @@ public class ScheduleControllerIT extends ContainersEnvironment {
         assertThat(schedule.getGroupNumber())
                 .isEqualTo(1);
 
-        ScheduleEventMessage expectedMsg = new ScheduleEventMessage(schedule.getId());
+        ScheduleEventMessage expectedMsg = new ScheduleEventMessage(
+                schedule.getId(),
+                schedule.getType(),
+                schedule.getPlanPolslId(),
+                schedule.getWd()
+        );
 
         await().atMost(30, TimeUnit.SECONDS)
                 .untilAsserted(() -> assertThat(getMessage(SCHEDULE_CREATE_QUEUE))
@@ -437,7 +442,12 @@ public class ScheduleControllerIT extends ContainersEnvironment {
 
         schedule = optionalSchedule.get();
 
-        ScheduleEventMessage expectedMsg = new ScheduleEventMessage(schedule.getId());
+        ScheduleEventMessage expectedMsg = new ScheduleEventMessage(
+                schedule.getId(),
+                schedule.getType(),
+                schedule.getPlanPolslId(),
+                schedule.getWd()
+        );
 
         await().atMost(30, TimeUnit.SECONDS)
                 .untilAsserted(() -> assertThat(getMessage(SCHEDULE_UPDATE_QUEUE))
@@ -501,7 +511,12 @@ public class ScheduleControllerIT extends ContainersEnvironment {
                 .exchange()
                 .expectStatus().isNoContent();
 
-        ScheduleEventMessage expectedMsg = new ScheduleEventMessage(schedule.getId());
+        ScheduleEventMessage expectedMsg = new ScheduleEventMessage(
+                schedule.getId(),
+                schedule.getType(),
+                schedule.getPlanPolslId(),
+                schedule.getWd()
+        );
 
         await().atMost(30, TimeUnit.SECONDS)
                 .untilAsserted(() -> assertThat(getMessage(SCHEDULE_DELETE_QUEUE))
@@ -546,7 +561,12 @@ public class ScheduleControllerIT extends ContainersEnvironment {
                 .exchange()
                 .expectStatus().isNoContent();
 
-        ScheduleEventMessage expectedMsg = new ScheduleEventMessage(schedule.getId());
+        ScheduleEventMessage expectedMsg = new ScheduleEventMessage(
+                schedule.getId(),
+                schedule.getType(),
+                schedule.getPlanPolslId(),
+                schedule.getWd()
+        );
 
         await().atMost(30, TimeUnit.SECONDS)
                 .untilAsserted(() -> assertThat(getMessage(SCHEDULE_UPDATE_QUEUE))
