@@ -5,6 +5,7 @@ import com.github.karixdev.discordservice.dto.DiscordWebhook;
 import com.github.karixdev.discordservice.dto.DiscordWebhookRequest;
 import com.github.karixdev.discordservice.exception.NotValidNotificationMessageException;
 import com.github.karixdev.discordservice.message.NotificationMessage;
+import com.github.karixdev.discordservice.props.NotificationProperties;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -61,6 +62,27 @@ class NotificationServiceTest {
         verify(discordWebhookClient).sendMessage(
                 eq(message.discordWebhook().discordId()),
                 eq(message.discordWebhook().token()),
+                eq(expectedRequest)
+        );
+    }
+
+    @Test
+    void GivenDiscordIdAndToken_WhenSendWelcomeMessage_ThenSendsWelcomeMessage() {
+        // Given
+        String discordId = "discordId";
+        String token = "token";
+
+        // When
+        underTest.sendWelcomeMessage(discordId, token);
+
+        // Then
+        DiscordWebhookRequest expectedRequest = new DiscordWebhookRequest(
+                NotificationProperties.WELCOME_MESSAGE
+        );
+
+        verify(discordWebhookClient).sendMessage(
+                eq(discordId),
+                eq(token),
                 eq(expectedRequest)
         );
     }

@@ -5,6 +5,7 @@ import com.github.karixdev.discordservice.dto.DiscordWebhook;
 import com.github.karixdev.discordservice.dto.DiscordWebhookRequest;
 import com.github.karixdev.discordservice.exception.NotValidNotificationMessageException;
 import com.github.karixdev.discordservice.message.NotificationMessage;
+import com.github.karixdev.discordservice.props.NotificationProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -40,5 +41,17 @@ public class NotificationService {
         }
 
         return message.content() != null || (message.embeds() != null && !message.embeds().isEmpty());
+    }
+
+    public void sendWelcomeMessage(String discordId, String token) {
+        DiscordWebhookRequest request = new DiscordWebhookRequest(
+                NotificationProperties.WELCOME_MESSAGE
+        );
+
+        discordWebhookClient.sendMessage(
+                discordId,
+                token,
+                request
+        );
     }
 }
