@@ -1,10 +1,11 @@
 package com.github.karixdev.domaincoursemapperservice.model.domain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalTimeDeserializer;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer;
+import com.github.karixdev.domaincoursemapperservice.serialization.LocalTimeDeserializer;
+import com.github.karixdev.domaincoursemapperservice.serialization.LocalTimeSerializer;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
