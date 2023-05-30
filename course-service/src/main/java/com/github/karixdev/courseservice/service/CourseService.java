@@ -7,6 +7,7 @@ import com.github.karixdev.courseservice.dto.CourseResponse;
 import com.github.karixdev.courseservice.entity.Course;
 import com.github.karixdev.courseservice.exception.NotExistingScheduleException;
 import com.github.karixdev.courseservice.exception.ResourceNotFoundException;
+import com.github.karixdev.courseservice.exception.ValidationException;
 import com.github.karixdev.courseservice.mapper.CourseMapper;
 import com.github.karixdev.courseservice.producer.CourseEventProducer;
 import com.github.karixdev.courseservice.repository.CourseRepository;
@@ -33,7 +34,10 @@ public class CourseService {
     public CourseResponse create(CourseRequest request) {
         UUID scheduleId = request.getScheduleId();
         if (!doesScheduleExist(scheduleId)) {
-            throw new NotExistingScheduleException(scheduleId);
+            throw new ValidationException(
+                    "scheduleId",
+                    "Schedule with id %s does not exist".formatted(scheduleId)
+            );
         }
 
         Course course = Course.builder()
@@ -74,7 +78,10 @@ public class CourseService {
         if (!course.getScheduleId().equals(request.getScheduleId())
                 && !doesScheduleExist(newScheduleId)
         ) {
-            throw new NotExistingScheduleException(newScheduleId);
+            throw new ValidationException(
+                    "scheduleId",
+                    "Schedule with id %s does not exist".formatted(newScheduleId)
+            );
         }
 
         course.setScheduleId(newScheduleId);
