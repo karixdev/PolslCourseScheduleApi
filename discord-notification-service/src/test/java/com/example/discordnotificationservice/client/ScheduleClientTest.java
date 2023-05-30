@@ -1,10 +1,10 @@
 package com.example.discordnotificationservice.client;
 
 import com.example.discordnotificationservice.ContainersEnvironment;
-import com.example.discordnotificationservice.client.ScheduleClient;
-import com.example.discordnotificationservice.testconfig.WebClientTestConfig;
 import com.example.discordnotificationservice.dto.ScheduleResponse;
-import com.example.discordnotificationservice.exception.ScheduleClientException;
+import com.example.discordnotificationservice.exception.client.ServiceClientException;
+import com.example.discordnotificationservice.exception.client.ServiceServerException;
+import com.example.discordnotificationservice.testconfig.WebClientTestConfig;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +36,27 @@ public class ScheduleClientTest extends ContainersEnvironment {
     }
 
     @Test
-    void shouldThrowScheduleClientExceptionWhenReceivedErrorStatusCode() {
+    void shouldThrowServiceServerExceptionWhenReceived5xxStatusCode() {
+        UUID id1 = UUID.randomUUID();
+        UUID id2 = UUID.randomUUID();
+
+        Set<UUID> ids = Set.of(id1, id2);
+
+        stubFor(
+                get(urlPathEqualTo("/api/schedules"))
+                        .withQueryParam("ids", havingExactly(
+                                id1.toString(),
+                                id2.toString()
+                        ))
+                        .willReturn(serverError())
+        );
+
+        assertThatThrownBy(() -> underTest.findSelected(ids))
+                .isInstanceOf(ServiceServerException.class);
+    }
+
+    @Test
+    void shouldThrowServiceClientExceptionWhenReceived4xxStatusCode() {
         UUID id1 = UUID.randomUUID();
         UUID id2 = UUID.randomUUID();
 
@@ -52,7 +72,7 @@ public class ScheduleClientTest extends ContainersEnvironment {
         );
 
         assertThatThrownBy(() -> underTest.findSelected(ids))
-                .isInstanceOf(ScheduleClientException.class);
+                .isInstanceOf(ServiceClientException.class);
     }
 
     @Test

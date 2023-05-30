@@ -38,3 +38,6 @@ schedule-service:
 
 discord-api:
   base-url: https://discord.com/api
+
+notification-service:
+  base-url: http://notification-service
