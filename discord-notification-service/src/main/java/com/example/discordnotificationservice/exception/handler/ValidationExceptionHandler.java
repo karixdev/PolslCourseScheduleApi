@@ -2,7 +2,6 @@ package com.example.discordnotificationservice.exception.handler;
 
 import com.example.discordnotificationservice.dto.ValidationErrorResponse;
 import com.example.discordnotificationservice.exception.ValidationException;
-import com.example.discordnotificationservice.converter.NameCaseConverter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -24,7 +23,7 @@ public class ValidationExceptionHandler {
                 .stream()
                 .filter(error -> error.getDefaultMessage() != null)
                 .collect(Collectors.toMap(
-                        error -> NameCaseConverter.camelToSnake(error.getField()),
+                        FieldError::getField,
                         FieldError::getDefaultMessage
                 ));
 
