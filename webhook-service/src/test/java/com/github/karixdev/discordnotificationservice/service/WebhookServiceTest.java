@@ -6,7 +6,6 @@ import com.github.karixdev.discordnotificationservice.document.DiscordWebhook;
 import com.github.karixdev.discordnotificationservice.document.Webhook;
 import com.github.karixdev.discordnotificationservice.dto.WebhookRequest;
 import com.github.karixdev.discordnotificationservice.dto.WebhookResponse;
-import com.example.discordnotificationservice.exception.*;
 import com.github.karixdev.discordnotificationservice.exception.ForbiddenAccessException;
 import com.github.karixdev.discordnotificationservice.exception.ResourceNotFoundException;
 import com.github.karixdev.discordnotificationservice.exception.ValidationException;
