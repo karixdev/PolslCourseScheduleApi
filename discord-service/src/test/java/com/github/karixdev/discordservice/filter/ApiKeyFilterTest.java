@@ -43,7 +43,7 @@ class ApiKeyFilterTest {
     void GivenRequestWithInvalidApiKey_WhenDoFilterInternal_ThenSetsUnauthorizedStatus() throws ServletException, IOException {
         // Given
         MockHttpServletRequest request = new MockHttpServletRequest();
-        request.addParameter("apiKey", "invalid");
+        request.addHeader("X-API-KEY", "invalid");
 
         // When
         underTest.doFilterInternal(request, response, filterChain);
@@ -57,7 +57,7 @@ class ApiKeyFilterTest {
     void GivenRequestWithValidApiKey_WhenDoFilterInternal_ThenContinuesFilterChain() throws ServletException, IOException {
         // Given
         MockHttpServletRequest request = new MockHttpServletRequest();
-        request.addParameter("apiKey", "api-key");
+        request.addHeader("X-API-KEY", "api-key");
 
         // When
         underTest.doFilterInternal(request, response, filterChain);

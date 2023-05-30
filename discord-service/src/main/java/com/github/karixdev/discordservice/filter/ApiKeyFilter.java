@@ -16,7 +16,7 @@ import java.util.Optional;
 public class ApiKeyFilter extends OncePerRequestFilter {
     private final String apiKey;
 
-    private static final String API_KEY_PARAMETER = "apiKey";
+    private static final String API_KEY_HEADER = "X-API-KEY";
 
     public ApiKeyFilter(@Value("${api-key}") String apiKey) {
         this.apiKey = apiKey;
@@ -28,7 +28,7 @@ public class ApiKeyFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain
     ) throws ServletException, IOException {
-        Optional<String> optionalKey = Optional.ofNullable(request.getParameter(API_KEY_PARAMETER));
+        Optional<String> optionalKey = Optional.ofNullable(request.getHeader(API_KEY_HEADER));
 
         if (optionalKey.isEmpty() || !optionalKey.get().equals(apiKey)) {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());

@@ -46,7 +46,8 @@ public class NotificationControllerIT extends ContainersEnvironment {
                         .willReturn(serverError())
         );
 
-        webClient.post().uri("/api/notifications/discordId/token?apiKey=myKey")
+        webClient.post().uri("/api/notifications/discordId/token")
+                .header("X-API-KEY", "myKey")
                 .exchange()
                 .expectStatus().isEqualTo(500);
     }
@@ -58,7 +59,8 @@ public class NotificationControllerIT extends ContainersEnvironment {
                         .willReturn(notFound())
         );
 
-        webClient.post().uri("/api/notifications/discordId/token?apiKey=myKey")
+        webClient.post().uri("/api/notifications/discordId/token")
+                .header("X-API-KEY", "myKey")
                 .exchange()
                 .expectStatus().isBadRequest();
     }
@@ -70,7 +72,8 @@ public class NotificationControllerIT extends ContainersEnvironment {
                         .willReturn(noContent())
         );
 
-        webClient.post().uri("/api/notifications/discordId/token?apiKey=myKey")
+        webClient.post().uri("/api/notifications/discordId/token")
+                .header("X-API-KEY", "myKey")
                 .exchange()
                 .expectStatus().isNoContent();
     }
