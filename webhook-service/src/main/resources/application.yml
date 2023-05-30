@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: discord-notification-service
+    name: webhook-service
 
   data:
     mongodb:
