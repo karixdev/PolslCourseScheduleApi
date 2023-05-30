@@ -1,16 +1,14 @@
 package com.example.discordnotificationservice.service;
 
+import com.example.discordnotificationservice.client.NotificationServiceClient;
 import com.example.discordnotificationservice.document.DiscordWebhook;
 import com.example.discordnotificationservice.document.Webhook;
+import com.example.discordnotificationservice.exception.*;
+import com.example.discordnotificationservice.exception.client.ServiceClientException;
 import com.example.discordnotificationservice.mapper.WebhookDTOMapper;
 import com.example.discordnotificationservice.repository.WebhookRepository;
-import com.example.discordnotificationservice.exception.ForbiddenAccessException;
-import com.example.discordnotificationservice.exception.ResourceNotFoundException;
 import com.example.discordnotificationservice.dto.WebhookRequest;
 import com.example.discordnotificationservice.dto.WebhookResponse;
-import com.example.discordnotificationservice.exception.InvalidDiscordWebhookUrlException;
-import com.example.discordnotificationservice.exception.NotExistingSchedulesException;
-import com.example.discordnotificationservice.exception.UnavailableDiscordWebhookException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -32,6 +30,7 @@ public class WebhookService {
     private final SecurityService securityService;
     private final WebhookDTOMapper mapper;
     private final DiscordWebhookService discordWebhookService;
+    private final NotificationServiceClient notificationServiceClient;
 
     private static final int PAGE_SIZE = 10;
 
@@ -55,7 +54,17 @@ public class WebhookService {
             throw new NotExistingSchedulesException();
         }
 
-        discordWebhookService.sendWelcomeMessage(discordWebhook);
+        try {
+            notificationServiceClient.sendWelcomeMessage(
+                    discordWebhook.getDiscordId(),
+                    discordWebhook.getToken()
+            );
+        } catch (ServiceClientException e) {
+            throw new ValidationException(
+                    "url",
+                    "Discord webhook url does not work"
+            );
+        }
 
         Webhook webhook = repository.save(
                 Webhook.builder()
@@ -130,7 +139,17 @@ public class WebhookService {
             throw new NotExistingSchedulesException();
         }
 
-        discordWebhookService.sendWelcomeMessage(discordWebhook);
+        try {
+            notificationServiceClient.sendWelcomeMessage(
+                    discordWebhook.getDiscordId(),
+                    discordWebhook.getToken()
+            );
+        } catch (ServiceClientException e) {
+            throw new ValidationException(
+                    "url",
+                    "Discord webhook url does not work"
+            );
+        }
 
         webhook.setDiscordWebhook(discordWebhook);
         webhook.setSchedules(request.schedules());

@@ -58,6 +58,9 @@ public class WebhookControllerIT extends ContainersEnvironment {
         registry.add(
                 "schedule-service.base-url",
                 () -> "http://localhost:9999");
+        registry.add(
+                "notification-service.base-url",
+                () -> "http://localhost:9999");
     }
 
     @BeforeEach
@@ -258,7 +261,7 @@ public class WebhookControllerIT extends ContainersEnvironment {
         );
 
         stubFor(
-                post(urlPathEqualTo("/webhooks/discordApiId/token"))
+                post(urlPathEqualTo("/api/notifications/discordApiId/token"))
                         .willReturn(noContent())
         );
 
@@ -627,7 +630,7 @@ public class WebhookControllerIT extends ContainersEnvironment {
 
 
         stubFor(
-                post(urlPathEqualTo("/webhooks/discordApiId/token"))
+                post(urlPathEqualTo("/api/notifications/discordApiId/token"))
                         .willReturn(badRequest())
         );
 
@@ -769,7 +772,7 @@ public class WebhookControllerIT extends ContainersEnvironment {
         );
 
         stubFor(
-                post(urlPathMatching("/[A-Za-z0-9]+/[A-Za-z0-9]+/[A-Za-z0-9]+"))
+                post(urlPathMatching("/[A-Za-z0-9]+/[A-Za-z0-9]+/[A-Za-z0-9]+/[A-Za-z0-9]+"))
                         .willReturn(noContent())
         );
 

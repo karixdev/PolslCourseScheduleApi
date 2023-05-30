@@ -1,21 +1,15 @@
 package com.example.discordnotificationservice.service;
 
 
-import com.example.discordnotificationservice.service.DiscordWebhookService;
+import com.example.discordnotificationservice.client.NotificationServiceClient;
 import com.example.discordnotificationservice.document.DiscordWebhook;
 import com.example.discordnotificationservice.document.Webhook;
-import com.example.discordnotificationservice.mapper.WebhookDTOMapper;
-import com.example.discordnotificationservice.repository.WebhookRepository;
-import com.example.discordnotificationservice.service.ScheduleService;
-import com.example.discordnotificationservice.service.SecurityService;
-import com.example.discordnotificationservice.service.WebhookService;
-import com.example.discordnotificationservice.exception.ForbiddenAccessException;
-import com.example.discordnotificationservice.exception.ResourceNotFoundException;
 import com.example.discordnotificationservice.dto.WebhookRequest;
 import com.example.discordnotificationservice.dto.WebhookResponse;
-import com.example.discordnotificationservice.exception.InvalidDiscordWebhookUrlException;
-import com.example.discordnotificationservice.exception.NotExistingSchedulesException;
-import com.example.discordnotificationservice.exception.UnavailableDiscordWebhookException;
+import com.example.discordnotificationservice.exception.*;
+import com.example.discordnotificationservice.exception.client.ServiceClientException;
+import com.example.discordnotificationservice.mapper.WebhookDTOMapper;
+import com.example.discordnotificationservice.repository.WebhookRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -56,6 +50,9 @@ class WebhookServiceTest {
 
     @Mock
     DiscordWebhookService discordWebhookService;
+
+    @Mock
+    NotificationServiceClient notificationServiceClient;
 
     @Mock
     Jwt jwt;
@@ -138,6 +135,38 @@ class WebhookServiceTest {
     }
 
     @Test
+    void GivenWebhookRequestWithNotWorkingUrl_WhenCreate_ThenThrowsValidationException() {
+        // Given
+        UUID scheduleId = UUID.randomUUID();
+        Set<UUID> schedules = Set.of(scheduleId);
+        String url = "https://discord.com/api/webhooks/456/def";
+
+        WebhookRequest request = new WebhookRequest(url, schedules);
+
+        DiscordWebhook discordWebhook = new DiscordWebhook("456", "def");
+
+        when(repository.findByDiscordWebhook(eq(discordWebhook)))
+                .thenReturn(Optional.empty());
+
+        when(discordWebhookService.isNotValidDiscordWebhookUrl(eq(url)))
+                .thenReturn(false);
+
+        when(discordWebhookService.getDiscordWebhookFromUrl(eq(url)))
+                .thenReturn(discordWebhook);
+
+        when(scheduleService.checkIfSchedulesExist(eq(schedules)))
+                .thenReturn(true);
+
+        when(notificationServiceClient.sendWelcomeMessage(eq("456"), eq("def")))
+                .thenThrow(ServiceClientException.class);
+
+        // When & Then
+        assertThatThrownBy(() -> underTest.create(request, jwt))
+                .isInstanceOf(ValidationException.class)
+                .hasMessage("Discord webhook url does not work");
+    }
+
+    @Test
     void GivenJwtAndValidRequest_WhenCreate_ThenSendWelcomeMessageSavesWebhookAndReturnsCorrectResponse() {
         // Given
         UUID scheduleId = UUID.randomUUID();
@@ -192,7 +221,7 @@ class WebhookServiceTest {
         WebhookResponse result = underTest.create(request, jwt);
 
         // Then
-        verify(discordWebhookService).sendWelcomeMessage(eq(discordWebhook));
+        verify(notificationServiceClient).sendWelcomeMessage(eq("123"), eq("abc"));
 
         assertThat(result).isEqualTo(expected);
     }
@@ -534,6 +563,55 @@ class WebhookServiceTest {
     }
 
     @Test
+    void GivenWebhookRequestWithNotWorkingUrl_WhenUpdate_ThenThrowsValidationException() {
+        // Given
+        UUID newSchedule = UUID.fromString("57f6874d-1f91-4862-a31c-dfb8bea8ca72");
+        Set<UUID> schedules = Set.of(
+                UUID.fromString("bb46a7d5-f267-4527-a00b-13c1172ac442"),
+                newSchedule
+        );
+        String url = "https://discord.com/api/webhooks/456/def";
+
+        String id = "id";
+        WebhookRequest request = new WebhookRequest(url, schedules);
+
+        Webhook webhook = Webhook.builder()
+                .id(id)
+                .addedBy("123-456-789")
+                .schedules(Set.of(UUID.fromString("bb46a7d5-f267-4527-a00b-13c1172ac442")))
+                .discordWebhook(new DiscordWebhook(
+                        "123",
+                        "abc"
+                ))
+                .build();
+
+        DiscordWebhook discordWebhook = new DiscordWebhook("456", "def");
+
+        when(securityService.getUserId(eq(jwt)))
+                .thenReturn("123-456-789");
+
+        when(repository.findById(eq(id)))
+                .thenReturn(Optional.of(webhook));
+
+        when(scheduleService.checkIfSchedulesExist(eq(Set.of(newSchedule))))
+                .thenReturn(true);
+
+        when(repository.findByDiscordWebhook(eq(discordWebhook)))
+                .thenReturn(Optional.of(webhook));
+
+        when(discordWebhookService.getDiscordWebhookFromUrl(eq(url)))
+                .thenReturn(discordWebhook);
+
+        when(notificationServiceClient.sendWelcomeMessage(eq("456"), eq("def")))
+                .thenThrow(ServiceClientException.class);
+
+        // When & Then
+        assertThatThrownBy(() -> underTest.update(request, jwt, id))
+                .isInstanceOf(ValidationException.class)
+                .hasMessage("Discord webhook url does not work");
+    }
+
+    @Test
     void GivenWebhookRequestAndAdminWhoIsNotOwner_WhenUpdate_ThenSendWelcomeMessageUpdatesWebhookAndReturnsCorrectResponse() {
         // Given
         UUID oldSchedule = UUID.fromString("bb46a7d5-f267-4527-a00b-13c1172ac442");
@@ -600,7 +678,7 @@ class WebhookServiceTest {
         WebhookResponse result = underTest.update(request, jwt, id);
 
         // Then
-        verify(discordWebhookService).sendWelcomeMessage(eq(discordWebhook));
+        verify(notificationServiceClient).sendWelcomeMessage(eq("456"), eq("def"));
 
         assertThat(result).isEqualTo(expectedResponse);
     }
@@ -669,7 +747,7 @@ class WebhookServiceTest {
         WebhookResponse result = underTest.update(request, jwt, id);
 
         // Then
-        verify(discordWebhookService).sendWelcomeMessage(eq(discordWebhook));
+        verify(notificationServiceClient).sendWelcomeMessage(eq("456"), eq("def"));
 
         assertThat(result).isEqualTo(expectedResponse);
     }
