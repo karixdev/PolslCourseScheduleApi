@@ -9,6 +9,8 @@ import com.example.discordnotificationservice.dto.WebhookResponse;
 import com.example.discordnotificationservice.exception.*;
 import com.example.discordnotificationservice.exception.client.ServiceClientException;
 import com.example.discordnotificationservice.mapper.WebhookDTOMapper;
+import com.example.discordnotificationservice.message.CoursesUpdateMessage;
+import com.example.discordnotificationservice.producer.NotificationProducer;
 import com.example.discordnotificationservice.repository.WebhookRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -53,6 +55,9 @@ class WebhookServiceTest {
 
     @Mock
     NotificationServiceClient notificationServiceClient;
+
+    @Mock
+    NotificationProducer notificationProducer;
 
     @Mock
     Jwt jwt;
@@ -775,5 +780,54 @@ class WebhookServiceTest {
 
         // Then
         assertThat(result).containsExactly(webhook);
+    }
+
+    @Test
+    void GivenCoursesUpdateMessage_WhenHandleCoursesUpdateMessage_ThenProducesNotificationMessages() {
+        // Given
+        String scheduleName = "name";
+        UUID scheduleId = UUID.randomUUID();
+        CoursesUpdateMessage message = new CoursesUpdateMessage(scheduleId);
+
+        DiscordWebhook discordWebhook1 = new DiscordWebhook(
+                "discordId1",
+                "token1"
+        );
+        Webhook webhook1 = Webhook.builder()
+                .id("1")
+                .addedBy("123-456-789")
+                .discordWebhook(discordWebhook1)
+                .schedules(Set.of(scheduleId))
+                .build();
+
+        DiscordWebhook discordWebhook2 = new DiscordWebhook(
+                "discordId2",
+                "token2"
+        );
+        Webhook webhook2 = Webhook.builder()
+                .id("2")
+                .addedBy("123-456-789")
+                .discordWebhook(discordWebhook2)
+                .schedules(Set.of(scheduleId))
+                .build();
+
+        when(repository.findBySchedulesContaining(eq(scheduleId)))
+                .thenReturn(List.of(webhook1, webhook2));
+
+        when(scheduleService.getScheduleName(scheduleId))
+                .thenReturn(scheduleName);
+
+        // When
+        underTest.handleCourseUpdateMessage(message);
+
+        // Then
+        verify(notificationProducer).produceNotificationMessage(
+                eq(scheduleName),
+                eq(discordWebhook1)
+        );
+        verify(notificationProducer).produceNotificationMessage(
+                eq(scheduleName),
+                eq(discordWebhook2)
+        );
     }
 }

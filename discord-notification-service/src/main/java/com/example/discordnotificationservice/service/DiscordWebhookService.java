@@ -1,9 +1,6 @@
 package com.example.discordnotificationservice.service;
 
-import com.example.discordnotificationservice.client.DiscordWebhookClient;
 import com.example.discordnotificationservice.document.DiscordWebhook;
-import com.example.discordnotificationservice.dto.DiscordWebhookRequest;
-import com.example.discordnotificationservice.dto.Embedded;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -11,13 +8,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Service
 @RequiredArgsConstructor
 public class DiscordWebhookService {
-    private final DiscordWebhookClient client;
-
     private static final String DISCORD_WEBHOOK_URL_PREFIX = "https://discord.com/api/webhooks/";
-    private static final String WELCOME_MESSAGE = "Hello form PolslCourseApi!";
-    public static final int EMBED_COLOR = 10360031;
-    public static final String SCHEDULE_UPDATE_DESCRIPTION = "Schedule %s has been updated";
-    public static final String SCHEDULE_UPDATE_TITLE = "Schedule update";
 
     public boolean isNotValidDiscordWebhookUrl(String url) {
         if (!url.startsWith(DISCORD_WEBHOOK_URL_PREFIX)) {
@@ -49,14 +40,6 @@ public class DiscordWebhookService {
         return afterPrefix.split("/");
     }
 
-    public void sendWelcomeMessage(DiscordWebhook discordWebhook) {
-        client.sendMessage(
-                discordWebhook.getDiscordId(),
-                discordWebhook.getToken(),
-                new DiscordWebhookRequest(WELCOME_MESSAGE)
-        );
-    }
-
     public String transformDiscordWebhookIntoUrl(DiscordWebhook discordWebhook) {
         return UriComponentsBuilder
                 .fromUriString(DISCORD_WEBHOOK_URL_PREFIX)
@@ -65,20 +48,5 @@ public class DiscordWebhookService {
                         discordWebhook.getToken()
                 )
                 .toUriString();
-    }
-
-    public void sendScheduleUpdateNotification(DiscordWebhook discordWebhook, String scheduleName) {
-        Embedded embedded = new Embedded(
-                SCHEDULE_UPDATE_TITLE,
-                SCHEDULE_UPDATE_DESCRIPTION.formatted(scheduleName),
-                EMBED_COLOR
-        );
-        DiscordWebhookRequest request = new DiscordWebhookRequest(embedded);
-
-        client.sendMessage(
-                discordWebhook.getDiscordId(),
-                discordWebhook.getToken(),
-                request
-        );
     }
 }

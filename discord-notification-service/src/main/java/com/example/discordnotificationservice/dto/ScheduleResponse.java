@@ -6,5 +6,7 @@ import java.util.UUID;
 
 public record ScheduleResponse(
         @JsonProperty("id")
-        UUID id
+        UUID id,
+        @JsonProperty("name")
+        String name
 ) {}

@@ -110,10 +110,10 @@ public class ScheduleClientTest extends ContainersEnvironment {
         Set<ScheduleResponse> result = underTest.findSelected(ids);
 
         assertThat(result).contains(
-                new ScheduleResponse(id1)
+                new ScheduleResponse(id1, null)
         );
         assertThat(result).contains(
-                new ScheduleResponse(id2)
+                new ScheduleResponse(id2, null)
         );
     }
 }

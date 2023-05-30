@@ -1,28 +1,12 @@
 package com.example.discordnotificationservice.service;
 
-import com.example.discordnotificationservice.client.DiscordWebhookClient;
 import com.example.discordnotificationservice.document.DiscordWebhook;
-import com.example.discordnotificationservice.dto.DiscordWebhookRequest;
-import com.example.discordnotificationservice.dto.Embedded;
-import com.example.discordnotificationservice.service.DiscordWebhookService;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
-import static com.example.discordnotificationservice.service.DiscordWebhookService.*;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
 
-@ExtendWith(MockitoExtension.class)
 class DiscordWebhookServiceTest {
-    @InjectMocks
-    DiscordWebhookService underTest;
-
-    @Mock
-    DiscordWebhookClient client;
+    DiscordWebhookService underTest = new DiscordWebhookService();
 
     @Test
     void GivenInvalidDiscordWebhookUrl_WhenIsNotValidDiscordWebhookUrl_ThenReturnsTrue() {
@@ -66,25 +50,6 @@ class DiscordWebhookServiceTest {
     }
 
     @Test
-    void GivenDiscordWebhook_SendWelcomeMessage_ThenSendsMessageUsingDiscordWebhookClient() {
-        // Given
-        DiscordWebhook discordWebhook = new DiscordWebhook(
-                "discordId",
-                "token"
-        );
-
-        // When
-        underTest.sendWelcomeMessage(discordWebhook);
-
-        // Then
-        verify(client).sendMessage(
-                eq("discordId"),
-                eq("token"),
-                eq(new DiscordWebhookRequest("Hello form PolslCourseApi!"))
-        );
-    }
-
-    @Test
     void GivenDiscordWebhook_WhenTransformDiscordWebhookIntoUrl_ThenReturnsCorrectUrl() {
         // Given
         DiscordWebhook discordWebhook = new DiscordWebhook(
@@ -97,33 +62,5 @@ class DiscordWebhookServiceTest {
 
         // Then
         assertThat(result).isEqualTo("https://discord.com/api/webhooks/discordId/token");
-    }
-
-    @Test
-    void GivenDiscordWebhookAndScheduleName_WhenSendScheduleUpdateNotification_ThenSendsCorrectMessage() {
-        // Given
-        DiscordWebhook discordWebhook = new DiscordWebhook(
-                "discordId",
-                "token"
-        );
-        String scheduleName = "scheduleName";
-
-        DiscordWebhookRequest request = new DiscordWebhookRequest(
-                new Embedded(
-                        SCHEDULE_UPDATE_TITLE,
-                        SCHEDULE_UPDATE_DESCRIPTION.formatted(scheduleName),
-                        EMBED_COLOR
-                )
-        );
-
-        // When
-        underTest.sendScheduleUpdateNotification(discordWebhook, scheduleName);
-
-        // Then
-        verify(client).sendMessage(
-                eq(discordWebhook.getDiscordId()),
-                eq(discordWebhook.getToken()),
-                eq(request)
-        );
     }
 }

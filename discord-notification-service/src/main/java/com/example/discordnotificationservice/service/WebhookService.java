@@ -3,12 +3,14 @@ package com.example.discordnotificationservice.service;
 import com.example.discordnotificationservice.client.NotificationServiceClient;
 import com.example.discordnotificationservice.document.DiscordWebhook;
 import com.example.discordnotificationservice.document.Webhook;
+import com.example.discordnotificationservice.dto.WebhookRequest;
+import com.example.discordnotificationservice.dto.WebhookResponse;
 import com.example.discordnotificationservice.exception.*;
 import com.example.discordnotificationservice.exception.client.ServiceClientException;
 import com.example.discordnotificationservice.mapper.WebhookDTOMapper;
+import com.example.discordnotificationservice.message.CoursesUpdateMessage;
+import com.example.discordnotificationservice.producer.NotificationProducer;
 import com.example.discordnotificationservice.repository.WebhookRepository;
-import com.example.discordnotificationservice.dto.WebhookRequest;
-import com.example.discordnotificationservice.dto.WebhookResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -31,6 +33,7 @@ public class WebhookService {
     private final WebhookDTOMapper mapper;
     private final DiscordWebhookService discordWebhookService;
     private final NotificationServiceClient notificationServiceClient;
+    private final NotificationProducer notificationProducer;
 
     private static final int PAGE_SIZE = 10;
 
@@ -170,5 +173,17 @@ public class WebhookService {
 
     public List<Webhook> findBySchedule(UUID schedule) {
         return repository.findBySchedulesContaining(schedule);
+    }
+
+    public void handleCourseUpdateMessage(CoursesUpdateMessage message) {
+        String scheduleName = scheduleService.getScheduleName(message.scheduleId());
+
+        findBySchedule(message.scheduleId()).stream()
+                .map(Webhook::getDiscordWebhook)
+                .forEach(discordWebhook ->
+                        notificationProducer.produceNotificationMessage(
+                                scheduleName,
+                                discordWebhook)
+                );
     }
 }
