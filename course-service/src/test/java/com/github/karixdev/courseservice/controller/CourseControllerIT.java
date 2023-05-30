@@ -49,6 +49,40 @@ public class CourseControllerIT extends ContainersEnvironment {
     }
 
     @Test
+    void shouldNotCreateForUser() {
+        String token = getUserToken();
+
+        stubFor(
+                get(urlPathEqualTo("/api/schedules/11111111-1111-1111-1111-111111111111"))
+                        .willReturn(aResponse().withStatus(404))
+        );
+
+        String payload = """
+                {
+                    "scheduleId": "11111111-1111-1111-1111-111111111111",
+                    "startsAt": "08:30",
+                    "endsAt": "10:15",
+                    "name": "course-name",
+                    "courseType": "LAB",
+                    "teachers": "dr Adam",
+                    "dayOfWeek": "FRIDAY",
+                    "weekType": "EVEN",
+                    "classrooms": "LAB 1",
+                    "additionalInfo": "Only on 3.08"
+                }
+                """;
+
+        webClient.post().uri("/api/courses")
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(payload)
+                .exchange()
+                .expectStatus().isForbidden();
+
+        assertThat(courseRepository.findAll()).isEmpty();
+    }
+
+    @Test
     void shouldNotCreateCourseForNotExistingSchedule() {
         String token = getAdminToken();
 
@@ -140,6 +174,35 @@ public class CourseControllerIT extends ContainersEnvironment {
         assertThat(course.getWeekType()).isEqualTo(WeekType.EVEN);
         assertThat(course.getStartsAt()).isEqualTo(LocalTime.of(8, 30));
         assertThat(course.getEndsAt()).isEqualTo(LocalTime.of(10, 15));
+    }
+
+    @Test
+    void shouldNotUpdateForUser() {
+        String token = getUserToken();
+
+        String payload = """
+                {
+                    "scheduleId": "11111111-1111-1111-1111-111111111111",
+                    "startsAt": "08:30",
+                    "endsAt": "10:15",
+                    "name": "course-name",
+                    "courseType": "LAB",
+                    "teachers": "dr Adam",
+                    "dayOfWeek": "FRIDAY",
+                    "weekType": "EVEN",
+                    "classrooms": "LAB 1",
+                    "additionalInfo": "Only on 3.08"
+                }
+                """;
+
+        webClient.put().uri("/api/courses/11111111-1111-1111-1111-111111111112")
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(payload)
+                .exchange()
+                .expectStatus().isForbidden();
+
+        assertThat(courseRepository.findAll()).isEmpty();
     }
 
     @Test
@@ -286,6 +349,16 @@ public class CourseControllerIT extends ContainersEnvironment {
         assertThat(resultCourse.getWeekType()).isEqualTo(WeekType.EVERY);
         assertThat(resultCourse.getStartsAt()).isEqualTo(LocalTime.of(10, 30));
         assertThat(resultCourse.getEndsAt()).isEqualTo(LocalTime.of(12, 15));
+    }
+
+    @Test
+    void shouldNotDeleteCourseForUser() {
+        String token = getUserToken();
+
+        webClient.delete().uri("/api/courses/11111111-1111-1111-1111-111111111111")
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus().isForbidden();
     }
 
     @Test
