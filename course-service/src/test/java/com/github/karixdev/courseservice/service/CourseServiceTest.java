@@ -7,8 +7,8 @@ import com.github.karixdev.courseservice.dto.ScheduleResponse;
 import com.github.karixdev.courseservice.entity.Course;
 import com.github.karixdev.courseservice.entity.CourseType;
 import com.github.karixdev.courseservice.entity.WeekType;
-import com.github.karixdev.courseservice.exception.NotExistingScheduleException;
 import com.github.karixdev.courseservice.exception.ResourceNotFoundException;
+import com.github.karixdev.courseservice.exception.ValidationException;
 import com.github.karixdev.courseservice.mapper.CourseMapper;
 import com.github.karixdev.courseservice.producer.CourseEventProducer;
 import com.github.karixdev.courseservice.repository.CourseRepository;
@@ -94,7 +94,7 @@ class CourseServiceTest {
 
         // When & Then
         assertThatThrownBy(() -> underTest.create(courseRequest))
-                .isInstanceOf(NotExistingScheduleException.class);
+                .isInstanceOf(ValidationException.class);
     }
 
     @Test
@@ -153,7 +153,7 @@ class CourseServiceTest {
 
         // When & Then
         assertThatThrownBy(() -> underTest.update(id, courseRequest))
-                .isInstanceOf(NotExistingScheduleException.class);
+                .isInstanceOf(ValidationException.class);
     }
 
     @Test
