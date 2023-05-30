@@ -63,7 +63,7 @@ class WebhookServiceTest {
     Jwt jwt;
 
     @Test
-    void GivenInvalidWebhookUrl_WhenCreate_ThenThrowsInvalidDiscordWebhookUrlException() {
+    void GivenInvalidWebhookUrl_WhenCreate_ThenThrowsValidationException() {
         // Given
         String url = "invalid url";
         WebhookRequest request = new WebhookRequest(url, Set.of());
@@ -73,12 +73,12 @@ class WebhookServiceTest {
 
         // When & Then
         assertThatThrownBy(() -> underTest.create(request, jwt))
-                .isInstanceOf(InvalidDiscordWebhookUrlException.class)
+                .isInstanceOf(ValidationException.class)
                 .hasMessage("Provided Discord webhook url is invalid");
     }
 
     @Test
-    void GivenRequestContainingNotExistingSchedules_WhenCreate_ThenThrowsNotExistingSchedulesException() {
+    void GivenRequestContainingNotExistingSchedules_WhenCreate_ThenThrowsValidationException() {
         // Given
         Set<UUID> schedules = Set.of(UUID.randomUUID());
         String url = "https://discord.com/api/webhooks/123/abc";
@@ -102,12 +102,12 @@ class WebhookServiceTest {
 
         // When & Then
         assertThatThrownBy(() -> underTest.create(request, jwt))
-                .isInstanceOf(NotExistingSchedulesException.class)
+                .isInstanceOf(ValidationException.class)
                 .hasMessage("Provided set of schedules includes non-existing schedules");
     }
 
     @Test
-    void GivenWebhookRequestWithUnavailableDiscordWebhookUrl_WhenCreate_ThenThrowsUnavailableDiscordWebhookException() {
+    void GivenWebhookRequestWithUnavailableDiscordWebhookUrl_WhenCreate_ThenValidationException() {
         // Given
         UUID scheduleId = UUID.randomUUID();
         Set<UUID> schedules = Set.of(scheduleId);
@@ -135,7 +135,7 @@ class WebhookServiceTest {
 
         // When & Then
         assertThatThrownBy(() -> underTest.create(request, jwt))
-                .isInstanceOf(UnavailableDiscordWebhookException.class)
+                .isInstanceOf(ValidationException.class)
                 .hasMessage("Provided Discord webhook is not available");
     }
 
@@ -447,7 +447,7 @@ class WebhookServiceTest {
     }
 
     @Test
-    void GivenInvalidWebhookUrl_WhenUpdate_ThenThrowsInvalidWebhookUrlException() {
+    void GivenInvalidWebhookUrl_WhenUpdate_ThenThrowsValidationException() {
         // Given
         String url = "invalid url";
         WebhookRequest request = new WebhookRequest(url, Set.of());
@@ -470,12 +470,12 @@ class WebhookServiceTest {
 
         // When & Then
         assertThatThrownBy(() -> underTest.update(request, jwt, id))
-                .isInstanceOf(InvalidDiscordWebhookUrlException.class)
+                .isInstanceOf(ValidationException.class)
                 .hasMessage("Provided Discord webhook url is invalid");
     }
 
     @Test
-    void GivenWebhookRequestWithUnavailableDiscordWebhookUrl_WhenUpdate_ThenThrowsUnavailableDiscordWebhookException() {
+    void GivenWebhookRequestWithUnavailableDiscordWebhookUrl_WhenUpdate_ThenThrowsValidationException() {
         // Given
         UUID scheduleId = UUID.randomUUID();
         Set<UUID> schedules = Set.of(scheduleId);
@@ -517,12 +517,12 @@ class WebhookServiceTest {
 
         // When & Then
         assertThatThrownBy(() -> underTest.update(request, jwt, id))
-                .isInstanceOf(UnavailableDiscordWebhookException.class)
+                .isInstanceOf(ValidationException.class)
                 .hasMessage("Provided Discord webhook is not available");
     }
 
     @Test
-    void GivenRequestContainingNotExistingSchedules_WhenUpdate_ThenThrowsNotExistingSchedulesException() {
+    void GivenRequestContainingNotExistingSchedules_WhenUpdate_ThenThrowsValidationException() {
         // Given
         UUID newSchedule = UUID.fromString("57f6874d-1f91-4862-a31c-dfb8bea8ca72");
         Set<UUID> schedules = Set.of(
@@ -563,7 +563,7 @@ class WebhookServiceTest {
 
         // When & Then
         assertThatThrownBy(() -> underTest.update(request, jwt, id))
-                .isInstanceOf(NotExistingSchedulesException.class)
+                .isInstanceOf(ValidationException.class)
                 .hasMessage("Provided set of schedules includes non-existing schedules");
     }
 

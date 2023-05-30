@@ -42,19 +42,28 @@ public class WebhookService {
         String discordWebhookUrl = request.url();
 
         if (discordWebhookService.isNotValidDiscordWebhookUrl(discordWebhookUrl)) {
-            throw new InvalidDiscordWebhookUrlException();
+            throw new ValidationException(
+                    "schedules",
+                    "Provided Discord webhook url is invalid"
+            );
         }
 
         DiscordWebhook discordWebhook = discordWebhookService.getDiscordWebhookFromUrl(discordWebhookUrl);
 
         if (isDiscordWebhookUnavailable(discordWebhook, null)) {
-            throw new UnavailableDiscordWebhookException();
+            throw new ValidationException(
+                    "url",
+                    "Provided Discord webhook is not available"
+            );
         }
 
         Set<UUID> schedules = request.schedules();
 
         if (doesAnyScheduleDoNotExist(request.schedules())) {
-            throw new NotExistingSchedulesException();
+            throw new ValidationException(
+                    "schedules",
+                    "Provided set of schedules includes non-existing schedules"
+            );
         }
 
         try {
@@ -124,13 +133,19 @@ public class WebhookService {
         String discordWebhookUrl = request.url();
 
         if (discordWebhookService.isNotValidDiscordWebhookUrl(discordWebhookUrl)) {
-            throw new InvalidDiscordWebhookUrlException();
+            throw new ValidationException(
+                    "url",
+                    "Provided Discord webhook url is invalid"
+            );
         }
 
         DiscordWebhook discordWebhook = discordWebhookService.getDiscordWebhookFromUrl(discordWebhookUrl);
 
         if (isDiscordWebhookUnavailable(discordWebhook, webhook.getId())) {
-            throw new UnavailableDiscordWebhookException();
+            throw new ValidationException(
+                    "url",
+                    "Provided Discord webhook is not available"
+            );
         }
 
         Set<UUID> currentSchedules = webhook.getSchedules();
@@ -139,7 +154,10 @@ public class WebhookService {
                 .collect(Collectors.toSet());
 
         if (doesAnyScheduleDoNotExist(schedulesToCheck)) {
-            throw new NotExistingSchedulesException();
+            throw new ValidationException(
+                    "schedules",
+                    "Provided set of schedules includes non-existing schedules"
+            );
         }
 
         try {
