@@ -18,3 +18,5 @@ eureka:
 
 discord-api:
   base-url: https://discord.com/api
+
+api-key: fu1IGDv9DSgQXyJm1FIue0f3MvWgxskdOZ3iX3cROW9PXbCEQpYZclpsD5lULggqFk5eOGHGtYw2r975hpUICLPfrm8UAjFWosUG

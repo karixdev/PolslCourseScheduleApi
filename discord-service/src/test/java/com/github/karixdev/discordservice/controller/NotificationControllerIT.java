@@ -10,7 +10,6 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static com.github.tomakehurst.wiremock.client.WireMock.serverError;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
@@ -26,6 +25,20 @@ public class NotificationControllerIT extends ContainersEnvironment {
                 () -> "http://localhost:9999");
     }
 
+    @DynamicPropertySource
+    static void overrideApiKey(DynamicPropertyRegistry registry) {
+        registry.add(
+                "api-key",
+                () -> "myKey");
+    }
+
+    @Test
+    void shouldNotAllowSendingWelcomeMessageWithoutApiKey() {
+        webClient.post().uri("/api/notifications/discordId/token")
+                .exchange()
+                .expectStatus().isUnauthorized();
+    }
+
     @Test
     void shouldReceiveStatus500WhenServerErrorOccursWhileSendingWelcomeMessage() {
         stubFor(
@@ -33,7 +46,7 @@ public class NotificationControllerIT extends ContainersEnvironment {
                         .willReturn(serverError())
         );
 
-        webClient.post().uri("/api/notifications/discordId/token")
+        webClient.post().uri("/api/notifications/discordId/token?apiKey=myKey")
                 .exchange()
                 .expectStatus().isEqualTo(500);
     }
@@ -45,7 +58,7 @@ public class NotificationControllerIT extends ContainersEnvironment {
                         .willReturn(notFound())
         );
 
-        webClient.post().uri("/api/notifications/discordId/token")
+        webClient.post().uri("/api/notifications/discordId/token?apiKey=myKey")
                 .exchange()
                 .expectStatus().isBadRequest();
     }
@@ -57,7 +70,7 @@ public class NotificationControllerIT extends ContainersEnvironment {
                         .willReturn(noContent())
         );
 
-        webClient.post().uri("/api/notifications/discordId/token")
+        webClient.post().uri("/api/notifications/discordId/token?apiKey=myKey")
                 .exchange()
                 .expectStatus().isNoContent();
     }
