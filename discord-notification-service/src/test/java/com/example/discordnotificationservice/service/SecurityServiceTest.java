@@ -1,7 +1,6 @@
 package com.example.discordnotificationservice.service;
 
 import com.example.discordnotificationservice.converter.RealmRoleConverter;
-import com.example.discordnotificationservice.service.SecurityService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

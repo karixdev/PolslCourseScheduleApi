@@ -1,10 +1,9 @@
 package com.example.discordnotificationservice.mapper;
 
-import com.example.discordnotificationservice.service.DiscordWebhookService;
 import com.example.discordnotificationservice.document.DiscordWebhook;
 import com.example.discordnotificationservice.document.Webhook;
 import com.example.discordnotificationservice.dto.WebhookResponse;
-import com.example.discordnotificationservice.mapper.WebhookDTOMapper;
+import com.example.discordnotificationservice.service.DiscordWebhookService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

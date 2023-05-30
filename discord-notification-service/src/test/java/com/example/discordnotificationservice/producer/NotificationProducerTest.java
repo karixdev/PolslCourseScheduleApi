@@ -3,12 +3,10 @@ package com.example.discordnotificationservice.producer;
 import com.example.discordnotificationservice.document.DiscordWebhook;
 import com.example.discordnotificationservice.dto.Embedded;
 import com.example.discordnotificationservice.message.NotificationMessage;
-import com.example.discordnotificationservice.props.NotificationMQProperties;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 

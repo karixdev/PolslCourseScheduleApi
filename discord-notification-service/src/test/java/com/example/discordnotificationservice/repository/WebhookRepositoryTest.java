@@ -3,7 +3,6 @@ package com.example.discordnotificationservice.repository;
 import com.example.discordnotificationservice.ContainersEnvironment;
 import com.example.discordnotificationservice.document.DiscordWebhook;
 import com.example.discordnotificationservice.document.Webhook;
-import com.example.discordnotificationservice.repository.WebhookRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

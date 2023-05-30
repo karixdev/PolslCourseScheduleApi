@@ -3,7 +3,6 @@ package com.example.discordnotificationservice.service;
 import com.example.discordnotificationservice.client.ScheduleClient;
 import com.example.discordnotificationservice.dto.ScheduleResponse;
 import com.example.discordnotificationservice.exception.ResourceNotFoundException;
-import com.example.discordnotificationservice.service.ScheduleService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

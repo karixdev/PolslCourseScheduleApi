@@ -1,6 +1,5 @@
 package com.example.discordnotificationservice.converter;
 
-import com.example.discordnotificationservice.converter.RealmRoleConverter;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

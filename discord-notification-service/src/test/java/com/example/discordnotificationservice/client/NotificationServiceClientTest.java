@@ -3,8 +3,6 @@ package com.example.discordnotificationservice.client;
 import com.example.discordnotificationservice.ContainersEnvironment;
 import com.example.discordnotificationservice.exception.client.ServiceClientException;
 import com.example.discordnotificationservice.exception.client.ServiceServerException;
-import com.example.discordnotificationservice.exception.notification.NotificationServiceClientException;
-import com.example.discordnotificationservice.exception.notification.NotificationServiceServerException;
 import com.example.discordnotificationservice.testconfig.WebClientTestConfig;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import org.junit.jupiter.api.Test;

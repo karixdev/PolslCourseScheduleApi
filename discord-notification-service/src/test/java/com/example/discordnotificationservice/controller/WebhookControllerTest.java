@@ -1,6 +1,5 @@
 package com.example.discordnotificationservice.controller;
 
-import com.example.discordnotificationservice.controller.WebhookController;
 import com.example.discordnotificationservice.dto.WebhookRequest;
 import com.example.discordnotificationservice.exception.InvalidDiscordWebhookUrlException;
 import com.example.discordnotificationservice.exception.NotExistingSchedulesException;
