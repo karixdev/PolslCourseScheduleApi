@@ -6,12 +6,14 @@ import com.github.karixdev.courseservice.dto.CourseRequest;
 import com.github.karixdev.courseservice.dto.CourseResponse;
 import com.github.karixdev.courseservice.entity.Course;
 import com.github.karixdev.courseservice.exception.ResourceNotFoundException;
+import com.github.karixdev.courseservice.exception.ScheduleServiceClientException;
 import com.github.karixdev.courseservice.exception.ValidationException;
 import com.github.karixdev.courseservice.mapper.CourseMapper;
 import com.github.karixdev.courseservice.producer.CourseEventProducer;
 import com.github.karixdev.courseservice.repository.CourseRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,6 +24,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CourseService {
     private final CourseRepository repository;
     private final CourseMapper mapper;
@@ -60,7 +63,12 @@ public class CourseService {
     }
 
     private boolean doesScheduleExist(UUID scheduleId) {
-        return scheduleClient.findById(scheduleId).isPresent();
+        try {
+            return scheduleClient.findById(scheduleId).isPresent();
+        } catch (ScheduleServiceClientException e) {
+            log.error("Schedule service returned client error status", e);
+            return false;
+        }
     }
 
     private Course findByIdOrElseThrow(UUID id) {

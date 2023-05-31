@@ -8,6 +8,7 @@ import com.github.karixdev.courseservice.entity.Course;
 import com.github.karixdev.courseservice.entity.CourseType;
 import com.github.karixdev.courseservice.entity.WeekType;
 import com.github.karixdev.courseservice.exception.ResourceNotFoundException;
+import com.github.karixdev.courseservice.exception.ScheduleServiceClientException;
 import com.github.karixdev.courseservice.exception.ValidationException;
 import com.github.karixdev.courseservice.mapper.CourseMapper;
 import com.github.karixdev.courseservice.producer.CourseEventProducer;
@@ -85,12 +86,25 @@ class CourseServiceTest {
     }
 
     @Test
-    void GivenCourseRequestWithNotExistingSchedule_WhenCreate_ThenThrowsNotExistingScheduleException() {
+    void GivenCourseRequestWithNotExistingSchedule_WhenCreate_ThenThrowsValidationException() {
         // Given
         CourseRequest courseRequest = exampleCourseRequest;
 
         when(scheduleClient.findById(eq(courseRequest.getScheduleId())))
                 .thenReturn(Optional.empty());
+
+        // When & Then
+        assertThatThrownBy(() -> underTest.create(courseRequest))
+                .isInstanceOf(ValidationException.class);
+    }
+
+    @Test
+    void GivenCourseRequestScheduleIdSuchThatScheduleServiceClientExceptionIsThrown_WhenCreate_ThenThrowsValidationException() {
+        // Given
+        CourseRequest courseRequest = exampleCourseRequest;
+
+        when(scheduleClient.findById(eq(courseRequest.getScheduleId())))
+                .thenThrow(ScheduleServiceClientException.class);
 
         // When & Then
         assertThatThrownBy(() -> underTest.create(courseRequest))
@@ -132,7 +146,7 @@ class CourseServiceTest {
     }
 
     @Test
-    void GivenCourseRequestWithNotExistingSchedule_WhenUpdate_ThenThrowsNotExistingScheduleException() {
+    void GivenCourseRequestWithNotExistingSchedule_WhenUpdate_ThenThrowsValidationException() {
         // Given
         UUID id = UUID.randomUUID();
 
