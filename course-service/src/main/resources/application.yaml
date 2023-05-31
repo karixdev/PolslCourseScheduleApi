@@ -44,6 +44,8 @@ schedule-service:
 
 springdoc:
   swagger-ui:
-    path: /course-service/v3/swagger-ui.html
-  api-docs:
-    path: /course-service/v3/api-docs
+    path: /swagger-ui.html
+
+keycloak:
+  server-url: http://localhost:8000
+  realm: polsl-course-api
