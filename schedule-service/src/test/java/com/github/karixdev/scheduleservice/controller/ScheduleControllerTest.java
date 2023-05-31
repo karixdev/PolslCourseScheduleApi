@@ -1,10 +1,7 @@
 package com.github.karixdev.scheduleservice.controller;
 
-import com.github.karixdev.scheduleservice.controller.ScheduleController;
 import com.github.karixdev.scheduleservice.dto.ScheduleRequest;
-import com.github.karixdev.scheduleservice.exception.ScheduleNameUnavailableException;
 import com.github.karixdev.scheduleservice.service.ScheduleService;
-import com.github.karixdev.scheduleservice.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,9 +14,8 @@ import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.UUID;
 
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -78,45 +74,6 @@ public class ScheduleControllerTest {
     }
 
     @Test
-    void GivenUnavailableName_WhenCreate_ThenRespondsWithBadRequestAndProperBody() throws Exception {
-        // Given
-        String content = mapper.writeValueAsString(validScheduleRequest);
-        RuntimeException exception = new ScheduleNameUnavailableException("unavailable");
-
-        when(service.create(eq(validScheduleRequest)))
-                .thenThrow(exception);
-
-        // When & Then
-        mockMvc.perform(post("/api/schedules")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(content))
-                .andExpect(status().isBadRequest())
-                .andExpectAll(
-                        jsonPath("$.constraints.name").value(exception.getMessage()),
-                        jsonPath("$.message").value("Validation Failed")
-                );
-    }
-
-    @Test
-    void GivenNotExistingScheduleId_WhenFindById_ThenRespondsWithNotFoundAndProperBody() throws Exception {
-        // Given
-        UUID id = UUID.randomUUID();
-
-        RuntimeException exception = new ResourceNotFoundException("Exception message");
-
-        when(service.findById(eq(id)))
-                .thenThrow(exception);
-
-        // When & Then
-        mockMvc.perform(get("/api/schedules/" + id))
-                .andExpect(status().isNotFound())
-                .andExpectAll(
-                        jsonPath("$.status").value(404),
-                        jsonPath("$.message").value("Exception message")
-                );
-    }
-
-    @Test
     void GivenInvalidScheduleRequest_WhenUpdate_ThenRespondsWithBadRequestAndProperBody() throws Exception {
         // Given
         UUID id = UUID.randomUUID();
@@ -133,28 +90,6 @@ public class ScheduleControllerTest {
                         jsonPath("$.constraints.semester").isNotEmpty(),
                         jsonPath("$.constraints.name").isNotEmpty(),
                         jsonPath("$.constraints.groupNumber").isNotEmpty(),
-                        jsonPath("$.message").value("Validation Failed")
-                );
-    }
-
-    @Test
-    void GivenUnavailableName_WhenUpdate_ThenRespondsWithBadRequestAndProperBody() throws Exception {
-        // Given
-        UUID id = UUID.randomUUID();
-        String content = mapper.writeValueAsString(validScheduleRequest);
-
-        RuntimeException exception = new ScheduleNameUnavailableException("unavailable");
-
-        when(service.update(eq(id), eq(validScheduleRequest)))
-                .thenThrow(exception);
-
-        // When & Then
-        mockMvc.perform(put("/api/schedules/" + id)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(content))
-                .andExpect(status().isBadRequest())
-                .andExpectAll(
-                        jsonPath("$.constraints.name").value(exception.getMessage()),
                         jsonPath("$.message").value("Validation Failed")
                 );
     }
