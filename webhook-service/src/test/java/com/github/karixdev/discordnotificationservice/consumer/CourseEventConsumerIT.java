@@ -69,9 +69,6 @@ class CourseEventConsumerIT extends ContainersEnvironment {
         UUID scheduleId = UUID.randomUUID();
         UUID otherScheduleId = UUID.randomUUID();
 
-        System.out.println(scheduleId);
-        System.out.println(otherScheduleId);
-
         DiscordWebhook discordWebhook = new DiscordWebhook(
                 "discordId",
                 "token"

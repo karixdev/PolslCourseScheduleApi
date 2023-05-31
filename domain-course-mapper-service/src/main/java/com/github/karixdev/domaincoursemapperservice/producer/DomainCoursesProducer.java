@@ -22,8 +22,6 @@ public class DomainCoursesProducer {
                 courses
         );
 
-        System.out.println(message);
-
         rabbitTemplate.convertAndSend(
                 COURSES_EXCHANGE,
                 DOMAIN_COURSES_ROUTING_KEY,

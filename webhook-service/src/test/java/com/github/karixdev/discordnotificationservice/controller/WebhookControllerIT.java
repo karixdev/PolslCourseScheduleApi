@@ -510,15 +510,9 @@ public class WebhookControllerIT extends ContainersEnvironment {
 
         UUID scheduleId = UUID.randomUUID();
 
-        System.out.println(scheduleId);
-
         seedDatabase(1, 2, token, scheduleId);
 
         Webhook webhookBefore = webhookRepository.findAll().get(0);
-
-        System.out.println("----------------------------");
-        System.out.println(webhookRepository.findAll());
-        System.out.println("----------------------------");
 
         String payload = """
                 {
@@ -667,7 +661,6 @@ public class WebhookControllerIT extends ContainersEnvironment {
         String newWebhookUrl = "https://discord.com/api/webhooks/discordApiId3/token3";
 
         UUID newSchedule = UUID.randomUUID();
-        System.out.println(newSchedule);
 
         stubFor(
                 get(urlPathEqualTo("/api/schedules"))
