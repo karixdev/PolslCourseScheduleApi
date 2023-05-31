@@ -23,6 +23,7 @@ public class ApiGatewayApplication {
 				.route(r -> r.path("/api/notifications/**").uri("lb://notification-service"))
 
 				.route(r -> r.path("/course-service/v3/api-docs").uri("lb://course-service"))
+				.route(r -> r.path("/schedule-service/v3/api-docs").uri("lb://schedule-service"))
 				.build();
 	}
 

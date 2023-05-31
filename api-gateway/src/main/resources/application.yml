@@ -17,3 +17,5 @@ springdoc:
     urls:
       - url: /course-service/v3/api-docs
         name: Course Service
+      - url: /schedule-service/v3/api-docs
+        name: Schedule Service

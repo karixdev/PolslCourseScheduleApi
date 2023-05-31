@@ -42,3 +42,13 @@ eureka:
 schedule:
   job:
     cron: 0 0 */1 * * *
+
+springdoc:
+  swagger-ui:
+    path: /schedule-service/v3/swagger-ui.html
+  api-docs:
+    path: /schedule-service/v3/api-docs
+
+keycloak:
+  server-url: http://localhost:8000
+  realm: polsl-course-api
