@@ -53,7 +53,7 @@ public class ScheduleServiceTest {
     }
 
     @Test
-    void GivenScheduleRequestWithUnavailableScheduleName_WhenCreate_ThenThrowsScheduleNameUnavailableExceptionWithProperMessage() {
+    void GivenScheduleRequestWithUnavailableScheduleName_WhenCreate_ThenThrowsValidationException() {
         // Given
         ScheduleRequest scheduleRequest = new ScheduleRequest(
                 1,
@@ -187,7 +187,7 @@ public class ScheduleServiceTest {
     }
 
     @Test
-    void GivenScheduleRequestWithUnavailableName_WhenUpdate_ThenThrowsScheduleNameUnavailableExceptionWithProperMessage() {
+    void GivenScheduleRequestWithUnavailableName_WhenUpdate_ThenThrowsValidationException() {
         // Given
         UUID id = UUID.randomUUID();
         ScheduleRequest scheduleRequest = new ScheduleRequest(
