@@ -45,7 +45,10 @@ notification-service:
 
 springdoc:
   swagger-ui:
-    path: /swagger-ui.html
+    path: /webhook-service/v3/swagger-ui.html
+  api-docs:
+    path: /webhook-service/v3/api-docs
+
 
 keycloak:
   server-url: http://localhost:8000

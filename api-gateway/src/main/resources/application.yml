@@ -19,3 +19,5 @@ springdoc:
         name: Course Service
       - url: /schedule-service/v3/api-docs
         name: Schedule Service
+      - url: /webhook-service/v3/api-docs
+        name: Webhook Service
