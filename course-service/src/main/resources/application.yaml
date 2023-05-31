@@ -44,4 +44,6 @@ schedule-service:
 
 springdoc:
   swagger-ui:
-    path: /swagger-ui.html
+    path: /course-service/v3/swagger-ui.html
+  api-docs:
+    path: /course-service/v3/api-docs
