@@ -6,4 +6,4 @@ The aim of the project was to build a publicly accessible course schedule REST A
 The course schedules are cyclically updated - by default every hour.
 
 ## Architecture
-<img src="https://github.com/karixdev/PolslCourseScheduleApi/blob/v2-dev/images/architecture.png" width="100%"/>
+<img src="https://github.com/karixdev/PolslCourseScheduleApi/blob/v2-dev/images/architecture.svg" width="100%"/>
