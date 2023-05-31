@@ -4,7 +4,7 @@ import com.github.karixdev.scheduleservice.dto.ScheduleRequest;
 import com.github.karixdev.scheduleservice.dto.ScheduleResponse;
 import com.github.karixdev.scheduleservice.entity.Schedule;
 import com.github.karixdev.scheduleservice.exception.ResourceNotFoundException;
-import com.github.karixdev.scheduleservice.exception.ScheduleNameUnavailableException;
+import com.github.karixdev.scheduleservice.exception.ValidationException;
 import com.github.karixdev.scheduleservice.message.ScheduleEventType;
 import com.github.karixdev.scheduleservice.producer.ScheduleEventProducer;
 import com.github.karixdev.scheduleservice.repository.ScheduleRepository;
@@ -26,8 +26,10 @@ public class ScheduleService {
     @Transactional
     public ScheduleResponse create(ScheduleRequest scheduleRequest) {
         if (repository.findByName(scheduleRequest.name()).isPresent()) {
-            throw new ScheduleNameUnavailableException(
-                    scheduleRequest.name());
+            throw new ValidationException(
+                    "name",
+                    "name %s is unavailable".formatted(scheduleRequest.name())
+            );
         }
 
         Schedule schedule = repository.save(Schedule.builder()
@@ -101,8 +103,10 @@ public class ScheduleService {
         Optional<Schedule> scheduleWithName = repository.findByName(scheduleRequest.name());
 
         if (scheduleWithName.isPresent() && !scheduleWithName.get().equals(schedule)) {
-            throw new ScheduleNameUnavailableException(
-                    scheduleRequest.name());
+            throw new ValidationException(
+                    "name",
+                    "name %s is unavailable".formatted(scheduleRequest.name())
+            );
         }
 
         schedule.setName(scheduleRequest.name());

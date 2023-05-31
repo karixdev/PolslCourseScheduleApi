@@ -4,7 +4,7 @@ import com.github.karixdev.scheduleservice.dto.ScheduleRequest;
 import com.github.karixdev.scheduleservice.dto.ScheduleResponse;
 import com.github.karixdev.scheduleservice.entity.Schedule;
 import com.github.karixdev.scheduleservice.exception.ResourceNotFoundException;
-import com.github.karixdev.scheduleservice.exception.ScheduleNameUnavailableException;
+import com.github.karixdev.scheduleservice.exception.ValidationException;
 import com.github.karixdev.scheduleservice.message.ScheduleEventType;
 import com.github.karixdev.scheduleservice.producer.ScheduleEventProducer;
 import com.github.karixdev.scheduleservice.repository.ScheduleRepository;
@@ -69,8 +69,7 @@ public class ScheduleServiceTest {
 
         // When & Then
         assertThatThrownBy(() -> underTest.create(scheduleRequest))
-                .isInstanceOf(ScheduleNameUnavailableException.class)
-                .hasMessage("name schedule is unavailable");
+                .isInstanceOf(ValidationException.class);
     }
 
     @Test
@@ -215,8 +214,7 @@ public class ScheduleServiceTest {
 
         // When & Then
         assertThatThrownBy(() -> underTest.update(id, scheduleRequest))
-                .isInstanceOf(ScheduleNameUnavailableException.class)
-                .hasMessage("name schedule-name is unavailable");
+                .isInstanceOf(ValidationException.class);
     }
 
     @Test
