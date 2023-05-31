@@ -42,3 +42,11 @@ discord-api:
 notification-service:
   base-url: http://notification-service
   api-key: fu1IGDv9DSgQXyJm1FIue0f3MvWgxskdOZ3iX3cROW9PXbCEQpYZclpsD5lULggqFk5eOGHGtYw2r975hpUICLPfrm8UAjFWosUG
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+keycloak:
+  server-url: http://localhost:8000
+  realm: polsl-course-api
