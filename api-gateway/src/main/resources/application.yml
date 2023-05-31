@@ -5,32 +5,16 @@ spring:
   application:
     name: api-gateway
 
-  cloud:
-    gateway:
-      discovery:
-        locator:
-          enabled: true
-      routes:
-        - id: schedule-service
-          uri: lb://schedule-service
-          predicates:
-            - Path=/api/schedules/**
-        - id: webhook-service
-          uri: lb://webhook-service
-          predicates:
-            - Path=/api/webhooks/**
-        - id: course-service
-          uri: lb://course-service
-          predicates:
-            - Path=/api/course-service/**
-        - id: notification-service
-          uri: lb://notification-service
-          predicates:
-            - Path=/api/notifications/**
-
 eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka
   instance:
     hostname: localhost
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    urls:
+      - url: /course-service/v3/api-docs
+        name: Course service
