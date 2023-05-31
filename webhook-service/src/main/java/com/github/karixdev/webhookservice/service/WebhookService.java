@@ -9,11 +9,13 @@ import com.github.karixdev.webhookservice.exception.ForbiddenAccessException;
 import com.github.karixdev.webhookservice.exception.ResourceNotFoundException;
 import com.github.karixdev.webhookservice.exception.ValidationException;
 import com.github.karixdev.webhookservice.exception.client.ServiceClientException;
+import com.github.karixdev.webhookservice.exception.client.ServiceServerException;
 import com.github.karixdev.webhookservice.mapper.WebhookDTOMapper;
 import com.github.karixdev.webhookservice.message.CoursesUpdateMessage;
 import com.github.karixdev.webhookservice.producer.NotificationProducer;
 import com.github.karixdev.webhookservice.repository.WebhookRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -27,6 +29,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class WebhookService {
     private final ScheduleService scheduleService;
@@ -196,14 +199,18 @@ public class WebhookService {
     }
 
     public void handleCourseUpdateMessage(CoursesUpdateMessage message) {
-        String scheduleName = scheduleService.getScheduleName(message.scheduleId());
+        try {
+            String scheduleName = scheduleService.getScheduleName(message.scheduleId());
 
-        findBySchedule(message.scheduleId()).stream()
-                .map(Webhook::getDiscordWebhook)
-                .forEach(discordWebhook ->
-                        notificationProducer.produceNotificationMessage(
-                                scheduleName,
-                                discordWebhook)
-                );
+            findBySchedule(message.scheduleId()).stream()
+                    .map(Webhook::getDiscordWebhook)
+                    .forEach(discordWebhook ->
+                            notificationProducer.produceNotificationMessage(
+                                    scheduleName,
+                                    discordWebhook)
+                    );
+        } catch (ServiceClientException | ServiceServerException e) {
+            log.error("Problem occurred while trying to handle course update message", e);
+        }
     }
 }
