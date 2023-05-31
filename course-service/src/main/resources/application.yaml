@@ -41,3 +41,7 @@ eureka:
 
 schedule-service:
   base-url: http://schedule-service
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
