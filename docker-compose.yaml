@@ -75,17 +75,3 @@ services:
       SPRING_PROFILES_ACTIVE: docker
     ports:
       - '8761:8761'
-
-  api-gateway:
-    container_name: api-gateway
-    build:
-      context: api-gateway
-      dockerfile: Dockerfile
-    environment:
-      SPRING_PROFILES_ACTIVE: docker
-      EUREKA_NAME: discovery-server
-      EUREKA_PORT: 8761
-    ports:
-      - '9090:9090'
-    depends_on:
-      - discovery-server
