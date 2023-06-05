@@ -1,8 +1,14 @@
 package com.github.karixdev.scheduleservice.controller;
 
+import com.github.karixdev.scheduleservice.dto.ErrorResponse;
 import com.github.karixdev.scheduleservice.dto.ScheduleRequest;
 import com.github.karixdev.scheduleservice.dto.ScheduleResponse;
+import com.github.karixdev.scheduleservice.dto.ValidationErrorResponse;
 import com.github.karixdev.scheduleservice.service.ScheduleService;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,6 +25,26 @@ import java.util.UUID;
 public class ScheduleController {
     private final ScheduleService service;
 
+    @ApiResponse(
+            responseCode = "201",
+            description = "Created",
+            content = @Content(schema = @Schema(implementation = ScheduleResponse.class))
+    )
+    @ApiResponse(
+            responseCode = "400",
+            description = "Bad request",
+            content = @Content(schema = @Schema(implementation = ValidationErrorResponse.class))
+    )
+    @ApiResponse(
+            responseCode = "401",
+            description = "Unauthorized",
+            content = @Content(schema = @Schema(hidden = true))
+    )
+    @ApiResponse(
+            responseCode = "403",
+            description = "Forbidden",
+            content = @Content(schema = @Schema(hidden = true))
+    )
     @PostMapping
     ResponseEntity<ScheduleResponse> create(
             @Valid @RequestBody ScheduleRequest scheduleRequest
@@ -29,6 +55,11 @@ public class ScheduleController {
         );
     }
 
+    @ApiResponse(
+            responseCode = "200",
+            description = "OK",
+            content = @Content(array = @ArraySchema(schema = @Schema(implementation = ScheduleController.class)))
+    )
     @GetMapping
     ResponseEntity<List<ScheduleResponse>> findAll(
             @RequestParam(name = "ids", required = false) Set<UUID> ids
@@ -39,6 +70,16 @@ public class ScheduleController {
         );
     }
 
+    @ApiResponse(
+            responseCode = "200",
+            description = "Created",
+            content = @Content(schema = @Schema(implementation = ScheduleResponse.class))
+    )
+    @ApiResponse(
+            responseCode = "404",
+            description = "Not found",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+    )
     @GetMapping("/{id}")
     ResponseEntity<ScheduleResponse> findById(
             @PathVariable(name = "id") UUID id
@@ -49,6 +90,31 @@ public class ScheduleController {
         );
     }
 
+    @ApiResponse(
+            responseCode = "200",
+            description = "OK",
+            content = @Content(schema = @Schema(implementation = ScheduleResponse.class))
+    )
+    @ApiResponse(
+            responseCode = "400",
+            description = "Bad request",
+            content = @Content(schema = @Schema(implementation = ValidationErrorResponse.class))
+    )
+    @ApiResponse(
+            responseCode = "404",
+            description = "Not found",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+    )
+    @ApiResponse(
+            responseCode = "401",
+            description = "Unauthorized",
+            content = @Content(schema = @Schema(hidden = true))
+    )
+    @ApiResponse(
+            responseCode = "403",
+            description = "Forbidden",
+            content = @Content(schema = @Schema(hidden = true))
+    )
     @PutMapping("/{id}")
     ResponseEntity<ScheduleResponse> update(
             @PathVariable(name = "id") UUID id,
@@ -60,6 +126,26 @@ public class ScheduleController {
         );
     }
 
+    @ApiResponse(
+            responseCode = "204",
+            description = "No Content",
+            content = @Content(schema = @Schema(hidden = true))
+    )
+    @ApiResponse(
+            responseCode = "404",
+            description = "Not found",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+    )
+    @ApiResponse(
+            responseCode = "401",
+            description = "Unauthorized",
+            content = @Content(schema = @Schema(hidden = true))
+    )
+    @ApiResponse(
+            responseCode = "403",
+            description = "Forbidden",
+            content = @Content(schema = @Schema(hidden = true))
+    )
     @DeleteMapping("/{id}")
     ResponseEntity<ScheduleResponse> delete(
             @PathVariable(name = "id") UUID id
@@ -69,6 +155,26 @@ public class ScheduleController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+    @ApiResponse(
+            responseCode = "204",
+            description = "No Content",
+            content = @Content(schema = @Schema(hidden = true))
+    )
+    @ApiResponse(
+            responseCode = "404",
+            description = "Not found",
+            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+    )
+    @ApiResponse(
+            responseCode = "401",
+            description = "Unauthorized",
+            content = @Content(schema = @Schema(hidden = true))
+    )
+    @ApiResponse(
+            responseCode = "403",
+            description = "Forbidden",
+            content = @Content(schema = @Schema(hidden = true))
+    )
     @PostMapping("/{id}/courses/update")
     ResponseEntity<Void> requestScheduleCoursesUpdate(
             @PathVariable(name = "id") UUID id
