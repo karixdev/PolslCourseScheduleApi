@@ -37,6 +37,7 @@ services:
   rabbitmq:
     container_name: 'rabbitmq'
     image: rabbitmq:3.11.7-management-alpine
+    restart: always
     environment:
       RABBITMQ_DEFAULT_USER: user
       RABBITMQ_DEFAULT_PASS: password
@@ -47,6 +48,7 @@ services:
   keycloak:
     container_name: 'keycloak'
     image: quay.io/keycloak/keycloak:latest
+    restart: always
     environment:
       DB_VENDOR: POSTGRES
       DB_ADDR: keycloak-postgres
@@ -68,6 +70,7 @@ services:
 
   discovery-server:
     container_name: 'discovery-server'
+    restart: always
     build:
       context: discovery-service
       dockerfile: Dockerfile
