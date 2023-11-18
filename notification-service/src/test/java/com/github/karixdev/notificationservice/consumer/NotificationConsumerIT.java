@@ -4,6 +4,7 @@ import com.github.karixdev.notificationservice.ContainersEnvironment;
 import com.github.karixdev.notificationservice.dto.DiscordWebhook;
 import com.github.karixdev.notificationservice.message.NotificationMessage;
 import com.github.tomakehurst.wiremock.WireMockServer;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
@@ -30,7 +31,7 @@ class NotificationConsumerIT extends ContainersEnvironment {
     @Autowired
     RabbitAdmin rabbitAdmin;
 
-    WireMockServer wm;
+    WireMockServer wm = new WireMockServer(9999);;
 
     @DynamicPropertySource
     static void overrideDiscordApiBaseUrl(DynamicPropertyRegistry registry) {
@@ -41,10 +42,14 @@ class NotificationConsumerIT extends ContainersEnvironment {
 
     @BeforeEach
     void setUp() {
-        wm = new WireMockServer(9999);
         wm.start();
 
         rabbitAdmin.purgeQueue(NOTIFICATION_QUEUE, true);
+    }
+
+    @AfterEach
+    void tearDown() {
+        wm.stop();
     }
 
     @Test

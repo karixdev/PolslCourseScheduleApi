@@ -12,6 +12,7 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import org.assertj.core.api.Assertions;
 import org.awaitility.Awaitility;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,7 +46,7 @@ class ScheduleEventConsumerIT extends ContainersEnvironment {
     @Autowired
     RabbitAdmin admin;
 
-    WireMockServer wm;
+    WireMockServer wm = new WireMockServer(9999);
 
     UUID exampleScheduleId;
     ScheduleEventMessage exampleMessage;
@@ -62,7 +63,6 @@ class ScheduleEventConsumerIT extends ContainersEnvironment {
 
     @BeforeEach
     void setUp() {
-        wm = new WireMockServer(9999);
         wm.start();
 
         admin.purgeQueue(SCHEDULE_UPDATE_QUEUE, true);
@@ -105,6 +105,11 @@ class ScheduleEventConsumerIT extends ContainersEnvironment {
                         )
                 )
         );
+    }
+
+    @AfterEach
+    void tearDown() {
+        wm.stop();
     }
 
     @Test

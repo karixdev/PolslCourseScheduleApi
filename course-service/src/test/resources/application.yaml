@@ -8,3 +8,7 @@ spring:
 
 schedule-service:
   base-url: http://localhost:9999
+
+keycloak:
+  server-url: http://localhost:8000
+  realm: polsl-course-api
