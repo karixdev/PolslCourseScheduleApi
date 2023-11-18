@@ -34,6 +34,17 @@ services:
     ports:
       - '5433:5432'
 
+  discord-webhooks-mongo:
+    container_name: 'discord-webhooks-mongo'
+    image: mongo:latest
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+      MONGO_INITDB_DATABASE: discord-webhooks-service
+    ports:
+      - '27017:27017'
+
   rabbitmq:
     container_name: 'rabbitmq'
     image: rabbitmq:3.11.7-management-alpine
