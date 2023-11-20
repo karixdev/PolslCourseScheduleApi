@@ -109,13 +109,12 @@ services:
     depends_on:
       - zookeeper
     ports:
-      - "9092:9092"
-      - "9101:9101"
+      - '29092:29092'
     environment:
       KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:9092,PLAINTEXT_HOST://localhost:29092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:29092,PLAINTEXT_HOST://localhost:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 1
@@ -148,7 +147,18 @@ services:
           connections:
             local:
               properties:
-                bootstrap.servers: "broker:29092"
+                bootstrap.servers: "broker:9092"
           pagination:
             page-size: 25 # number of elements per page (default : 25)
             threads: 8 # Number of parallel threads to resolve page
+
+  web-scraper-service:
+    image: karix02/polsl-course-schedule-api-web-scraper-service:1
+    container_name: web-scraper-service
+    restart: always
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      BOOTSTRAP_SERVER_HOST: broker
+      BOOTSTRAP_SERVER_PORT: 9092
+      EUREKA_HOST: discovery-server
+      EUREKA_PORT: 8761

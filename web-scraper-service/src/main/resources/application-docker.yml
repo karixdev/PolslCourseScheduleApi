@@ -1,0 +1,16 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: web-scraper-service
+
+  kafka:
+    bootstrap-servers: ${BOOTSTRAP_SERVER_HOST}:${BOOTSTRAP_SERVER_PORT}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_HOST}:${EUREKA_PORT}/eureka
+  instance:
+    prefer-ip-address: true
