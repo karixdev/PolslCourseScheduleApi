@@ -1,4 +1,4 @@
-package com.github.karixdev.commonservice.model.course.raw;
+package com.github.karixdev.commonservice.model.schedule.raw;
 
 import lombok.Builder;
 

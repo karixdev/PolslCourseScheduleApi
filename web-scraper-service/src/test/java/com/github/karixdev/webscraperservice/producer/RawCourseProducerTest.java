@@ -1,8 +1,8 @@
 package com.github.karixdev.webscraperservice.producer;
 
-import com.github.karixdev.commonservice.event.course.RawCourse;
+import com.github.karixdev.commonservice.event.schedule.RawCourse;
 import com.github.karixdev.commonservice.model.course.raw.CourseCell;
-import com.github.karixdev.commonservice.model.course.raw.TimeCell;
+import com.github.karixdev.commonservice.model.schedule.raw.TimeCell;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

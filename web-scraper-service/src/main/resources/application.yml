@@ -27,9 +27,9 @@ plan-polsl-url: https://plan.polsl.pl/
 
 kafka:
   topics:
-    schedule-event: schedule
-    course-raw: course.mapping.raw
-    dlt: web-scraper-service.course.dlt
+    schedule-event: schedule.event
+    course-raw: schedule.raw
+    dlt: web-scraper-service.schedule.event.dlt
   config:
     back-off:
       max-retries: 2

@@ -2,7 +2,7 @@ package com.github.karixdev.webscraperservice.mapper;
 
 import com.github.karixdev.commonservice.model.course.raw.CourseCell;
 import com.github.karixdev.commonservice.model.course.raw.Link;
-import com.github.karixdev.commonservice.model.course.raw.TimeCell;
+import com.github.karixdev.commonservice.model.schedule.raw.TimeCell;
 import com.github.karixdev.webscraperservice.model.PlanPolslResponse;
 import com.github.karixdev.webscraperservice.service.HtmlElementService;
 import org.jsoup.Jsoup;

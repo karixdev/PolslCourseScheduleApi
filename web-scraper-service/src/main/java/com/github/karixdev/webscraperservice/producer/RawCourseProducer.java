@@ -1,8 +1,8 @@
 package com.github.karixdev.webscraperservice.producer;
 
-import com.github.karixdev.commonservice.event.course.RawCourse;
+import com.github.karixdev.commonservice.event.schedule.RawCourse;
 import com.github.karixdev.commonservice.model.course.raw.CourseCell;
-import com.github.karixdev.commonservice.model.course.raw.TimeCell;
+import com.github.karixdev.commonservice.model.schedule.raw.TimeCell;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;

@@ -3,7 +3,7 @@ package com.github.karixdev.webscraperservice.service;
 import com.github.karixdev.commonservice.event.EventType;
 import com.github.karixdev.commonservice.event.schedule.ScheduleEvent;
 import com.github.karixdev.commonservice.model.course.raw.CourseCell;
-import com.github.karixdev.commonservice.model.course.raw.TimeCell;
+import com.github.karixdev.commonservice.model.schedule.raw.TimeCell;
 import com.github.karixdev.webscraperservice.exception.EmptyCourseCellsSetException;
 import com.github.karixdev.webscraperservice.exception.EmptyTimeCellSetException;
 import com.github.karixdev.webscraperservice.model.PlanPolslResponse;

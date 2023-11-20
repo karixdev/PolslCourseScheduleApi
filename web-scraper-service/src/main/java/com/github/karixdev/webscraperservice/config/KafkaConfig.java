@@ -1,6 +1,6 @@
 package com.github.karixdev.webscraperservice.config;
 
-import com.github.karixdev.commonservice.event.course.RawCourse;
+import com.github.karixdev.commonservice.event.schedule.RawCourse;
 import com.github.karixdev.commonservice.event.schedule.ScheduleEvent;
 import com.github.karixdev.webscraperservice.exception.PlanPolslUnavailableException;
 import lombok.extern.slf4j.Slf4j;

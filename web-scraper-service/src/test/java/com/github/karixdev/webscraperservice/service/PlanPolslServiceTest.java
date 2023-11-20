@@ -1,7 +1,7 @@
 package com.github.karixdev.webscraperservice.service;
 
 import com.github.karixdev.commonservice.model.course.raw.CourseCell;
-import com.github.karixdev.commonservice.model.course.raw.TimeCell;
+import com.github.karixdev.commonservice.model.schedule.raw.TimeCell;
 import com.github.karixdev.webscraperservice.client.PlanPolslClient;
 import com.github.karixdev.webscraperservice.mapper.PlanPolslResponseMapper;
 import com.github.karixdev.webscraperservice.model.PlanPolslResponse;
