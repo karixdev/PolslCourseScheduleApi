@@ -12,6 +12,7 @@ import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 
 @Configuration
 public class PlanPolslClientConfig {
+
     @Bean
     PlanPolslClient planPolslClient(
             @Value("${plan-polsl-url}") String planPolslUrl
@@ -31,4 +32,5 @@ public class PlanPolslClientConfig {
 
         return factory.createClient(PlanPolslClient.class);
     }
+
 }

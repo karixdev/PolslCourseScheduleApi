@@ -1,9 +1,9 @@
 package com.github.karixdev.webscraperservice.mapper;
 
-import com.github.karixdev.webscraperservice.model.CourseCell;
-import com.github.karixdev.webscraperservice.model.Link;
+import com.github.karixdev.commonservice.model.course.raw.CourseCell;
+import com.github.karixdev.commonservice.model.course.raw.Link;
+import com.github.karixdev.commonservice.model.course.raw.TimeCell;
 import com.github.karixdev.webscraperservice.model.PlanPolslResponse;
-import com.github.karixdev.webscraperservice.model.TimeCell;
 import com.github.karixdev.webscraperservice.service.HtmlElementService;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -22,7 +22,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class PlanPolslResponseMapperTest {
+class PlanPolslResponseMapperTest {
+
     @InjectMocks
     PlanPolslResponseMapper underTest;
 
@@ -215,4 +216,5 @@ public class PlanPolslResponseMapperTest {
                 )
         ));
     }
+
 }

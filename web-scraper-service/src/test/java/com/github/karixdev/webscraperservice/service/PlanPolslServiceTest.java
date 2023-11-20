@@ -1,10 +1,10 @@
 package com.github.karixdev.webscraperservice.service;
 
+import com.github.karixdev.commonservice.model.course.raw.CourseCell;
+import com.github.karixdev.commonservice.model.course.raw.TimeCell;
 import com.github.karixdev.webscraperservice.client.PlanPolslClient;
 import com.github.karixdev.webscraperservice.mapper.PlanPolslResponseMapper;
-import com.github.karixdev.webscraperservice.model.CourseCell;
 import com.github.karixdev.webscraperservice.model.PlanPolslResponse;
-import com.github.karixdev.webscraperservice.model.TimeCell;
 import com.github.karixdev.webscraperservice.props.PlanPolslClientProperties;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,11 +17,11 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class PlanPolslServiceTest {
+class PlanPolslServiceTest {
+
     @InjectMocks
     PlanPolslService underTest;
 
@@ -46,11 +46,11 @@ public class PlanPolslServiceTest {
                 """;
 
         when(client.getSchedule(
-                eq(planPolslId),
-                eq(type),
-                eq(wd),
-                eq(PlanPolslClientProperties.WIN_W),
-                eq(PlanPolslClientProperties.WIN_H)))
+                planPolslId,
+                type,
+                wd,
+                PlanPolslClientProperties.WIN_W,
+                PlanPolslClientProperties.WIN_H))
                 .thenReturn(new ByteArrayResource(clientResponse.getBytes()));
 
         TimeCell timeCell = new TimeCell("07-00:08:00");
@@ -80,4 +80,5 @@ public class PlanPolslServiceTest {
                         Set.of(courseCell))
                 );
     }
+
 }

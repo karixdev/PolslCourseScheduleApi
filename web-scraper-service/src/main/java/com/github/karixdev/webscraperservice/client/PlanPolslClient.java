@@ -7,6 +7,7 @@ import org.springframework.web.service.annotation.HttpExchange;
 
 @HttpExchange
 public interface PlanPolslClient {
+
     @GetExchange("/plan.php")
     ByteArrayResource getSchedule(
             @RequestParam(name = "id") int id,
@@ -15,4 +16,5 @@ public interface PlanPolslClient {
             @RequestParam(name = "winW") int winW,
             @RequestParam(name = "winH") int winH
     );
+
 }

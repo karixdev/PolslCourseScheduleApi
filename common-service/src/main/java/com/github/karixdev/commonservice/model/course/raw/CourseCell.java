@@ -1,8 +1,11 @@
-package com.github.karixdev.webscraperservice.model;
+package com.github.karixdev.commonservice.model.course.raw;
+
+import lombok.Builder;
 
 import java.util.HashSet;
 import java.util.Set;
 
+@Builder
 public record CourseCell(
         int top,
         int left,
