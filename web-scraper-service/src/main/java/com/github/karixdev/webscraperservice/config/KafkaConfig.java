@@ -1,6 +1,6 @@
 package com.github.karixdev.webscraperservice.config;
 
-import com.github.karixdev.commonservice.event.schedule.RawCourse;
+import com.github.karixdev.commonservice.event.schedule.ScheduleRaw;
 import com.github.karixdev.commonservice.event.schedule.ScheduleEvent;
 import com.github.karixdev.webscraperservice.exception.PlanPolslUnavailableException;
 import lombok.extern.slf4j.Slf4j;
@@ -77,12 +77,12 @@ public class KafkaConfig {
     }
 
     @Bean
-    ProducerFactory<String, RawCourse> rawCourseProducerFactory(KafkaProperties kafkaProperties) {
+    ProducerFactory<String, ScheduleRaw> scheduleRawProducerFactory(KafkaProperties kafkaProperties) {
         return new DefaultKafkaProducerFactory<>(kafkaProperties.buildProducerProperties());
     }
 
     @Bean
-    KafkaTemplate<String, RawCourse> rawCourseKafkaTemplate(ProducerFactory<String, RawCourse> producerFactory) {
+    KafkaTemplate<String, ScheduleRaw> scheduleRawKafkaTemplate(ProducerFactory<String, ScheduleRaw> producerFactory) {
         return new KafkaTemplate<>(producerFactory);
     }
 

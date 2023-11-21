@@ -7,7 +7,7 @@ import com.github.karixdev.commonservice.model.schedule.raw.TimeCell;
 import com.github.karixdev.webscraperservice.exception.EmptyCourseCellsSetException;
 import com.github.karixdev.webscraperservice.exception.EmptyTimeCellSetException;
 import com.github.karixdev.webscraperservice.model.PlanPolslResponse;
-import com.github.karixdev.webscraperservice.producer.RawCourseProducer;
+import com.github.karixdev.webscraperservice.producer.ScheduleRawProducer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,7 +35,7 @@ class ScheduleServiceTest {
     PlanPolslService planPolslService;
 
     @Mock
-    RawCourseProducer producer;
+    ScheduleRawProducer producer;
 
     @Test
     void GivenScheduleEventWithNotSupportedEventType_WhenHandleScheduleEvent_ThenEventIsNotProcessed() {

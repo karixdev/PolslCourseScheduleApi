@@ -8,7 +8,7 @@ import lombok.Builder;
 import java.util.Set;
 
 @Builder
-public record RawCourse(
+public record ScheduleRaw(
         @JsonProperty("scheduleId")
         String scheduleId,
         @JsonProperty("timeCells")

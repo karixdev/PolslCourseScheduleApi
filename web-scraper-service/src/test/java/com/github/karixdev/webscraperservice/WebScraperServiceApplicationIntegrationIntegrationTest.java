@@ -1,7 +1,7 @@
 package com.github.karixdev.webscraperservice;
 
 import com.github.karixdev.commonservice.event.EventType;
-import com.github.karixdev.commonservice.event.schedule.RawCourse;
+import com.github.karixdev.commonservice.event.schedule.ScheduleRaw;
 import com.github.karixdev.commonservice.event.schedule.ScheduleEvent;
 import com.github.karixdev.commonservice.model.course.raw.CourseCell;
 import com.github.karixdev.commonservice.model.course.raw.Link;
@@ -64,7 +64,7 @@ class WebScraperServiceApplicationIntegrationIntegrationTest {
     private static final String DLT_TOPIC = "web-scraper-service.schedule.event.dlt";
 
     KafkaTemplate<String, ScheduleEvent> scheduleEventProducer;
-    Consumer<String, RawCourse> rawCourseConsumer;
+    Consumer<String, ScheduleRaw> scheduleRawConsumer;
     Consumer<String, ScheduleEvent> dltConsumer;
 
     WireMockServer wm;
@@ -81,9 +81,9 @@ class WebScraperServiceApplicationIntegrationIntegrationTest {
         Map<String, Object> rawCourseConsumerProps = KafkaTestUtils.consumerProps(kafkaContainer.getBootstrapServers(), "raw-course-test-group", "false");
         addCommonConsumerProps(rawCourseConsumerProps);
 
-        ConsumerFactory<String, RawCourse> rawCourseConsumerFactory = new DefaultKafkaConsumerFactory<>(rawCourseConsumerProps);
-        rawCourseConsumer = rawCourseConsumerFactory.createConsumer();
-        rawCourseConsumer.subscribe(List.of(RAW_TOPIC));
+        ConsumerFactory<String, ScheduleRaw> rawCourseConsumerFactory = new DefaultKafkaConsumerFactory<>(rawCourseConsumerProps);
+        scheduleRawConsumer = rawCourseConsumerFactory.createConsumer();
+        scheduleRawConsumer.subscribe(List.of(RAW_TOPIC));
 
         Map<String, Object> dltConsumerProps = KafkaTestUtils.consumerProps(kafkaContainer.getBootstrapServers(), "dlt-test-group", "false");
         addCommonConsumerProps(dltConsumerProps);
@@ -98,7 +98,7 @@ class WebScraperServiceApplicationIntegrationIntegrationTest {
 
     @AfterEach
     void tearDown() {
-        rawCourseConsumer.close();
+        scheduleRawConsumer.close();
         dltConsumer.close();
         wm.stop();
     }
@@ -132,7 +132,7 @@ class WebScraperServiceApplicationIntegrationIntegrationTest {
                 ))
                 .build();
 
-        RawCourse expectedRawCourse = RawCourse.builder()
+        ScheduleRaw expectedRawCourse = ScheduleRaw.builder()
                 .scheduleId(scheduleId)
                 .timeCells(Set.of(timeCell))
                 .courseCells(Set.of(courseCell))
@@ -156,7 +156,7 @@ class WebScraperServiceApplicationIntegrationIntegrationTest {
 
         // When
         scheduleEventProducer.send(SCHEDULE_EVENT_TOPIC, scheduleId, scheduleEvent);
-        ConsumerRecord<String, RawCourse> result = KafkaTestUtils.getSingleRecord(rawCourseConsumer, RAW_TOPIC, Duration.ofSeconds(20));
+        ConsumerRecord<String, ScheduleRaw> result = KafkaTestUtils.getSingleRecord(scheduleRawConsumer, RAW_TOPIC, Duration.ofSeconds(20));
 
         // Then
         assertThat(result.key()).isEqualTo(scheduleId);

@@ -1,6 +1,6 @@
 package com.github.karixdev.webscraperservice.producer;
 
-import com.github.karixdev.commonservice.event.schedule.RawCourse;
+import com.github.karixdev.commonservice.event.schedule.ScheduleRaw;
 import com.github.karixdev.commonservice.model.course.raw.CourseCell;
 import com.github.karixdev.commonservice.model.schedule.raw.TimeCell;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,20 +16,20 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-class RawCourseProducerTest {
+class ScheduleRawProducerTest {
 
-    RawCourseProducer underTest;
+    ScheduleRawProducer underTest;
 
-    KafkaTemplate<String, RawCourse> kafkaTemplate;
+    KafkaTemplate<String, ScheduleRaw> kafkaTemplate;
 
     String topic;
 
     @BeforeEach
     @SuppressWarnings("unchecked")
     void setUp() {
-        kafkaTemplate = (KafkaTemplate<String, RawCourse>) mock(KafkaTemplate.class);
+        kafkaTemplate = (KafkaTemplate<String, ScheduleRaw>) mock(KafkaTemplate.class);
         topic = "output-topic";
-        underTest = new RawCourseProducer(topic, kafkaTemplate);
+        underTest = new ScheduleRawProducer(topic, kafkaTemplate);
     }
 
     @Test
@@ -53,7 +53,7 @@ class RawCourseProducerTest {
         underTest.produceRawCourse(scheduleId, courseCells, timeCells);
 
         // Then
-        RawCourse expectedMessage = new RawCourse(
+        ScheduleRaw expectedMessage = new ScheduleRaw(
                 scheduleId,
                 timeCells,
                 courseCells

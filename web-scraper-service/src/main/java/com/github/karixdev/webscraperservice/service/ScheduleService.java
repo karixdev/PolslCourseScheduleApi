@@ -5,7 +5,7 @@ import com.github.karixdev.commonservice.event.schedule.ScheduleEvent;
 import com.github.karixdev.webscraperservice.exception.EmptyCourseCellsSetException;
 import com.github.karixdev.webscraperservice.exception.EmptyTimeCellSetException;
 import com.github.karixdev.webscraperservice.model.PlanPolslResponse;
-import com.github.karixdev.webscraperservice.producer.RawCourseProducer;
+import com.github.karixdev.webscraperservice.producer.ScheduleRawProducer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -19,7 +19,7 @@ import java.util.Arrays;
 public class ScheduleService {
 
     private final PlanPolslService planPolslService;
-    private final RawCourseProducer producer;
+    private final ScheduleRawProducer producer;
 
     private static final EventType[] SUPPORTED_EVENT_TYPES = {EventType.CREATE, EventType.UPDATE};
 
