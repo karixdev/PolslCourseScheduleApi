@@ -1,23 +1,24 @@
-package com.github.karixdev.domaincoursemapperservice.model.domain;
+package com.github.karixdev.commonservice.model.course.domain;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.github.karixdev.domaincoursemapperservice.serialization.LocalTimeDeserializer;
-import com.github.karixdev.domaincoursemapperservice.serialization.LocalTimeSerializer;
+import com.github.karixdev.commonservice.serialization.LocalTimeDeserializer;
+import com.github.karixdev.commonservice.serialization.LocalTimeSerializer;
+import lombok.Builder;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
 
-public record Course(
-        @JsonSerialize(using = LocalTimeSerializer.class)
-        @JsonDeserialize(using = LocalTimeDeserializer.class)
+@Builder
+public record CourseDomain(
         @JsonProperty("startsAt")
-        LocalTime startsAt,
         @JsonSerialize(using = LocalTimeSerializer.class)
         @JsonDeserialize(using = LocalTimeDeserializer.class)
+        LocalTime startsAt,
         @JsonProperty("endsAt")
+        @JsonSerialize(using = LocalTimeSerializer.class)
+        @JsonDeserialize(using = LocalTimeDeserializer.class)
         LocalTime endsAt,
         @JsonProperty("name")
         String name,

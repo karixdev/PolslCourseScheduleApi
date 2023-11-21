@@ -1,4 +1,4 @@
-package com.github.karixdev.domaincoursemapperservice.serialization;
+package com.github.karixdev.commonservice.serialization;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -14,6 +14,7 @@ import java.time.LocalTime;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class LocalTimeSerializerTest {
+
     LocalTimeSerializer underTest = new LocalTimeSerializer();
 
     @Test
@@ -31,6 +32,7 @@ class LocalTimeSerializerTest {
         jsonGenerator.flush();
 
         // Then
-        assertThat(writer.toString()).isEqualTo("\"08:30:15\"");
+        assertThat(writer.toString()).hasToString("\"08:30:15\"");
     }
+
 }

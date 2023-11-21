@@ -1,10 +1,10 @@
 package com.github.karixdev.domaincoursemapperservice.mapper;
 
-import com.github.karixdev.domaincoursemapperservice.model.domain.Course;
-import com.github.karixdev.domaincoursemapperservice.model.domain.CourseType;
-import com.github.karixdev.domaincoursemapperservice.model.domain.WeekType;
-import com.github.karixdev.domaincoursemapperservice.model.raw.CourseCell;
-import com.github.karixdev.domaincoursemapperservice.model.raw.Link;
+import com.github.karixdev.commonservice.model.course.domain.CourseDomain;
+import com.github.karixdev.commonservice.model.course.domain.CourseType;
+import com.github.karixdev.commonservice.model.course.domain.WeekType;
+import com.github.karixdev.commonservice.model.course.raw.CourseCell;
+import com.github.karixdev.commonservice.model.course.raw.Link;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -18,7 +18,8 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class CourseMapperTest {
+class CourseMapperTest {
+
     CourseCellMapper underTest = new CourseCellMapper();
 
     LocalTime startTime;
@@ -31,16 +32,16 @@ public class CourseMapperTest {
     @Test
     void GivenValidPlanPolslResponse_WhenMap_ThenReturnsValidSetOfCourses() {
         // Given
-        CourseCell courseCell = new CourseCell(
-                259,
-                254,
-                135,
-                154,
-                "course 1"
-        );
+        CourseCell courseCell = CourseCell.builder()
+                .top(259)
+                .left(254)
+                .ch(135)
+                .cw(154)
+                .text("course 1")
+                .build();
 
         // When
-        Course result = underTest.mapToCourse(courseCell, startTime);
+        CourseDomain result = underTest.mapToCourse(courseCell, startTime);
 
         // Then
         assertThat(result.startsAt())
@@ -52,24 +53,38 @@ public class CourseMapperTest {
     @Test
     void GivenCourseCellWithLinks_WhenMap_ThenReturnsValidCourse() {
         // Given
-        CourseCell courseCell = new CourseCell(
-                259,
-                254,
-                135,
-                154,
-                "course",
-                Set.of(
-                        new Link("teacher 1", "plan.php?id=10&type=10"),
-                        new Link("teacher 2", "plan.php?id=10&type=10"),
-                        new Link("room 1", "plan.php?id=10&type=20"),
-                        new Link("room 2", "plan.php?id=10&type=20"),
-                        new Link("other link 2", "plan.php?id=10")
-
-                )
-        );
+        CourseCell courseCell = CourseCell.builder()
+                .top(259)
+                .left(254)
+                .ch(135)
+                .cw(154)
+                .links(Set.of(
+                        Link.builder()
+                                .text("teacher 1")
+                                .href("plan.php?id=10&type=10")
+                                .build(),
+                        Link.builder()
+                                .text("teacher 2")
+                                .href("plan.php?id=10&type=10")
+                                .build(),
+                        Link.builder()
+                                .text("room 1")
+                                .href("plan.php?id=10&type=20")
+                                .build(),
+                        Link.builder()
+                                .text("room 2")
+                                .href("plan.php?id=10&type=20")
+                                .build(),
+                        Link.builder()
+                                .text("other link 2")
+                                .href("plan.php?id=10")
+                                .build()
+                ))
+                .text("text")
+                .build();
 
         // When
-        Course result = underTest.mapToCourse(courseCell, startTime);
+        CourseDomain result = underTest.mapToCourse(courseCell, startTime);
 
         // Then
         assertThat(result.teachers())
@@ -82,10 +97,16 @@ public class CourseMapperTest {
     @MethodSource("courseTypesInputParameters")
     void GivenCourseCellWithNameContainingType_WhenMap_ThenReturnsCoursesWithValidCourseType(String name, CourseType expectedType) {
         // Given
-        CourseCell courseCell = new CourseCell(259, 254, 135, 154, name);
+        CourseCell courseCell = CourseCell.builder()
+                .top(259)
+                .left(254)
+                .ch(135)
+                .cw(154)
+                .text(name)
+                .build();
 
         // When
-        Course result = underTest.mapToCourse(courseCell, startTime);
+        CourseDomain result = underTest.mapToCourse(courseCell, startTime);
 
         // Then
         assertThat(result.courseType())
@@ -96,10 +117,16 @@ public class CourseMapperTest {
     @MethodSource("courseDayOfWeekLeftValues")
     void GivenCourseWithDifferentCourseLeftValues_WhenMap_ThenReturnsCourseWithProperDayOfWeek(int left, DayOfWeek expectedDay) {
         // Given
-        CourseCell courseCell = new CourseCell(259, left, 135, 154, "course");
+        CourseCell courseCell = CourseCell.builder()
+                .top(259)
+                .left(left)
+                .ch(135)
+                .cw(154)
+                .text("course")
+                .build();
 
         // When
-        Course result = underTest.mapToCourse(courseCell, startTime);
+        CourseDomain result = underTest.mapToCourse(courseCell, startTime);
 
         // Then
         assertThat(result.dayOfWeek())
@@ -110,10 +137,15 @@ public class CourseMapperTest {
     @MethodSource("courseWeeksLeftAndCwValues")
     void GivenCourseWithDifferentLeftAndCwValues_WhenMap_ThenReturnsCourseWithCorrectWeeks(int left, int cw, WeekType expectedWeeks) {
         // Given
-        CourseCell courseCell = new CourseCell(259, left, 135, cw, "course");
+        CourseCell courseCell = CourseCell.builder()
+                .top(259)
+                .left(left)
+                .cw(cw)
+                .text("course")
+                .build();
 
         // When
-        Course result = underTest.mapToCourse(courseCell, startTime);
+        CourseDomain result = underTest.mapToCourse(courseCell, startTime);
 
         // Then
         assertThat(result.weeks())
@@ -123,20 +155,20 @@ public class CourseMapperTest {
     @Test
     void GivenCourseCellWithAdditionalInfo_WhenMap_ThenReturnsCourseWithProperAdditionalInfo() {
         // Given
-        CourseCell courseCell = new CourseCell(
-                259,
-                254,
-                135,
-                154,
-                """
-                        course 1, ćw\n
-                        występowanie:\n
+        CourseCell courseCell = CourseCell.builder()
+                .top(259)
+                .left(254)
+                .ch(135)
+                .cw(154)
+                .text("""
+                        course 1, ćw
+                        występowanie:
                         1.03
-                        """
-                );
+                        """)
+                .build();
 
         // When
-        Course result = underTest.mapToCourse(courseCell, startTime);
+        CourseDomain result = underTest.mapToCourse(courseCell, startTime);
 
         // Then
         assertThat(result.additionalInfo())
@@ -188,4 +220,5 @@ public class CourseMapperTest {
                 Arguments.of(752, 154, WeekType.EVERY)
         );
     }
+
 }

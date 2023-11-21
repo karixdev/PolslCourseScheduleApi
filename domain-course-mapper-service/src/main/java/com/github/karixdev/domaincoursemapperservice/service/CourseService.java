@@ -1,37 +1,40 @@
 package com.github.karixdev.domaincoursemapperservice.service;
 
+import com.github.karixdev.commonservice.event.schedule.ScheduleRaw;
+import com.github.karixdev.commonservice.model.course.domain.CourseDomain;
 import com.github.karixdev.domaincoursemapperservice.exception.NoScheduleStartTimeException;
 import com.github.karixdev.domaincoursemapperservice.mapper.CourseCellMapper;
 import com.github.karixdev.domaincoursemapperservice.mapper.TimeCellMapper;
-import com.github.karixdev.domaincoursemapperservice.model.domain.Course;
-import com.github.karixdev.domaincoursemapperservice.model.raw.CourseCell;
-import com.github.karixdev.domaincoursemapperservice.model.raw.TimeCell;
-import com.github.karixdev.domaincoursemapperservice.producer.DomainCoursesProducer;
+import com.github.karixdev.domaincoursemapperservice.producer.ScheduleDomainProducer;
 import lombok.RequiredArgsConstructor;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalTime;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class CourseService {
+
     private final CourseCellMapper mapper;
     private final TimeCellMapper timeCellMapper;
-    private final DomainCoursesProducer producer;
+    private final ScheduleDomainProducer producer;
 
-    public void handleRawCoursesMessage(UUID scheduleId, Set<TimeCell> timeCells, Set<CourseCell> courseCells) {
-        LocalTime scheduleStartTime = timeCells.stream()
+    public void handleScheduleRaw(ConsumerRecord<String, ScheduleRaw> consumerRecord) {
+        ScheduleRaw value = consumerRecord.value();
+
+        LocalTime scheduleStartTime = value.timeCells().stream()
                 .map(timeCellMapper::mapToLocalTime)
                 .min(LocalTime::compareTo)
                 .orElseThrow(NoScheduleStartTimeException::new);
 
-        Set<Course> courses = courseCells.stream()
+        Set<CourseDomain> courses = value.courseCells().stream()
                 .map(courseCell -> mapper.mapToCourse(courseCell, scheduleStartTime))
                 .collect(Collectors.toSet());
 
-        producer.produceDomainCourseMessage(scheduleId, courses);
+        producer.produceScheduleDomain(consumerRecord.key(), courses);
     }
+
 }

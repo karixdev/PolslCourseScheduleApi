@@ -1,10 +1,10 @@
 package com.github.karixdev.domaincoursemapperservice.mapper;
 
-import com.github.karixdev.domaincoursemapperservice.model.domain.Course;
-import com.github.karixdev.domaincoursemapperservice.model.domain.CourseType;
-import com.github.karixdev.domaincoursemapperservice.model.domain.WeekType;
-import com.github.karixdev.domaincoursemapperservice.model.raw.CourseCell;
-import com.github.karixdev.domaincoursemapperservice.model.raw.Link;
+import com.github.karixdev.commonservice.model.course.domain.CourseDomain;
+import com.github.karixdev.commonservice.model.course.domain.CourseType;
+import com.github.karixdev.commonservice.model.course.domain.WeekType;
+import com.github.karixdev.commonservice.model.course.raw.CourseCell;
+import com.github.karixdev.commonservice.model.course.raw.Link;
 import com.github.karixdev.domaincoursemapperservice.props.CourseMapperProperties;
 import org.springframework.stereotype.Component;
 
@@ -15,7 +15,8 @@ import java.util.stream.Collectors;
 
 @Component
 public class CourseCellMapper {
-    public Course mapToCourse(CourseCell courseCell, LocalTime startTime) {
+
+    public CourseDomain mapToCourse(CourseCell courseCell, LocalTime startTime) {
         int scheduleStartTimeHour = startTime.getHour();
 
         LocalTime startsAt = getTime(
@@ -40,17 +41,17 @@ public class CourseCellMapper {
 
         String additionalInfo = getAdditionalInfo(courseCell.text());
 
-        return new Course(
-                startsAt,
-                endsAt,
-                name,
-                courseType,
-                teachers,
-                dayOfWeek,
-                weeks,
-                rooms,
-                additionalInfo
-        );
+        return CourseDomain.builder()
+                .startsAt(startsAt)
+                .endsAt(endsAt)
+                .name(name)
+                .courseType(courseType)
+                .teachers(teachers)
+                .dayOfWeek(dayOfWeek)
+                .weeks(weeks)
+                .classrooms(rooms)
+                .additionalInfo(additionalInfo)
+                .build();
     }
 
     private LocalTime getTime(int top, int startsAt, boolean addBorderToTop) {
@@ -161,8 +162,8 @@ public class CourseCellMapper {
         }
 
         return text.substring(idx).trim()
-                .replaceAll("\n", " ")
-                .replaceAll(" +", " ");
+                .replace("\n", " ")
+                .replace(" +", " ");
     }
 
     private Set<String> getTextFromLinks(Set<Link> links, String type) {
@@ -171,4 +172,5 @@ public class CourseCellMapper {
                 .map(Link::text)
                 .collect(Collectors.toSet());
     }
+
 }

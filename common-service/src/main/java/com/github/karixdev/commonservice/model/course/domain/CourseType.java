@@ -1,4 +1,4 @@
-package com.github.karixdev.domaincoursemapperservice.model.domain;
+package com.github.karixdev.commonservice.model.course.domain;
 
 public enum CourseType {
     LECTURE,

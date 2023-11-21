@@ -1,6 +1,6 @@
 package com.github.karixdev.domaincoursemapperservice.mapper;
 
-import com.github.karixdev.domaincoursemapperservice.model.raw.TimeCell;
+import com.github.karixdev.commonservice.model.schedule.raw.TimeCell;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalTime;

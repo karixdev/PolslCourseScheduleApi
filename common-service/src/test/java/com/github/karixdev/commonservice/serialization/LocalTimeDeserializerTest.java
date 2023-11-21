@@ -1,4 +1,4 @@
-package com.github.karixdev.domaincoursemapperservice.serialization;
+package com.github.karixdev.commonservice.serialization;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -14,6 +14,7 @@ import java.time.LocalTime;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class LocalTimeDeserializerTest {
+
     LocalTimeDeserializer underTest = new LocalTimeDeserializer();
 
     @Test
@@ -45,4 +46,5 @@ class LocalTimeDeserializerTest {
                         1
                 ));
     }
+
 }

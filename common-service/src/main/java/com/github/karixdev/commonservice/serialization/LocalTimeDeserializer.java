@@ -1,4 +1,4 @@
-package com.github.karixdev.domaincoursemapperservice.serialization;
+package com.github.karixdev.commonservice.serialization;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
