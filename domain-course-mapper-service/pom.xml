@@ -15,7 +15,9 @@
 	<description>domain-course-mapper-service</description>
 	<properties>
 		<java.version>17</java.version>
+		<testcontainers.version>1.19.2</testcontainers.version>
 	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
@@ -70,6 +72,18 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.testcontainers</groupId>
+				<artifactId>testcontainers-bom</artifactId>
+				<version>${testcontainers.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 	<build>
 		<plugins>
