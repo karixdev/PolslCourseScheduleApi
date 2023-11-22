@@ -49,8 +49,7 @@ class DomainCourseMapperServiceApplicationIntegrationTest {
 
     @Container
     static final KafkaContainer kafkaContainer =
-            new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.4.3"))
-                    .withEnv("KAFKA_TOPIC_AUTO_CREATE", "true");
+            new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.4.3"));
 
     @DynamicPropertySource
     static void overrideKafkaProperties(DynamicPropertyRegistry registry) {
