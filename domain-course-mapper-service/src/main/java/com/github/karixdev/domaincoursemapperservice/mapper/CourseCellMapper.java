@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -80,13 +81,11 @@ public class CourseCellMapper {
             return CourseType.INFO;
         }
 
-        return switch (firstLineSplit[1].trim()) {
-            case "ćw" -> CourseType.PRACTICAL;
-            case "lab" -> CourseType.LAB;
-            case "proj" -> CourseType.PROJECT;
-            case "wyk" -> CourseType.LECTURE;
-            default -> CourseType.INFO;
-        };
+        String typeName = firstLineSplit[1].trim();
+
+        return Optional
+                .ofNullable(CourseMapperProperties.COURSE_TYPE_MAP.get(typeName))
+                .orElse(CourseType.INFO);
     }
 
     private String getName(String text) {
