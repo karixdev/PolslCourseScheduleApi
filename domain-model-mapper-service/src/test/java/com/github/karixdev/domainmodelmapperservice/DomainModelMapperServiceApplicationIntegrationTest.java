@@ -57,7 +57,7 @@ class DomainModelMapperServiceApplicationIntegrationTest {
 
     private static final String SCHEDULE_RAW_TOPIC = "schedule.raw";
     private static final String SCHEDULE_DOMAIN_TOPIC = "schedule.domain";
-    private static final String DLT_TOPIC = "domain-course-mapper-service.schedule.raw.dlt";
+    private static final String DLT_TOPIC = "domain-model-mapper-service.schedule.raw.dlt";
 
     KafkaTemplate<String, ScheduleRaw> scheduleRawProducer;
     Consumer<String, ScheduleDomain> scheduleDomainConsumer;
