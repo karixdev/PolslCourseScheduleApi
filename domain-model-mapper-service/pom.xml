@@ -12,7 +12,7 @@
 
 	<groupId>com.github.karixdev</groupId>
 	<artifactId>domain-model-mapper-service</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name>domain-model-mapper-service</name>
 	<description>domain-model-mapper-service</description>
 

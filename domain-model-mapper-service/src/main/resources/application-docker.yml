@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: domain-model-mapper-service
+
+  kafka:
+    bootstrap-servers: ${BOOTSTRAP_SERVER_HOST}:${BOOTSTRAP_SERVER_PORT}
