@@ -34,7 +34,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-public class ScheduleControllerIT extends ContainersEnvironment {
+class ScheduleControllerIT extends ContainersEnvironment {
 
     @Autowired
     WebTestClient webClient;

@@ -5,6 +5,7 @@ import com.github.karixdev.commonservice.dto.schedule.ScheduleResponse;
 import com.github.karixdev.commonservice.exception.ResourceNotFoundException;
 import com.github.karixdev.commonservice.exception.ValidationException;
 import com.github.karixdev.scheduleservice.entity.Schedule;
+import com.github.karixdev.scheduleservice.mapper.ScheduleMapper;
 import com.github.karixdev.scheduleservice.producer.ScheduleEventProducer;
 import com.github.karixdev.scheduleservice.repository.ScheduleRepository;
 import jakarta.transaction.Transactional;
@@ -22,6 +23,7 @@ public class ScheduleService {
 
     private final ScheduleRepository repository;
     private final ScheduleEventProducer producer;
+    private final ScheduleMapper mapper;
 
     @Transactional
     public ScheduleResponse create(ScheduleRequest scheduleRequest) {
@@ -32,23 +34,12 @@ public class ScheduleService {
             );
         }
 
-        Schedule schedule = repository.save(Schedule.builder()
-                .type(scheduleRequest.type())
-                .planPolslId(scheduleRequest.planPolslId())
-                .semester(scheduleRequest.semester())
-                .name(scheduleRequest.name())
-                .groupNumber(scheduleRequest.groupNumber())
-                .wd(scheduleRequest.wd())
-                .build());
+        Schedule schedule = mapper.mapToEntity(scheduleRequest);
+        repository.save(schedule);
 
         producer.produceScheduleCreateEvent(schedule);
 
-        return new ScheduleResponse(
-                schedule.getId(),
-                schedule.getSemester(),
-                schedule.getName(),
-                schedule.getGroupNumber()
-        );
+        return mapper.mapToResponse(schedule);
     }
 
     public List<ScheduleResponse> findAll(Set<UUID> ids) {
@@ -60,25 +51,12 @@ public class ScheduleService {
                     .toList();
         }
 
-        return schedules.stream()
-                .map(schedule -> new ScheduleResponse(
-                        schedule.getId(),
-                        schedule.getSemester(),
-                        schedule.getName(),
-                        schedule.getGroupNumber()
-                ))
-                .toList();
+        return schedules.stream().map(mapper::mapToResponse).toList();
     }
 
     public ScheduleResponse findById(UUID id) {
         Schedule schedule = findByIdOrElseThrow(id);
-
-        return new ScheduleResponse(
-                schedule.getId(),
-                schedule.getSemester(),
-                schedule.getName(),
-                schedule.getGroupNumber()
-        );
+        return mapper.mapToResponse(schedule);
     }
 
     private Schedule findByIdOrElseThrow(UUID id) {
@@ -106,16 +84,9 @@ public class ScheduleService {
         schedule.setGroupNumber(scheduleRequest.groupNumber());
         schedule.setWd(scheduleRequest.wd());
 
-        repository.save(schedule);
-
         producer.produceScheduleUpdateEvent(schedule);
 
-        return new ScheduleResponse(
-                schedule.getId(),
-                schedule.getSemester(),
-                schedule.getName(),
-                schedule.getGroupNumber()
-        );
+        return mapper.mapToResponse(schedule);
     }
 
     @Transactional

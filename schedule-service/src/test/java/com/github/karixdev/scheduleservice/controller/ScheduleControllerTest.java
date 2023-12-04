@@ -21,7 +21,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(controllers = ScheduleController.class)
 @AutoConfigureMockMvc(addFilters = false)
-public class ScheduleControllerTest {
+class ScheduleControllerTest {
 
     @Autowired
     MockMvc mockMvc;
