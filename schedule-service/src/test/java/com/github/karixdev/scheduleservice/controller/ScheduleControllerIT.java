@@ -4,6 +4,7 @@ import com.github.karixdev.scheduleservice.ContainersEnvironment;
 import com.github.karixdev.scheduleservice.entity.Schedule;
 import com.github.karixdev.scheduleservice.message.ScheduleEventMessage;
 import com.github.karixdev.scheduleservice.repository.ScheduleRepository;
+import com.github.karixdev.scheduleservice.utils.KeycloakUtils;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -51,7 +52,7 @@ public class ScheduleControllerIT extends ContainersEnvironment {
 
     @Test
     void shouldNotCreateScheduleForStandardUser() {
-        String token = getUserToken();
+        String token = KeycloakUtils.getUserToken(keycloakContainer.getAuthServerUrl());
 
         String payload = """
                 {
@@ -76,7 +77,7 @@ public class ScheduleControllerIT extends ContainersEnvironment {
 
     @Test
     void shouldNotCreateSchedule() {
-        String token = getAdminToken();
+        String token = KeycloakUtils.getAdminToken(keycloakContainer.getAuthServerUrl());
 
         scheduleRepository.save(Schedule.builder()
                 .type(1)
@@ -111,7 +112,7 @@ public class ScheduleControllerIT extends ContainersEnvironment {
 
     @Test
     void shouldCreateSchedule() {
-        String token = getAdminToken();
+        String token = KeycloakUtils.getAdminToken(keycloakContainer.getAuthServerUrl());
 
         String payload = """
                 {
@@ -304,7 +305,7 @@ public class ScheduleControllerIT extends ContainersEnvironment {
 
     @Test
     void shouldNotUpdateScheduleForStandardUser() {
-        String token = getUserToken();
+        String token = KeycloakUtils.getUserToken(keycloakContainer.getAuthServerUrl());
         UUID id = UUID.randomUUID();
 
         String payload = """
@@ -328,7 +329,7 @@ public class ScheduleControllerIT extends ContainersEnvironment {
 
     @Test
     void shouldNotUpdateNotExistingSchedule() {
-        String token = getAdminToken();
+        String token = KeycloakUtils.getAdminToken(keycloakContainer.getAuthServerUrl());
         UUID id = UUID.randomUUID();
 
         String payload = """
@@ -352,7 +353,7 @@ public class ScheduleControllerIT extends ContainersEnvironment {
 
     @Test
     void shouldNotUpdateScheduleWhileTryingToAssignUnavailableName() {
-        String token = getAdminToken();
+        String token = KeycloakUtils.getAdminToken(keycloakContainer.getAuthServerUrl());
 
         Schedule schedule = scheduleRepository.save(Schedule.builder()
                 .type(1)
@@ -392,7 +393,7 @@ public class ScheduleControllerIT extends ContainersEnvironment {
 
     @Test
     void shouldUpdateSchedule() {
-        String token = getAdminToken();
+        String token = KeycloakUtils.getAdminToken(keycloakContainer.getAuthServerUrl());
 
         Schedule schedule = scheduleRepository.save(Schedule.builder()
                 .type(1)
@@ -457,7 +458,7 @@ public class ScheduleControllerIT extends ContainersEnvironment {
 
     @Test
     void shouldNotDeleteScheduleForStandardUser() {
-        String token = getUserToken();
+        String token = KeycloakUtils.getUserToken(keycloakContainer.getAuthServerUrl());
 
         scheduleRepository.save(Schedule.builder()
                 .type(1)
@@ -476,7 +477,7 @@ public class ScheduleControllerIT extends ContainersEnvironment {
 
     @Test
     void shouldNotDeleteNotExistingSchedule() {
-        String token = getAdminToken();
+        String token = KeycloakUtils.getAdminToken(keycloakContainer.getAuthServerUrl());
 
         scheduleRepository.save(Schedule.builder()
                 .type(1)
@@ -495,7 +496,7 @@ public class ScheduleControllerIT extends ContainersEnvironment {
 
     @Test
     void shouldDeleteSchedule() {
-        String token = getAdminToken();
+        String token = KeycloakUtils.getAdminToken(keycloakContainer.getAuthServerUrl());
 
         Schedule schedule = scheduleRepository.save(Schedule.builder()
                 .type(1)
@@ -526,7 +527,7 @@ public class ScheduleControllerIT extends ContainersEnvironment {
 
     @Test
     void shouldNotRequestScheduleCoursesUpdateForNotExistingSchedule() {
-        String token = getAdminToken();
+        String token = KeycloakUtils.getAdminToken(keycloakContainer.getAuthServerUrl());
 
         scheduleRepository.save(Schedule.builder()
                 .type(1)
@@ -545,7 +546,7 @@ public class ScheduleControllerIT extends ContainersEnvironment {
 
     @Test
     void shouldRequestScheduleCourses() {
-        String token = getAdminToken();
+        String token = KeycloakUtils.getAdminToken(keycloakContainer.getAuthServerUrl());
 
         Schedule schedule = scheduleRepository.save(Schedule.builder()
                 .type(1)
