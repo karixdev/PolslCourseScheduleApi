@@ -5,7 +5,6 @@ import com.github.karixdev.commonservice.dto.schedule.ScheduleResponse;
 import com.github.karixdev.commonservice.exception.ResourceNotFoundException;
 import com.github.karixdev.commonservice.exception.ValidationException;
 import com.github.karixdev.scheduleservice.entity.Schedule;
-import com.github.karixdev.scheduleservice.message.ScheduleEventType;
 import com.github.karixdev.scheduleservice.producer.ScheduleEventProducer;
 import com.github.karixdev.scheduleservice.repository.ScheduleRepository;
 import jakarta.transaction.Transactional;
@@ -42,10 +41,7 @@ public class ScheduleService {
                 .wd(scheduleRequest.wd())
                 .build());
 
-        producer.produceScheduleEventMessage(
-                schedule,
-                ScheduleEventType.CREATE
-        );
+        producer.produceScheduleCreateEvent(schedule);
 
         return new ScheduleResponse(
                 schedule.getId(),
@@ -119,10 +115,7 @@ public class ScheduleService {
 
         repository.save(schedule);
 
-        producer.produceScheduleEventMessage(
-                schedule,
-                ScheduleEventType.UPDATE
-        );
+        producer.produceScheduleUpdateEvent(schedule);
 
         return new ScheduleResponse(
                 schedule.getId(),
@@ -137,28 +130,15 @@ public class ScheduleService {
         Schedule schedule = findByIdOrElseThrow(id, false);
 
         repository.delete(schedule);
-
-        producer.produceScheduleEventMessage(
-                schedule,
-                ScheduleEventType.DELETE
-        );
+        producer.produceScheduleDeleteEvent(schedule);
     }
 
     public void requestScheduleCoursesUpdate(UUID id) {
         Schedule schedule = findByIdOrElseThrow(id, false);
-
-        producer.produceScheduleEventMessage(
-                schedule,
-                ScheduleEventType.UPDATE
-        );
-
+        producer.produceScheduleUpdateEvent(schedule);
     }
 
     public void requestScheduleCoursesUpdateForAll() {
-        repository.findAll().forEach(schedule ->
-                producer.produceScheduleEventMessage(
-                        schedule,
-                        ScheduleEventType.UPDATE
-                ));
+        repository.findAll().forEach(producer::produceScheduleUpdateEvent);
     }
 }

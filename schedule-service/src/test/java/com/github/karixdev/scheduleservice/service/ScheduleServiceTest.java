@@ -5,7 +5,6 @@ import com.github.karixdev.commonservice.dto.schedule.ScheduleResponse;
 import com.github.karixdev.commonservice.exception.ResourceNotFoundException;
 import com.github.karixdev.commonservice.exception.ValidationException;
 import com.github.karixdev.scheduleservice.entity.Schedule;
-import com.github.karixdev.scheduleservice.message.ScheduleEventType;
 import com.github.karixdev.scheduleservice.producer.ScheduleEventProducer;
 import com.github.karixdev.scheduleservice.repository.ScheduleRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -121,10 +120,7 @@ public class ScheduleServiceTest {
         assertThat(result.id())
                 .isEqualTo(savedSchedule.getId());
 
-        verify(producer).produceScheduleEventMessage(
-                any(),
-                eq(ScheduleEventType.CREATE)
-        );
+        verify(producer).produceScheduleCreateEvent(any());
     }
 
     @Test
@@ -261,10 +257,7 @@ public class ScheduleServiceTest {
         assertThat(result.groupNumber())
                 .isEqualTo(scheduleRequest.groupNumber());
 
-        verify(producer).produceScheduleEventMessage(
-                eq(schedule),
-                eq(ScheduleEventType.UPDATE)
-        );
+        verify(producer).produceScheduleUpdateEvent(eq(schedule));
     }
 
     @Test
@@ -297,11 +290,7 @@ public class ScheduleServiceTest {
 
         // Then
         verify(repository).delete(eq(schedule));
-
-        verify(producer).produceScheduleEventMessage(
-                eq(schedule),
-                eq(ScheduleEventType.DELETE)
-        );
+        verify(producer).produceScheduleDeleteEvent(eq(schedule));
     }
 
     @Test
@@ -333,10 +322,7 @@ public class ScheduleServiceTest {
         underTest.requestScheduleCoursesUpdate(id);
 
         // Then
-        verify(producer).produceScheduleEventMessage(
-                eq(schedule),
-                eq(ScheduleEventType.UPDATE)
-        );
+        verify(producer).produceScheduleUpdateEvent(eq(schedule));
     }
 
     @Test

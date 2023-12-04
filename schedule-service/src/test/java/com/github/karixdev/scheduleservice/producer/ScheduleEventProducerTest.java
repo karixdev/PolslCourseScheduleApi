@@ -1,32 +1,27 @@
 package com.github.karixdev.scheduleservice.producer;
 
+import com.github.karixdev.commonservice.event.EventType;
+import com.github.karixdev.commonservice.event.schedule.ScheduleEvent;
 import com.github.karixdev.scheduleservice.entity.Schedule;
-import com.github.karixdev.scheduleservice.message.ScheduleEventMessage;
-import com.github.karixdev.scheduleservice.message.ScheduleEventType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.mockito.Mockito;
+import org.springframework.kafka.core.KafkaTemplate;
 
 import java.util.UUID;
 
-import static com.github.karixdev.scheduleservice.props.ScheduleMQProperties.*;
 import static org.mockito.Mockito.verify;
 
-@ExtendWith(MockitoExtension.class)
 class ScheduleEventProducerTest {
-    @InjectMocks
+
     ScheduleEventProducer underTest;
+    KafkaTemplate<String, ScheduleEvent> kafkaTemplate;
+    String topic;
 
-    @Mock
-    RabbitTemplate rabbitTemplate;
-
-    Schedule exampleSchedule;
+    static Schedule exampleSchedule;
 
     @BeforeEach
+    @SuppressWarnings("unchecked")
     void setUp() {
         exampleSchedule = Schedule.builder()
                 .id(UUID.randomUUID())
@@ -37,78 +32,62 @@ class ScheduleEventProducerTest {
                 .name("schedule")
                 .wd(4)
                 .build();
+
+        kafkaTemplate = (KafkaTemplate<String, ScheduleEvent>) Mockito.mock(KafkaTemplate.class);
+        topic = "schedule-event";
+        underTest = new ScheduleEventProducer(kafkaTemplate, topic);
     }
 
     @Test
-    void GivenCreateScheduleEventType_WhenProduceScheduleEventMessage_ThenSendsMessageToCorrectExchangeWithCorrectRoutingKey() {
+    void GivenSchedule_WhenProduceScheduleCreateEvent_ThenProducesCorrectEventToProperTopic() {
         // Given
         Schedule schedule = exampleSchedule;
-        ScheduleEventType eventType = ScheduleEventType.CREATE;
-
-        ScheduleEventMessage expectedMessage = new ScheduleEventMessage(
-                exampleSchedule.getId(),
-                0,
-                1,
-                4
-        );
+        ScheduleEvent event = createEvent(EventType.CREATE);
 
         // When
-        underTest.produceScheduleEventMessage(schedule, eventType);
+        underTest.produceScheduleCreateEvent(schedule);
 
         // Then
-        verify(rabbitTemplate).convertAndSend(
-                SCHEDULE_EXCHANGE,
-                SCHEDULE_CREATE_ROUTING_KEY,
-                expectedMessage
-        );
+        verify(kafkaTemplate).send(topic, event.scheduleId(), event);
     }
 
     @Test
-    void GivenUpdateScheduleEventType_WhenProduceScheduleEventMessage_ThenSendsMessageToCorrectExchangeWithCorrectRoutingKey() {
+    void GivenSchedule_WhenProduceScheduleUpdateEvent_ThenProducesCorrectEventToProperTopic() {
         // Given
         Schedule schedule = exampleSchedule;
-        ScheduleEventType eventType = ScheduleEventType.UPDATE;
-
-        ScheduleEventMessage expectedMessage = new ScheduleEventMessage(
-                schedule.getId(),
-                0,
-                1,
-                4
-        );
+        ScheduleEvent event = createEvent(EventType.UPDATE);
 
         // When
-        underTest.produceScheduleEventMessage(schedule, eventType);
+        underTest.produceScheduleUpdateEvent(schedule);
 
         // Then
-        verify(rabbitTemplate).convertAndSend(
-                SCHEDULE_EXCHANGE,
-                SCHEDULE_UPDATE_ROUTING_KEY,
-                expectedMessage
-        );
+        verify(kafkaTemplate).send(topic, event.scheduleId(), event);
     }
 
     @Test
-    void GivenDeleteScheduleEventType_WhenProduceScheduleEventMessage_ThenSendsMessageToCorrectExchangeWithCorrectRoutingKey() {
+    void GivenSchedule_WhenProduceScheduleDeleteEvent_ThenProducesCorrectEventToProperTopic() {
         // Given
         Schedule schedule = exampleSchedule;
-        ScheduleEventType eventType = ScheduleEventType.DELETE;
-
-        ScheduleEventMessage expectedMessage = new ScheduleEventMessage(
-                schedule.getId(),
-                0,
-                1,
-                4
-        );
+        ScheduleEvent event = ScheduleEvent.builder()
+                .eventType(EventType.DELETE)
+                .scheduleId(schedule.getId().toString())
+                .build();
 
         // When
-        underTest.produceScheduleEventMessage(schedule, eventType);
+        underTest.produceScheduleDeleteEvent(schedule);
 
         // Then
-        verify(rabbitTemplate).convertAndSend(
-                SCHEDULE_EXCHANGE,
-                SCHEDULE_DELETE_ROUTING_KEY,
-                expectedMessage
-        );
+        verify(kafkaTemplate).send(topic, event.scheduleId(), event);
+    }
+
+    private static ScheduleEvent createEvent(EventType eventType) {
+        return ScheduleEvent.builder()
+                .eventType(eventType)
+                .scheduleId(exampleSchedule.getId().toString())
+                .type(exampleSchedule.getType())
+                .planPolslId(exampleSchedule.getPlanPolslId())
+                .wd(exampleSchedule.getWd())
+                .build();
     }
 
 }

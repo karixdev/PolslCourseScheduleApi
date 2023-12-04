@@ -26,6 +26,14 @@ spring:
     host: localhost
     port: 5672
 
+  kafka:
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    bootstrap-servers: localhost:29092
+    security:
+      protocol: PLAINTEXT
+
   security:
     oauth2:
       resourceserver:
@@ -52,3 +60,7 @@ springdoc:
 keycloak:
   server-url: http://localhost:8000
   realm: polsl-course-api
+
+kafka:
+  topics:
+    schedule-event: schedule.event
