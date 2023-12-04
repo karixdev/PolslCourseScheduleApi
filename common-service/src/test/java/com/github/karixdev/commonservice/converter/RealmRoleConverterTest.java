@@ -1,6 +1,5 @@
-package com.github.karixdev.scheduleservice.converter;
+package com.github.karixdev.commonservice.converter;
 
-import com.github.karixdev.scheduleservice.converter.RealmRoleConverter;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

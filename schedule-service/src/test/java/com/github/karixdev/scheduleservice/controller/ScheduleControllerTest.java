@@ -1,6 +1,6 @@
 package com.github.karixdev.scheduleservice.controller;
 
-import com.github.karixdev.scheduleservice.dto.ScheduleRequest;
+import com.github.karixdev.commonservice.dto.schedule.ScheduleRequest;
 import com.github.karixdev.scheduleservice.service.ScheduleService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

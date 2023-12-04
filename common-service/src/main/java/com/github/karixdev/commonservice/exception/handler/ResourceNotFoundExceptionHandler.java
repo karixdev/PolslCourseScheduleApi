@@ -1,13 +1,11 @@
-package com.github.karixdev.scheduleservice.exception.handler;
+package com.github.karixdev.commonservice.exception.handler;
 
 import com.github.karixdev.commonservice.dto.ErrorResponse;
 import com.github.karixdev.commonservice.exception.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-@RestControllerAdvice
 public class ResourceNotFoundExceptionHandler {
 
     @ExceptionHandler(ResourceNotFoundException.class)

@@ -1,4 +1,4 @@
-package com.github.karixdev.scheduleservice.exception.handler;
+package com.github.karixdev.commonservice.exception.handler;
 
 import com.github.karixdev.commonservice.dto.ValidationErrorResponse;
 import com.github.karixdev.commonservice.exception.ValidationException;
@@ -7,12 +7,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@RestControllerAdvice
 public class ValidationExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

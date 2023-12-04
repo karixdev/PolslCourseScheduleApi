@@ -1,10 +1,10 @@
 package com.github.karixdev.scheduleservice.service;
 
-import com.github.karixdev.scheduleservice.dto.ScheduleRequest;
-import com.github.karixdev.scheduleservice.dto.ScheduleResponse;
+import com.github.karixdev.commonservice.dto.schedule.ScheduleRequest;
+import com.github.karixdev.commonservice.dto.schedule.ScheduleResponse;
+import com.github.karixdev.commonservice.exception.ResourceNotFoundException;
+import com.github.karixdev.commonservice.exception.ValidationException;
 import com.github.karixdev.scheduleservice.entity.Schedule;
-import com.github.karixdev.scheduleservice.exception.ResourceNotFoundException;
-import com.github.karixdev.scheduleservice.exception.ValidationException;
 import com.github.karixdev.scheduleservice.message.ScheduleEventType;
 import com.github.karixdev.scheduleservice.producer.ScheduleEventProducer;
 import com.github.karixdev.scheduleservice.repository.ScheduleRepository;
@@ -20,6 +20,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class ScheduleService {
+
     private final ScheduleRepository repository;
     private final ScheduleEventProducer producer;
 

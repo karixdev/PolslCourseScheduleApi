@@ -1,14 +1,18 @@
-package com.github.karixdev.scheduleservice.converter;
+package com.github.karixdev.commonservice.converter;
 
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class RealmRoleConverter implements Converter<Jwt, Collection<GrantedAuthority>> {
+
     @Override
     @SuppressWarnings("unchecked")
     public Collection<GrantedAuthority> convert(Jwt jwt) {
@@ -27,4 +31,5 @@ public class RealmRoleConverter implements Converter<Jwt, Collection<GrantedAuth
                 .map(roleName -> new SimpleGrantedAuthority("ROLE_" + roleName))
                 .collect(Collectors.toSet());
     }
+
 }

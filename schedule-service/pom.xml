@@ -89,6 +89,11 @@
 			<artifactId>springdoc-openapi-starter-webmvc-api</artifactId>
 			<version>2.1.0</version>
 		</dependency>
+		<dependency>
+			<groupId>com.github.karixdev</groupId>
+			<artifactId>common-service</artifactId>
+			<version>1.0.0</version>
+		</dependency>
 
 		<dependency>
 			<groupId>com.github.dasniko</groupId>

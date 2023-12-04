@@ -1,4 +1,4 @@
-package com.github.karixdev.scheduleservice.exception;
+package com.github.karixdev.commonservice.exception;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @Setter
 @ResponseStatus(HttpStatus.BAD_REQUEST)
 public class ValidationException extends RuntimeException {
+
     private String fieldName;
 
     public ValidationException(String fieldName, String message) {

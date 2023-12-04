@@ -1,4 +1,4 @@
-package com.github.karixdev.scheduleservice.dto;
+package com.github.karixdev.commonservice.dto.schedule;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;

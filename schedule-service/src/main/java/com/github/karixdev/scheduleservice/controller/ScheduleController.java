@@ -1,9 +1,9 @@
 package com.github.karixdev.scheduleservice.controller;
 
-import com.github.karixdev.scheduleservice.dto.ErrorResponse;
-import com.github.karixdev.scheduleservice.dto.ScheduleRequest;
-import com.github.karixdev.scheduleservice.dto.ScheduleResponse;
-import com.github.karixdev.scheduleservice.dto.ValidationErrorResponse;
+import com.github.karixdev.commonservice.dto.ErrorResponse;
+import com.github.karixdev.commonservice.dto.ValidationErrorResponse;
+import com.github.karixdev.commonservice.dto.schedule.ScheduleRequest;
+import com.github.karixdev.commonservice.dto.schedule.ScheduleResponse;
 import com.github.karixdev.scheduleservice.service.ScheduleService;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
