@@ -23,6 +23,7 @@ import java.util.UUID;
 @RequestMapping("/api/schedules")
 @RequiredArgsConstructor
 public class ScheduleController {
+
     private final ScheduleService service;
 
     @ApiResponse(
@@ -183,4 +184,5 @@ public class ScheduleController {
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
 }

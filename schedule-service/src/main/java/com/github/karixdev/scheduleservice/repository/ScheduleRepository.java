@@ -12,6 +12,7 @@ import java.util.UUID;
 
 @Repository
 public interface ScheduleRepository extends JpaRepository<Schedule, UUID> {
+
     @Query("""
             SELECT schedule
             FROM Schedule schedule
@@ -25,4 +26,5 @@ public interface ScheduleRepository extends JpaRepository<Schedule, UUID> {
             ORDER BY schedule.semester, schedule.groupNumber ASC
             """)
     List<Schedule> findAllOrderBySemesterAndGroupNumberAsc();
+
 }

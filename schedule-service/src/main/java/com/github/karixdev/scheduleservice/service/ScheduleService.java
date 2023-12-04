@@ -54,7 +54,7 @@ public class ScheduleService {
     public List<ScheduleResponse> findAll(Set<UUID> ids) {
         List<Schedule> schedules = repository.findAllOrderBySemesterAndGroupNumberAsc();
 
-        if (ids != null && ids.size() > 0) {
+        if (ids != null && !ids.isEmpty()) {
             schedules = schedules.stream()
                     .filter(schedule -> ids.contains(schedule.getId()))
                     .toList();
@@ -71,7 +71,7 @@ public class ScheduleService {
     }
 
     public ScheduleResponse findById(UUID id) {
-        Schedule schedule = findByIdOrElseThrow(id, false);
+        Schedule schedule = findByIdOrElseThrow(id);
 
         return new ScheduleResponse(
                 schedule.getId(),
@@ -81,21 +81,14 @@ public class ScheduleService {
         );
     }
 
-    public Schedule findByIdOrElseThrow(UUID id, boolean eagerLoad) {
-        Optional<Schedule> optionalSchedule = repository.findById(id);
-
-        return optionalSchedule.orElseThrow(() -> {
-            throw new ResourceNotFoundException(
-                    String.format(
-                            "Schedule with id %s not found",
-                            id)
-            );
-        });
+    private Schedule findByIdOrElseThrow(UUID id) {
+        String exceptionMsg = String.format("Schedule with id %s not found", id);
+        return repository.findById(id).orElseThrow(() -> new ResourceNotFoundException(exceptionMsg));
     }
 
     @Transactional
     public ScheduleResponse update(UUID id, ScheduleRequest scheduleRequest) {
-        Schedule schedule = findByIdOrElseThrow(id, false);
+        Schedule schedule = findByIdOrElseThrow(id);
 
         Optional<Schedule> scheduleWithName = repository.findByName(scheduleRequest.name());
 
@@ -127,18 +120,19 @@ public class ScheduleService {
 
     @Transactional
     public void delete(UUID id) {
-        Schedule schedule = findByIdOrElseThrow(id, false);
+        Schedule schedule = findByIdOrElseThrow(id);
 
         repository.delete(schedule);
         producer.produceScheduleDeleteEvent(schedule);
     }
 
     public void requestScheduleCoursesUpdate(UUID id) {
-        Schedule schedule = findByIdOrElseThrow(id, false);
+        Schedule schedule = findByIdOrElseThrow(id);
         producer.produceScheduleUpdateEvent(schedule);
     }
 
     public void requestScheduleCoursesUpdateForAll() {
         repository.findAll().forEach(producer::produceScheduleUpdateEvent);
     }
+
 }

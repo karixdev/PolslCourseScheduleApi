@@ -17,6 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class ScheduleRepositoryTest extends ContainersEnvironment {
+
     @Autowired
     ScheduleRepository underTest;
 
@@ -127,4 +128,5 @@ public class ScheduleRepositoryTest extends ContainersEnvironment {
         assertThat(result.get(1)).isEqualTo(schedule1);
         assertThat(result.get(2)).isEqualTo(schedule3);
     }
+
 }

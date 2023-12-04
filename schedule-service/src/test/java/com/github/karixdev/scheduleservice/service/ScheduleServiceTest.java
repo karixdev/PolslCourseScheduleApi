@@ -28,6 +28,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class ScheduleServiceTest {
+
     @InjectMocks
     ScheduleService underTest;
 
@@ -454,4 +455,5 @@ public class ScheduleServiceTest {
                 )
         );
     }
+
 }

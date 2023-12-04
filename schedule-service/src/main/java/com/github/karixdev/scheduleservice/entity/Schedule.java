@@ -14,6 +14,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "schedule")
 public class Schedule {
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(
@@ -78,4 +79,5 @@ public class Schedule {
     public int hashCode() {
         return Objects.hash(id, type, planPolslId, semester, name, groupNumber, wd);
     }
+
 }

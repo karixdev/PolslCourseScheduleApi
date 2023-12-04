@@ -101,4 +101,5 @@ public class ScheduleJobIT extends ContainersEnvironment {
         ConsumerRecords<String, ScheduleEvent> consumerRecords = KafkaTestUtils.getRecords(scheduleEventConsumer, Duration.ofSeconds(20));
         assertThat(consumerRecords.count()).isEqualTo(3);
     }
+
 }
