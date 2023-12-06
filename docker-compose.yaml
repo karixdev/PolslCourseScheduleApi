@@ -45,21 +45,11 @@ services:
     ports:
       - '27017:27017'
 
-  rabbitmq:
-    container_name: 'rabbitmq'
-    image: rabbitmq:3.11.7-management-alpine
-    restart: always
-    environment:
-      RABBITMQ_DEFAULT_USER: user
-      RABBITMQ_DEFAULT_PASS: password
-    ports:
-      - '5672:5672'
-      - '15672:15672'
-
   keycloak:
     container_name: 'keycloak'
     image: quay.io/keycloak/keycloak:latest
     restart: always
+    hostname: keycloak
     environment:
       DB_VENDOR: POSTGRES
       DB_ADDR: keycloak-postgres
@@ -169,3 +159,29 @@ services:
     environment:
       BOOTSTRAP_SERVER_HOST: broker
       BOOTSTRAP_SERVER_PORT: 9092
+
+  api-gateway:
+    image: api-gateway
+    container_name: api-gateway
+    restart: always
+    ports:
+      - '8080:8080'
+    environment:
+      EUREKA_HOST: discovery-server
+      EUREKA_PORT: 8761
+
+  schedule-service:
+    image: schedule-service
+    container_name: schedule-service
+    restart: always
+    environment:
+      BOOTSTRAP_SERVER_HOST: broker
+      BOOTSTRAP_SERVER_PORT: 9092
+      EUREKA_HOST: discovery-server
+      EUREKA_PORT: 8761
+      POSTGRES_HOST: schedule-service-postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USERNAME: root
+      POSTGRES_PASSWORD: root
+      KEYCLOAK_HOST: keycloak
+      KEYCLOAK_PORT: 8080
