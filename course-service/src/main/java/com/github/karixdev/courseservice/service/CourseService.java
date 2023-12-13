@@ -1,5 +1,7 @@
 package com.github.karixdev.courseservice.service;
 
+import com.github.karixdev.commonservice.event.EventType;
+import com.github.karixdev.commonservice.event.schedule.ScheduleEvent;
 import com.github.karixdev.courseservice.client.ScheduleClient;
 import com.github.karixdev.courseservice.comparator.CourseComparator;
 import com.github.karixdev.courseservice.dto.CourseRequest;
@@ -9,7 +11,7 @@ import com.github.karixdev.courseservice.exception.ResourceNotFoundException;
 import com.github.karixdev.courseservice.exception.ScheduleServiceClientException;
 import com.github.karixdev.courseservice.exception.ValidationException;
 import com.github.karixdev.courseservice.mapper.CourseMapper;
-import com.github.karixdev.courseservice.producer.CourseEventProducer;
+import com.github.karixdev.courseservice.producer.ScheduleCoursesEventProducer;
 import com.github.karixdev.courseservice.repository.CourseRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -26,11 +28,12 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class CourseService {
+
     private final CourseRepository repository;
     private final CourseMapper mapper;
     private final ScheduleClient scheduleClient;
     private final CourseComparator courseComparator;
-    private final CourseEventProducer producer;
+    private final ScheduleCoursesEventProducer producer;
 
     @Transactional
     public CourseResponse create(CourseRequest request) {
@@ -56,8 +59,7 @@ public class CourseService {
                 .build();
 
         repository.save(course);
-
-        producer.produceCoursesUpdate(scheduleId);
+        producer.produceCreated(scheduleId, Set.of(course));
 
         return mapper.map(course);
     }
@@ -82,9 +84,9 @@ public class CourseService {
         Course course = findByIdOrElseThrow(id);
 
         UUID newScheduleId = request.getScheduleId();
-        if (!course.getScheduleId().equals(request.getScheduleId())
-                && !doesScheduleExist(newScheduleId)
-        ) {
+        UUID oldScheduleId = course.getScheduleId();
+
+        if (!oldScheduleId.equals(request.getScheduleId()) && !doesScheduleExist(newScheduleId)) {
             throw new ValidationException(
                     "scheduleId",
                     "Schedule with id %s does not exist".formatted(newScheduleId)
@@ -103,8 +105,7 @@ public class CourseService {
         course.setAdditionalInfo(request.getAdditionalInfo());
 
         repository.save(course);
-
-        producer.produceCoursesUpdate(newScheduleId);
+        producer.produceUpdated(newScheduleId, Set.of(course));
 
         return mapper.map(course);
     }
@@ -113,9 +114,8 @@ public class CourseService {
     public void delete(UUID id) {
         Course course = findByIdOrElseThrow(id);
 
-        producer.produceCoursesUpdate(course.getScheduleId());
-
         repository.delete(course);
+        producer.produceDeleted(course.getScheduleId(), Set.of(course));
     }
 
     public List<CourseResponse> findCoursesBySchedule(UUID scheduleId) {
@@ -126,12 +126,7 @@ public class CourseService {
     }
 
     @Transactional
-    public void handleScheduleDelete(UUID scheduleId) {
-        repository.deleteAll(repository.findByScheduleId(scheduleId));
-    }
-
-    @Transactional
-    public void handleMappedCourses(UUID scheduleId, Set<Course> retrievedCourses) {
+    public void updateScheduleCourses(UUID scheduleId, Set<Course> retrievedCourses) {
         List<Course> currentCourses = repository.findByScheduleId(scheduleId);
 
         Set<Course> coursesToSave = retrievedCourses.stream()
@@ -154,7 +149,7 @@ public class CourseService {
         repository.saveAll(coursesToSave);
 
         if (!coursesToDelete.isEmpty() || !coursesToSave.isEmpty()) {
-            producer.produceCoursesUpdate(scheduleId);
+            producer.produceCreatedAndDeleted(scheduleId, coursesToSave, coursesToDelete);
         }
     }
 
@@ -168,5 +163,14 @@ public class CourseService {
                 course1.getWeekType() == course2.getWeekType() &&
                 Objects.equals(course1.getStartsAt(), course2.getStartsAt()) &&
                 Objects.equals(course1.getEndsAt(), course2.getEndsAt());
+    }
+
+    public void handleScheduleEvent(ScheduleEvent value) {
+        if (value.eventType() != EventType.DELETE) {
+            return;
+        }
+
+        UUID scheduleId = UUID.fromString(value.scheduleId());
+        repository.deleteAll(repository.findByScheduleId(scheduleId));
     }
 }

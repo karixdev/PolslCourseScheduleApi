@@ -12,3 +12,7 @@ schedule-service:
 keycloak:
   server-url: http://localhost:8000
   realm: polsl-course-api
+
+eureka:
+  client:
+    enabled: false

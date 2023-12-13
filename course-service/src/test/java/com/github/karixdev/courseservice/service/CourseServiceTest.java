@@ -1,5 +1,7 @@
 package com.github.karixdev.courseservice.service;
 
+import com.github.karixdev.commonservice.event.EventType;
+import com.github.karixdev.commonservice.event.schedule.ScheduleEvent;
 import com.github.karixdev.courseservice.client.ScheduleClient;
 import com.github.karixdev.courseservice.comparator.CourseComparator;
 import com.github.karixdev.courseservice.dto.CourseRequest;
@@ -11,11 +13,14 @@ import com.github.karixdev.courseservice.exception.ResourceNotFoundException;
 import com.github.karixdev.courseservice.exception.ScheduleServiceClientException;
 import com.github.karixdev.courseservice.exception.ValidationException;
 import com.github.karixdev.courseservice.mapper.CourseMapper;
-import com.github.karixdev.courseservice.producer.CourseEventProducer;
+import com.github.karixdev.courseservice.producer.ScheduleCoursesEventProducer;
 import com.github.karixdev.courseservice.repository.CourseRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -26,6 +31,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.eq;
@@ -33,6 +39,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class CourseServiceTest {
+
     @InjectMocks
     CourseService underTest;
 
@@ -49,7 +56,7 @@ class CourseServiceTest {
     CourseComparator courseComparator;
 
     @Mock
-    CourseEventProducer producer;
+    ScheduleCoursesEventProducer producer;
 
     Course exampleCourse;
     CourseRequest exampleCourseRequest;
@@ -128,7 +135,7 @@ class CourseServiceTest {
         verify(scheduleClient).findById(eq(courseRequest.getScheduleId()));
         verify(repository).save(eq(course));
         verify(courseMapper).map(eq(course));
-        verify(producer).produceCoursesUpdate(eq(course.getScheduleId()));
+        verify(producer).produceCreated(eq(course.getScheduleId()), any());
 
     }
 
@@ -215,8 +222,7 @@ class CourseServiceTest {
         // Then
         verify(repository).save(eq(expectedCourse));
         verify(courseMapper).map(eq(expectedCourse));
-        verify(producer).produceCoursesUpdate(eq(expectedCourse.getScheduleId()));
-
+        verify(producer).produceUpdated(expectedCourse.getScheduleId(), Set.of(expectedCourse));
     }
 
     @Test
@@ -290,7 +296,7 @@ class CourseServiceTest {
 
         // Then
         verify(repository).delete(exampleCourse);
-        verify(producer).produceCoursesUpdate(eq(exampleCourse.getScheduleId()));
+        verify(producer).produceDeleted(eq(exampleCourse.getScheduleId()), any());
     }
 
     @Test
@@ -337,21 +343,6 @@ class CourseServiceTest {
         // Then
         verify(courseComparator, times(2)).compare(any(), any());
         verify(courseMapper, times(3)).map(any());
-    }
-
-    @Test
-    void GivenScheduleId_WhenHandleScheduleDelete_ThenDeletesAllCourseWithProvidedScheduleId() {
-        // Given
-        UUID scheduleId = exampleCourse.getScheduleId();
-
-        when(repository.findByScheduleId(eq(scheduleId)))
-                .thenReturn(List.of(exampleCourse));
-
-        // When
-        underTest.handleScheduleDelete(scheduleId);
-
-        // Then
-        verify(repository).deleteAll(eq(List.of(exampleCourse)));
     }
 
     @Test
@@ -402,12 +393,12 @@ class CourseServiceTest {
                 .thenReturn(List.of(course2, course3));
 
         // When
-        underTest.handleMappedCourses(scheduleId, retrievedCourses);
+        underTest.updateScheduleCourses(scheduleId, retrievedCourses);
 
         // Then
         verify(repository).deleteAll(Set.of(course3));
         verify(repository).saveAll(Set.of(course1));
-        verify(producer).produceCoursesUpdate(eq(scheduleId));
+        verify(producer).produceCreatedAndDeleted(eq(scheduleId), any(), any());
     }
 
     @Test
@@ -433,9 +424,53 @@ class CourseServiceTest {
                 .thenReturn(List.of(course1));
 
         // When
-        underTest.handleMappedCourses(scheduleId, retrievedCourses);
+        underTest.updateScheduleCourses(scheduleId, retrievedCourses);
 
         // Then
-        verify(producer, never()).produceCoursesUpdate(eq(scheduleId));
+        verify(producer, never()).produceCreatedAndDeleted(any(), any(), any());
     }
+
+    @ParameterizedTest
+    @MethodSource("notSupportScheduleEventEventTypes")
+    void GivenScheduleEventWithTypeOtherThanDelete_WhenHandleScheduleEvent_ThenDoNotPerformsEvent(EventType eventType) {
+        // Given
+        ScheduleEvent event = ScheduleEvent.builder()
+                .eventType(eventType)
+                .build();
+
+        // When
+        underTest.handleScheduleEvent(event);
+
+        // Then
+        verify(repository, never()).deleteAll(any());
+    }
+
+    @Test
+    void GivenScheduleEventWithDeleteType_WhenHandleScheduleEvent_ThenDeletesAllCoursesHavingScheduleIdFromEvent() {
+        // Given
+        Course course = Course.builder().id(UUID.randomUUID()).build();
+        UUID scheduleId = course.getId();
+
+        ScheduleEvent event = ScheduleEvent.builder()
+                .scheduleId(scheduleId.toString())
+                .eventType(EventType.DELETE)
+                .build();
+
+        when(repository.findByScheduleId(scheduleId))
+                .thenReturn(List.of(course));
+
+        // When
+        underTest.handleScheduleEvent(event);
+
+        // Then
+        verify(repository).deleteAll(List.of(course));
+    }
+
+    private static Stream<Arguments> notSupportScheduleEventEventTypes() {
+        return Stream.of(
+                Arguments.of(EventType.CREATE),
+                Arguments.of(EventType.UPDATE)
+        );
+    }
+
 }

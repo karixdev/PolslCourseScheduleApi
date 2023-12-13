@@ -11,39 +11,39 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.testcontainers.containers.KafkaContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.containers.RabbitMQContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
 
 import java.util.Collections;
 
 @Testcontainers
 @ActiveProfiles("test")
 public abstract class ContainersEnvironment {
-    static final PostgreSQLContainer<?> postgreSQLContainer =
+
+    protected static final PostgreSQLContainer<?> postgreSQLContainer =
             new PostgreSQLContainer<>("postgres:15.1-alpine")
                     .withUsername("root")
                     .withPassword("root")
                     .withDatabaseName("course-service-test")
                     .withReuse(true);
 
-    static final RabbitMQContainer rabbitMQContainer =
-            new RabbitMQContainer("rabbitmq:3.11.7-management-alpine")
-                    .withUser("user", "password")
-                    .withReuse(true);
-
-    static final KeycloakContainer keycloakContainer =
+    protected static final KeycloakContainer keycloakContainer =
             new KeycloakContainer()
                     .withAdminUsername("admin")
                     .withAdminPassword("admin")
                     .withRealmImportFile("keycloak/realm.json")
                     .withReuse(true);
 
+    protected static final KafkaContainer kafkaContainer =
+            new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.4.3"));
+
     @BeforeAll
     static void beforeAll() {
         postgreSQLContainer.start();
-        rabbitMQContainer.start();
         keycloakContainer.start();
+        kafkaContainer.start();
     }
 
     @DynamicPropertySource
@@ -66,29 +66,15 @@ public abstract class ContainersEnvironment {
     }
 
     @DynamicPropertySource
-    static void overrideRabbitMqProperties(DynamicPropertyRegistry registry) {
-        registry.add(
-                "spring.rabbitmq.host",
-                rabbitMQContainer::getHost);
-
-        registry.add(
-                "spring.rabbitmq.port",
-                rabbitMQContainer::getAmqpPort);
-
-        registry.add(
-                "spring.rabbitmq.password",
-                rabbitMQContainer::getAdminPassword);
-
-        registry.add(
-                "spring.rabbitmq.username",
-                rabbitMQContainer::getAdminUsername);
-    }
-
-    @DynamicPropertySource
     static void overrideSecurityProperties(DynamicPropertyRegistry registry) {
         registry.add(
                 "spring.security.oauth2.resourceserver.jwt.issuer-uri",
                 () -> keycloakContainer.getAuthServerUrl() + "realms/polsl-course-api");
+    }
+
+    @DynamicPropertySource
+    static void overrideKafkaProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.kafka.bootstrap-servers", kafkaContainer::getBootstrapServers);
     }
 
     private record KeyCloakToken(String accessToken) {
