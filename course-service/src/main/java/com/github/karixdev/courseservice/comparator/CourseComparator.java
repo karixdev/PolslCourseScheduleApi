@@ -9,6 +9,7 @@ import java.util.Comparator;
 
 @Component
 public class CourseComparator implements Comparator<Course> {
+
     @Override
     public int compare(Course course1, Course course2) {
         DayOfWeek dayOfWeek1 = course1.getDayOfWeek();
@@ -25,4 +26,5 @@ public class CourseComparator implements Comparator<Course> {
 
         return localTime1.compareTo(localTime2);
     }
+
 }

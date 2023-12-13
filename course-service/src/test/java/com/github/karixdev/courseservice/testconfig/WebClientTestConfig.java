@@ -7,9 +7,11 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 @TestConfiguration
 public class WebClientTestConfig {
+
     @Primary
     @Bean
     WebClient.Builder webClientBuilder() {
         return WebClient.builder();
     }
+
 }

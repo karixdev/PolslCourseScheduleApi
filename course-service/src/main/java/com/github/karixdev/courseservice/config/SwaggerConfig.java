@@ -16,6 +16,7 @@ import java.time.format.DateTimeFormatter;
 
 @Configuration
 public class SwaggerConfig {
+
     private static final String OPEN_ID_SCHEME_NAME = "OpenId";
     private static final String OPENID_CONFIG_FORMAT = "%s/realms/%s/.well-known/openid-configuration";
 
@@ -48,4 +49,5 @@ public class SwaggerConfig {
                 .type(SecurityScheme.Type.OPENIDCONNECT)
                 .openIdConnectUrl(connectUrl);
     }
+
 }

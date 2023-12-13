@@ -15,6 +15,7 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class RealmRoleConverterTest {
+
     RealmRoleConverter underTest = new RealmRoleConverter();
 
     @Test

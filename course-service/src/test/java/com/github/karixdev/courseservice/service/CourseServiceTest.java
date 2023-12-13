@@ -97,7 +97,7 @@ class CourseServiceTest {
         // Given
         CourseRequest courseRequest = exampleCourseRequest;
 
-        when(scheduleClient.findById(eq(courseRequest.getScheduleId())))
+        when(scheduleClient.findById(courseRequest.getScheduleId()))
                 .thenReturn(Optional.empty());
 
         // When & Then
@@ -110,7 +110,7 @@ class CourseServiceTest {
         // Given
         CourseRequest courseRequest = exampleCourseRequest;
 
-        when(scheduleClient.findById(eq(courseRequest.getScheduleId())))
+        when(scheduleClient.findById(courseRequest.getScheduleId()))
                 .thenThrow(ScheduleServiceClientException.class);
 
         // When & Then
@@ -125,16 +125,16 @@ class CourseServiceTest {
 
         Course course = exampleCourse;
 
-        when(scheduleClient.findById(eq(courseRequest.getScheduleId())))
+        when(scheduleClient.findById(courseRequest.getScheduleId()))
                 .thenReturn(Optional.of(new ScheduleResponse(courseRequest.getScheduleId())));
 
         // When
         underTest.create(courseRequest);
 
         // Then
-        verify(scheduleClient).findById(eq(courseRequest.getScheduleId()));
-        verify(repository).save(eq(course));
-        verify(courseMapper).map(eq(course));
+        verify(scheduleClient).findById(courseRequest.getScheduleId());
+        verify(repository).save(course);
+        verify(courseMapper).map(course);
         verify(producer).produceCreated(eq(course.getScheduleId()), any());
 
     }
@@ -143,12 +143,12 @@ class CourseServiceTest {
     void GivenNotExistingCourseId_WhenUpdate_ThenThrowsResourceNotFoundExceptionWithProperMessage() {
         // Given
         UUID id = UUID.randomUUID();
+        CourseRequest request = CourseRequest.builder().build();
 
-        when(repository.findById(eq(id)))
-                .thenReturn(Optional.empty());
+        when(repository.findById(id)).thenReturn(Optional.empty());
 
         // When & Then
-        assertThatThrownBy(() -> underTest.update(id, CourseRequest.builder().build()))
+        assertThatThrownBy(() -> underTest.update(id, request))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 
@@ -166,11 +166,8 @@ class CourseServiceTest {
                 .scheduleId(UUID.fromString("158ed783-928c-4155-bee9-fdbaaadc15f2"))
                 .build();
 
-        when(repository.findById(eq(id)))
-                .thenReturn(Optional.of(course));
-
-        when(scheduleClient.findById(eq(courseRequest.getScheduleId())))
-                .thenReturn(Optional.empty());
+        when(repository.findById(id)).thenReturn(Optional.of(course));
+        when(scheduleClient.findById(courseRequest.getScheduleId())).thenReturn(Optional.empty());
 
         // When & Then
         assertThatThrownBy(() -> underTest.update(id, courseRequest))
@@ -210,18 +207,17 @@ class CourseServiceTest {
                 .scheduleId(courseRequest.getScheduleId())
                 .build();
 
-        when(repository.findById(eq(id)))
-                .thenReturn(Optional.of(course));
+        when(repository.findById(id)).thenReturn(Optional.of(course));
 
-        when(scheduleClient.findById(eq(courseRequest.getScheduleId())))
+        when(scheduleClient.findById(courseRequest.getScheduleId()))
                 .thenReturn(Optional.of(new ScheduleResponse(courseRequest.getScheduleId())));
 
         // When
         underTest.update(id, courseRequest);
 
         // Then
-        verify(repository).save(eq(expectedCourse));
-        verify(courseMapper).map(eq(expectedCourse));
+        verify(repository).save(expectedCourse);
+        verify(courseMapper).map(expectedCourse);
         verify(producer).produceUpdated(expectedCourse.getScheduleId(), Set.of(expectedCourse));
     }
 
@@ -258,16 +254,15 @@ class CourseServiceTest {
                 .scheduleId(courseRequest.getScheduleId())
                 .build();
 
-        when(repository.findById(eq(id)))
-                .thenReturn(Optional.of(course));
+        when(repository.findById(id)).thenReturn(Optional.of(course));
 
         // When
         underTest.update(id, courseRequest);
 
         // Then
-        verify(scheduleClient, never()).findById(eq(course.getScheduleId()));
-        verify(repository).save(eq(expectedCourse));
-        verify(courseMapper).map(eq(expectedCourse));
+        verify(scheduleClient, never()).findById(course.getScheduleId());
+        verify(repository).save(expectedCourse);
+        verify(courseMapper).map(expectedCourse);
     }
 
     @Test
@@ -275,8 +270,7 @@ class CourseServiceTest {
         // Given
         UUID id = UUID.randomUUID();
 
-        when(repository.findById(eq(id)))
-                .thenReturn(Optional.empty());
+        when(repository.findById(id)).thenReturn(Optional.empty());
 
         // When & Then
         assertThatThrownBy(() -> underTest.delete(id))
@@ -288,8 +282,7 @@ class CourseServiceTest {
         // Given
         UUID id = exampleCourse.getId();
 
-        when(repository.findById(eq(id)))
-                .thenReturn(Optional.of(exampleCourse));
+        when(repository.findById(id)).thenReturn(Optional.of(exampleCourse));
 
         // When
         underTest.delete(id);
@@ -334,7 +327,7 @@ class CourseServiceTest {
                 .endsAt(LocalTime.of(16, 15))
                 .build();
 
-        when(repository.findByScheduleId(eq(scheduleId)))
+        when(repository.findByScheduleId(scheduleId))
                 .thenReturn(List.of(course1, course2, course3));
 
         // When
@@ -389,7 +382,7 @@ class CourseServiceTest {
 
         Set<Course> retrievedCourses = Set.of(course1, course2);
 
-        when(repository.findByScheduleId(eq(scheduleId)))
+        when(repository.findByScheduleId(scheduleId))
                 .thenReturn(List.of(course2, course3));
 
         // When
@@ -420,7 +413,7 @@ class CourseServiceTest {
 
         Set<Course> retrievedCourses = Set.of(course1);
 
-        when(repository.findByScheduleId(eq(scheduleId)))
+        when(repository.findByScheduleId(scheduleId))
                 .thenReturn(List.of(course1));
 
         // When

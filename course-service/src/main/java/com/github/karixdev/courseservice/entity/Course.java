@@ -17,6 +17,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "course")
 public class Course {
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(
@@ -120,4 +121,5 @@ public class Course {
                 endsAt
         );
     }
+
 }

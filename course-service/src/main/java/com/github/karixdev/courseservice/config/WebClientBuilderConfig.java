@@ -9,6 +9,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Configuration
 @RequiredArgsConstructor
 public class WebClientBuilderConfig {
+
     private final LoadBalancedExchangeFilterFunction filterFunction;
 
     @Bean
@@ -16,4 +17,5 @@ public class WebClientBuilderConfig {
         return WebClient.builder()
                 .filter(filterFunction);
     }
+
 }

@@ -22,15 +22,18 @@ import java.util.List;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+    
+    private static final String ADMIN_ROLE = "admin";
+
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers(HttpMethod.POST).hasRole("admin")
-                        .requestMatchers(HttpMethod.PUT).hasRole("admin")
-                        .requestMatchers(HttpMethod.DELETE).hasRole("admin")
+                        .requestMatchers(HttpMethod.POST).hasRole(ADMIN_ROLE)
+                        .requestMatchers(HttpMethod.PUT).hasRole(ADMIN_ROLE)
+                        .requestMatchers(HttpMethod.DELETE).hasRole(ADMIN_ROLE)
                         .requestMatchers(HttpMethod.GET).permitAll()
                         .anyRequest().authenticated()
                 )
@@ -63,4 +66,5 @@ public class SecurityConfig {
 
         return source;
     }
+
 }

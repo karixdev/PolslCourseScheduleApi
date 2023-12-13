@@ -25,7 +25,8 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @ContextConfiguration(classes = {WebClientTestConfig.class})
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @WireMockTest(httpPort = 9999)
-public class ScheduleClientTest extends ContainersEnvironment {
+class ScheduleClientTest extends ContainersEnvironment {
+
     @Autowired
     ScheduleClient underTest;
 

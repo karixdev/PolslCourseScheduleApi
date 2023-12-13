@@ -10,11 +10,11 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.support.WebClientAdapter;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
-import reactor.core.publisher.Mono;
 
 @Configuration
 @RequiredArgsConstructor
 public class ScheduleClientConfig {
+
     private final WebClient.Builder webClientBuilder;
 
     @Bean
@@ -38,4 +38,5 @@ public class ScheduleClientConfig {
 
         return factory.createClient(ScheduleClient.class);
     }
+
 }

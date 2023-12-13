@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class RealmRoleConverter implements Converter<Jwt, Collection<GrantedAuthority>> {
+
     @Override
     @SuppressWarnings("unchecked")
     public Collection<GrantedAuthority> convert(Jwt jwt) {
@@ -30,4 +31,5 @@ public class RealmRoleConverter implements Converter<Jwt, Collection<GrantedAuth
                 .map(roleName -> new SimpleGrantedAuthority("ROLE_" + roleName))
                 .collect(Collectors.toSet());
     }
+
 }

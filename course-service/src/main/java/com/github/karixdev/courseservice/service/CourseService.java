@@ -74,9 +74,8 @@ public class CourseService {
     }
 
     private Course findByIdOrElseThrow(UUID id) {
-        return repository.findById(id).orElseThrow(() -> {
-            throw new ResourceNotFoundException("Course with it %s not found".formatted(id));
-        });
+        return repository.findById(id).orElseThrow(() ->
+                new ResourceNotFoundException("Course with it %s not found".formatted(id)));
     }
 
     @Transactional

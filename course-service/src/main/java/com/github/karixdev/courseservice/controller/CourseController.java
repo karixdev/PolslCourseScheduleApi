@@ -24,6 +24,7 @@ import java.util.UUID;
 @Tag(name = "Course controller", description = "All actions except GET are forbidden to normal user")
 @RequiredArgsConstructor
 public class CourseController {
+
     private final CourseService service;
 
     @ApiResponse(
@@ -135,4 +136,5 @@ public class CourseController {
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
 }
