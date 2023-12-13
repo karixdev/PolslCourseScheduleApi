@@ -8,6 +8,7 @@ import com.github.karixdev.courseservice.entity.WeekType;
 import com.github.karixdev.courseservice.repository.CourseRepository;
 import com.github.karixdev.courseservice.testconfig.TestKafkaTopicsConfig;
 import com.github.karixdev.courseservice.testconfig.WebClientTestConfig;
+import com.github.karixdev.courseservice.utils.KeycloakUtils;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -92,7 +93,7 @@ class CourseControllerIT extends ContainersEnvironment {
 
     @Test
     void shouldNotCreateForUser() {
-        String token = getUserToken();
+        String token = KeycloakUtils.getUserToken(keycloakContainer.getAuthServerUrl());;
 
         wm.stubFor(
                 get(urlPathEqualTo("/api/schedules/11111111-1111-1111-1111-111111111111"))
@@ -126,7 +127,7 @@ class CourseControllerIT extends ContainersEnvironment {
 
     @Test
     void shouldNotCreateCourseForNotExistingSchedule() {
-        String token = getAdminToken();
+        String token = KeycloakUtils.getAdminToken(keycloakContainer.getAuthServerUrl());;
 
         wm.stubFor(
                 get(urlPathEqualTo("/api/schedules/11111111-1111-1111-1111-111111111111"))
@@ -160,7 +161,7 @@ class CourseControllerIT extends ContainersEnvironment {
 
     @Test
     void shouldCreateCourse() {
-        String token = getAdminToken();
+        String token = KeycloakUtils.getAdminToken(keycloakContainer.getAuthServerUrl());;
 
         wm.stubFor(
                 get(urlPathEqualTo("/api/schedules/11111111-1111-1111-1111-111111111111"))
@@ -224,7 +225,7 @@ class CourseControllerIT extends ContainersEnvironment {
 
     @Test
     void shouldNotUpdateForUser() {
-        String token = getUserToken();
+        String token = KeycloakUtils.getUserToken(keycloakContainer.getAuthServerUrl());;
 
         String payload = """
                 {
@@ -253,7 +254,7 @@ class CourseControllerIT extends ContainersEnvironment {
 
     @Test
     void shouldNotUpdateNotExistingCourse() {
-        String token = getAdminToken();
+        String token = KeycloakUtils.getAdminToken(keycloakContainer.getAuthServerUrl());;
 
         String payload = """
                 {
@@ -282,7 +283,7 @@ class CourseControllerIT extends ContainersEnvironment {
 
     @Test
     void shouldNotUpdateCourseForNotExistingSchedule() {
-        String token = getAdminToken();
+        String token = KeycloakUtils.getAdminToken(keycloakContainer.getAuthServerUrl());;
 
         wm.stubFor(
                 get(urlPathEqualTo("/api/schedules/11111111-1111-1111-1111-111111111111"))
@@ -329,7 +330,7 @@ class CourseControllerIT extends ContainersEnvironment {
 
     @Test
     void shouldUpdateCourse() {
-        String token = getAdminToken();
+        String token = KeycloakUtils.getAdminToken(keycloakContainer.getAuthServerUrl());;
 
         Course course = courseRepository.save(Course.builder()
                 .scheduleId(UUID.randomUUID())
@@ -403,7 +404,7 @@ class CourseControllerIT extends ContainersEnvironment {
 
     @Test
     void shouldNotDeleteCourseForUser() {
-        String token = getUserToken();
+        String token = KeycloakUtils.getUserToken(keycloakContainer.getAuthServerUrl());;
 
         webClient.delete().uri("/api/courses/11111111-1111-1111-1111-111111111111")
                 .header("Authorization", "Bearer " + token)
@@ -413,7 +414,7 @@ class CourseControllerIT extends ContainersEnvironment {
 
     @Test
     void shouldNotDeleteNotExistingCourse() {
-        String token = getAdminToken();
+        String token = KeycloakUtils.getAdminToken(keycloakContainer.getAuthServerUrl());;
 
         webClient.delete().uri("/api/courses/11111111-1111-1111-1111-111111111111")
                 .header("Authorization", "Bearer " + token)
@@ -423,7 +424,7 @@ class CourseControllerIT extends ContainersEnvironment {
 
     @Test
     void shouldDeleteCourse() {
-        String token = getAdminToken();
+        String token = KeycloakUtils.getAdminToken(keycloakContainer.getAuthServerUrl());;
 
         Course course = Course.builder()
                 .scheduleId(UUID.randomUUID())

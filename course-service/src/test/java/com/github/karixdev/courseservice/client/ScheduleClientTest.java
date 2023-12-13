@@ -1,6 +1,5 @@
 package com.github.karixdev.courseservice.client;
 
-import com.github.karixdev.courseservice.ContainersEnvironment;
 import com.github.karixdev.courseservice.dto.ScheduleResponse;
 import com.github.karixdev.courseservice.exception.ScheduleServiceClientException;
 import com.github.karixdev.courseservice.exception.ScheduleServiceServerException;
@@ -9,8 +8,6 @@ import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
@@ -20,12 +17,14 @@ import java.util.UUID;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
-@ContextConfiguration(classes = {WebClientTestConfig.class})
-@SpringBootTest(webEnvironment = RANDOM_PORT)
+@SpringBootTest(classes = {
+        ScheduleClient.class,
+        ScheduleClientConfig.class,
+        WebClientTestConfig.class
+})
 @WireMockTest(httpPort = 9999)
-class ScheduleClientTest extends ContainersEnvironment {
+class ScheduleClientTest {
 
     @Autowired
     ScheduleClient underTest;
@@ -88,4 +87,5 @@ class ScheduleClientTest extends ContainersEnvironment {
         assertThat(result).isPresent();
         assertThat(result.get().id()).isEqualTo(id);
     }
+
 }
