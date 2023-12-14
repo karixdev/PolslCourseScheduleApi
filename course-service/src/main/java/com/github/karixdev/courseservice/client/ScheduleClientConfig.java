@@ -1,7 +1,7 @@
 package com.github.karixdev.courseservice.client;
 
-import com.github.karixdev.courseservice.exception.ScheduleServiceClientException;
-import com.github.karixdev.courseservice.exception.ScheduleServiceServerException;
+import com.github.karixdev.commonservice.exception.HttpServiceClientException;
+import com.github.karixdev.commonservice.exception.HttpServiceClientServerException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -17,6 +17,8 @@ public class ScheduleClientConfig {
 
     private final WebClient.Builder webClientBuilder;
 
+    private static final String SERVICE_NAME = "schedule-service";
+
     @Bean
     ScheduleClient scheduleClient(
             @Value("${schedule-service.base-url}") String baseUrl
@@ -24,10 +26,10 @@ public class ScheduleClientConfig {
         WebClient webClient = webClientBuilder
                 .baseUrl(baseUrl)
                 .defaultStatusHandler(HttpStatusCode::is5xxServerError, resp -> {
-                    throw new ScheduleServiceServerException(resp.statusCode());
+                    throw new HttpServiceClientServerException(SERVICE_NAME, resp.statusCode());
                 })
                 .defaultStatusHandler(HttpStatusCode::is4xxClientError, resp -> {
-                    throw new ScheduleServiceClientException(resp.statusCode());
+                    throw new HttpServiceClientException(SERVICE_NAME, resp.statusCode());
                 })
                 .build();
 

@@ -2,16 +2,16 @@ package com.github.karixdev.courseservice.service;
 
 import com.github.karixdev.commonservice.event.EventType;
 import com.github.karixdev.commonservice.event.schedule.ScheduleEvent;
+import com.github.karixdev.commonservice.exception.HttpServiceClientException;
+import com.github.karixdev.commonservice.exception.ResourceNotFoundException;
+import com.github.karixdev.commonservice.exception.ValidationException;
 import com.github.karixdev.courseservice.client.ScheduleClient;
 import com.github.karixdev.courseservice.comparator.CourseComparator;
 import com.github.karixdev.courseservice.dto.CourseRequest;
-import com.github.karixdev.courseservice.dto.ScheduleResponse;
+import com.github.karixdev.commonservice.dto.schedule.ScheduleResponse;
 import com.github.karixdev.courseservice.entity.Course;
 import com.github.karixdev.courseservice.entity.CourseType;
 import com.github.karixdev.courseservice.entity.WeekType;
-import com.github.karixdev.courseservice.exception.ResourceNotFoundException;
-import com.github.karixdev.courseservice.exception.ScheduleServiceClientException;
-import com.github.karixdev.courseservice.exception.ValidationException;
 import com.github.karixdev.courseservice.mapper.CourseMapper;
 import com.github.karixdev.courseservice.producer.ScheduleCoursesEventProducer;
 import com.github.karixdev.courseservice.repository.CourseRepository;
@@ -111,7 +111,7 @@ class CourseServiceTest {
         CourseRequest courseRequest = exampleCourseRequest;
 
         when(scheduleClient.findById(courseRequest.getScheduleId()))
-                .thenThrow(ScheduleServiceClientException.class);
+                .thenThrow(HttpServiceClientException.class);
 
         // When & Then
         assertThatThrownBy(() -> underTest.create(courseRequest))
@@ -125,8 +125,11 @@ class CourseServiceTest {
 
         Course course = exampleCourse;
 
+        ScheduleResponse scheduleResponse = ScheduleResponse.builder()
+                .id(course.getScheduleId())
+                .build();
         when(scheduleClient.findById(courseRequest.getScheduleId()))
-                .thenReturn(Optional.of(new ScheduleResponse(courseRequest.getScheduleId())));
+                .thenReturn(Optional.of(scheduleResponse));
 
         // When
         underTest.create(courseRequest);
@@ -209,8 +212,11 @@ class CourseServiceTest {
 
         when(repository.findById(id)).thenReturn(Optional.of(course));
 
+        ScheduleResponse scheduleResponse = ScheduleResponse.builder()
+                .id(course.getScheduleId())
+                .build();
         when(scheduleClient.findById(courseRequest.getScheduleId()))
-                .thenReturn(Optional.of(new ScheduleResponse(courseRequest.getScheduleId())));
+                .thenReturn(Optional.of(scheduleResponse));
 
         // When
         underTest.update(id, courseRequest);

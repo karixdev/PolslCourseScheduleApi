@@ -1,9 +1,9 @@
 package com.github.karixdev.courseservice.controller;
 
+import com.github.karixdev.commonservice.dto.ErrorResponse;
+import com.github.karixdev.commonservice.dto.ValidationErrorResponse;
 import com.github.karixdev.courseservice.dto.CourseRequest;
 import com.github.karixdev.courseservice.dto.CourseResponse;
-import com.github.karixdev.courseservice.dto.ErrorResponse;
-import com.github.karixdev.courseservice.dto.ValidationErrorResponse;
 import com.github.karixdev.courseservice.service.CourseService;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;

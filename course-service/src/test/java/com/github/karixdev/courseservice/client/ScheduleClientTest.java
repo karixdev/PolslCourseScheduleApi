@@ -1,8 +1,8 @@
 package com.github.karixdev.courseservice.client;
 
-import com.github.karixdev.courseservice.dto.ScheduleResponse;
-import com.github.karixdev.courseservice.exception.ScheduleServiceClientException;
-import com.github.karixdev.courseservice.exception.ScheduleServiceServerException;
+import com.github.karixdev.commonservice.exception.HttpServiceClientException;
+import com.github.karixdev.commonservice.exception.HttpServiceClientServerException;
+import com.github.karixdev.commonservice.dto.schedule.ScheduleResponse;
 import com.github.karixdev.courseservice.testconfig.WebClientTestConfig;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import org.junit.jupiter.api.Test;
@@ -46,7 +46,7 @@ class ScheduleClientTest {
         );
 
         assertThatThrownBy(() -> underTest.findById(id))
-                .isInstanceOf(ScheduleServiceServerException.class);
+                .isInstanceOf(HttpServiceClientServerException.class);
     }
 
     @Test
@@ -59,7 +59,7 @@ class ScheduleClientTest {
         );
 
         assertThatThrownBy(() -> underTest.findById(id))
-                .isInstanceOf(ScheduleServiceClientException.class);
+                .isInstanceOf(HttpServiceClientException.class);
     }
 
     @Test

@@ -1,7 +1,7 @@
 package com.github.karixdev.courseservice.exception.handler;
 
-import com.github.karixdev.courseservice.dto.ErrorResponse;
-import com.github.karixdev.courseservice.exception.ResourceNotFoundException;
+import com.github.karixdev.commonservice.dto.ErrorResponse;
+import com.github.karixdev.commonservice.exception.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;

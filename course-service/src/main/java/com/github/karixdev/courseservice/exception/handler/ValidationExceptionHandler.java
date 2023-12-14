@@ -1,7 +1,7 @@
 package com.github.karixdev.courseservice.exception.handler;
 
-import com.github.karixdev.courseservice.dto.ValidationErrorResponse;
-import com.github.karixdev.courseservice.exception.ValidationException;
+import com.github.karixdev.commonservice.dto.ValidationErrorResponse;
+import com.github.karixdev.commonservice.exception.ValidationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;

@@ -2,14 +2,14 @@ package com.github.karixdev.courseservice.service;
 
 import com.github.karixdev.commonservice.event.EventType;
 import com.github.karixdev.commonservice.event.schedule.ScheduleEvent;
+import com.github.karixdev.commonservice.exception.HttpServiceClientException;
+import com.github.karixdev.commonservice.exception.ResourceNotFoundException;
+import com.github.karixdev.commonservice.exception.ValidationException;
 import com.github.karixdev.courseservice.client.ScheduleClient;
 import com.github.karixdev.courseservice.comparator.CourseComparator;
 import com.github.karixdev.courseservice.dto.CourseRequest;
 import com.github.karixdev.courseservice.dto.CourseResponse;
 import com.github.karixdev.courseservice.entity.Course;
-import com.github.karixdev.courseservice.exception.ResourceNotFoundException;
-import com.github.karixdev.courseservice.exception.ScheduleServiceClientException;
-import com.github.karixdev.courseservice.exception.ValidationException;
 import com.github.karixdev.courseservice.mapper.CourseMapper;
 import com.github.karixdev.courseservice.producer.ScheduleCoursesEventProducer;
 import com.github.karixdev.courseservice.repository.CourseRepository;
@@ -67,7 +67,7 @@ public class CourseService {
     private boolean doesScheduleExist(UUID scheduleId) {
         try {
             return scheduleClient.findById(scheduleId).isPresent();
-        } catch (ScheduleServiceClientException e) {
+        } catch (HttpServiceClientException e) {
             log.error("Schedule service returned client error status", e);
             return false;
         }
