@@ -33,6 +33,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import static com.github.karixdev.courseservice.matcher.DeepCourseArgumentMatcher.deepCourseMatcher;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -136,8 +137,8 @@ class CourseServiceTest {
 
         // Then
         verify(scheduleClient).findById(courseRequest.getScheduleId());
-        verify(repository).save(course);
-        verify(courseMapper).map(course);
+        verify(repository).save(argThat(deepCourseMatcher(course)));
+        verify(courseMapper).map(argThat(deepCourseMatcher(course)));
         verify(producer).produceCreated(eq(course.getScheduleId()), any());
 
     }
@@ -222,8 +223,8 @@ class CourseServiceTest {
         underTest.update(id, courseRequest);
 
         // Then
-        verify(repository).save(expectedCourse);
-        verify(courseMapper).map(expectedCourse);
+        verify(repository).save(argThat(deepCourseMatcher(expectedCourse)));
+        verify(courseMapper).map(argThat(deepCourseMatcher(expectedCourse)));
         verify(producer).produceUpdated(expectedCourse.getScheduleId(), Set.of(expectedCourse));
     }
 
@@ -267,7 +268,7 @@ class CourseServiceTest {
 
         // Then
         verify(scheduleClient, never()).findById(course.getScheduleId());
-        verify(repository).save(expectedCourse);
+        verify(repository).save(argThat(deepCourseMatcher(expectedCourse)));
         verify(courseMapper).map(expectedCourse);
     }
 
@@ -294,7 +295,7 @@ class CourseServiceTest {
         underTest.delete(id);
 
         // Then
-        verify(repository).delete(exampleCourse);
+        verify(repository).delete(argThat(deepCourseMatcher(exampleCourse)));
         verify(producer).produceDeleted(eq(exampleCourse.getScheduleId()), any());
     }
 
