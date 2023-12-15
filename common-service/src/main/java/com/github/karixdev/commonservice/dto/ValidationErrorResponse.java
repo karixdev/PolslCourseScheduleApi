@@ -10,6 +10,8 @@ public record ValidationErrorResponse(
         Map<String, String> constraints,
         @JsonProperty("status")
         Integer status,
+        @JsonProperty("error")
+        String error,
         @JsonProperty("message")
         String message
 ) {
@@ -17,6 +19,7 @@ public record ValidationErrorResponse(
         this(
                 constraints,
                 HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.BAD_REQUEST.toString(),
                 "Validation Failed"
         );
     }

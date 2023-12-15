@@ -1,7 +1,6 @@
 package com.github.karixdev.courseservice.controller;
 
-import com.github.karixdev.commonservice.dto.ErrorResponse;
-import com.github.karixdev.commonservice.dto.ValidationErrorResponse;
+import com.github.karixdev.commonservice.docs.schema.ErrorResponseSchema;
 import com.github.karixdev.courseservice.dto.CourseRequest;
 import com.github.karixdev.courseservice.dto.CourseResponse;
 import com.github.karixdev.courseservice.service.CourseService;
@@ -35,7 +34,7 @@ public class CourseController {
     @ApiResponse(
             responseCode = "400",
             description = "Bad request",
-            content = @Content(schema = @Schema(implementation = ValidationErrorResponse.class))
+            content = @Content(schema = @Schema(implementation = ErrorResponseSchema.class))
     )
     @ApiResponse(
             responseCode = "401",
@@ -80,12 +79,12 @@ public class CourseController {
     @ApiResponse(
             responseCode = "400",
             description = "Bad request",
-            content = @Content(schema = @Schema(implementation = ValidationErrorResponse.class))
+            content = @Content(schema = @Schema(implementation = ErrorResponseSchema.class))
     )
     @ApiResponse(
             responseCode = "404",
             description = "Not found",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            content = @Content(schema = @Schema(implementation = ErrorResponseSchema.class))
     )
     @ApiResponse(
             responseCode = "401",
@@ -116,7 +115,7 @@ public class CourseController {
     @ApiResponse(
             responseCode = "404",
             description = "Not found",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            content = @Content(schema = @Schema(implementation = ErrorResponseSchema.class))
     )
     @ApiResponse(
             responseCode = "401",

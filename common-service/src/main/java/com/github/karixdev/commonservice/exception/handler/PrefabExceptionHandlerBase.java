@@ -1,24 +1,26 @@
-package com.github.karixdev.courseservice.exception.handler;
+package com.github.karixdev.commonservice.exception.handler;
 
+import com.github.karixdev.commonservice.dto.ErrorResponse;
 import com.github.karixdev.commonservice.dto.ValidationErrorResponse;
-import com.github.karixdev.commonservice.exception.ValidationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@ControllerAdvice
-public class ValidationExceptionHandler {
+public abstract class PrefabExceptionHandlerBase {
+
+    private static final String TYPE_MISMATCH_MESSAGE_TEMPLATE = "Provided %s in URL is in invalid format";
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ValidationErrorResponse> handleConstraintViolationException(
-            MethodArgumentNotValidException exception
+            MethodArgumentNotValidException ex
     ) {
-        Map<String, String> constraintsMap = exception
+        Map<String, String> constraintsMap = ex
                 .getBindingResult()
                 .getFieldErrors()
                 .stream()
@@ -36,19 +38,19 @@ public class ValidationExceptionHandler {
         );
     }
 
-    @ExceptionHandler(ValidationException.class)
-    public ResponseEntity<ValidationErrorResponse> handleValidationException(
-            ValidationException exception
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatchException(
+            MethodArgumentTypeMismatchException ex
     ) {
-        Map<String, String> constraints = Map.of(
-                exception.getFieldName(), exception.getMessage()
-        );
+        String message = TYPE_MISMATCH_MESSAGE_TEMPLATE.formatted(ex.getName());
 
         return new ResponseEntity<>(
-                new ValidationErrorResponse(
-                    constraints
+                new ErrorResponse(
+                        HttpStatus.BAD_REQUEST,
+                        message
                 ),
                 HttpStatus.BAD_REQUEST
         );
     }
+
 }

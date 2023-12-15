@@ -16,7 +16,7 @@ public class ResourceNotFoundExceptionHandler {
     ) {
         return new ResponseEntity<>(
                 new ErrorResponse(
-                        HttpStatus.NOT_FOUND.value(),
+                        HttpStatus.NOT_FOUND,
                         exception.getMessage()
                 ),
                 HttpStatus.NOT_FOUND
