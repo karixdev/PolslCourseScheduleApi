@@ -3,6 +3,7 @@ package com.github.karixdev.courseservice.matcher;
 import com.github.karixdev.courseservice.entity.Course;
 import lombok.RequiredArgsConstructor;
 import org.mockito.ArgumentMatcher;
+import org.mockito.Mockito;
 
 import java.util.Objects;
 
@@ -11,8 +12,8 @@ public class DeepCourseArgumentMatcher implements ArgumentMatcher<Course> {
 
     private final Course course;
 
-    public static DeepCourseArgumentMatcher deepCourseMatcher(Course course) {
-        return new DeepCourseArgumentMatcher(course);
+    public static Course deepCourseEq(Course course) {
+        return Mockito.argThat(new DeepCourseArgumentMatcher(course));
     }
 
     @Override

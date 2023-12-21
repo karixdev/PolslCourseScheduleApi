@@ -92,21 +92,11 @@ public class Course {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Course course = (Course) o;
-        return Objects.equals(getId(), course.getId()) &&
-                Objects.equals(getScheduleId(), course.getScheduleId()) &&
-                Objects.equals(getName(), course.getName()) &&
-                getCourseType() == course.getCourseType() &&
-                Objects.equals(getTeachers(), course.getTeachers()) &&
-                Objects.equals(getClassroom(), course.getClassroom()) &&
-                Objects.equals(getAdditionalInfo(), course.getAdditionalInfo()) &&
-                getDayOfWeek() == course.getDayOfWeek() &&
-                getWeekType() == course.getWeekType() &&
-                Objects.equals(getStartsAt(), course.getStartsAt()) &&
-                Objects.equals(getEndsAt(), course.getEndsAt());
+        return id != null && Objects.equals(getId(), course.getId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getScheduleId(), getName(), getCourseType(), getTeachers(), getClassroom(), getAdditionalInfo(), getDayOfWeek(), getWeekType(), getStartsAt(), getEndsAt());
+        return Objects.hash(getId());
     }
 }
