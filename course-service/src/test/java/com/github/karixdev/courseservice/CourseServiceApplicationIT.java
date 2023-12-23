@@ -1,7 +1,9 @@
 package com.github.karixdev.courseservice;
 
+import com.github.karixdev.commonservice.event.EventType;
 import com.github.karixdev.commonservice.event.course.ScheduleCoursesEvent;
 import com.github.karixdev.commonservice.event.schedule.ScheduleDomain;
+import com.github.karixdev.commonservice.event.schedule.ScheduleEvent;
 import com.github.karixdev.commonservice.model.course.domain.CourseDomain;
 import com.github.karixdev.courseservice.entity.Course;
 import com.github.karixdev.courseservice.entity.CourseType;
@@ -14,8 +16,8 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.awaitility.Awaitility;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +38,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
@@ -49,8 +52,11 @@ class CourseServiceApplicationIT extends ContainersEnvironment {
     KafkaTemplate<String, ScheduleDomain> scheduleDomainKafkaTemplate;
     Consumer<String, ScheduleCoursesEvent> scheduleCoursesEventConsumer;
 
+    KafkaTemplate<String, ScheduleEvent> scheduleEventKafkaTemplate;
+
     private static final String SCHEDULE_DOMAIN_TOPIC = "schedule.domain";
     private static final String SCHEDULE_COURSES_EVENT_TOPIC = "schedule.courses.event";
+    private static final String SCHEDULE_EVENT_TOPIC = "schedule.event";
 
     @BeforeEach
     void setUp() {
@@ -74,6 +80,9 @@ class CourseServiceApplicationIT extends ContainersEnvironment {
         ConsumerFactory<String, ScheduleCoursesEvent> consumerFactory = new DefaultKafkaConsumerFactory<>(consumerProps);
         scheduleCoursesEventConsumer = consumerFactory.createConsumer();
         scheduleCoursesEventConsumer.subscribe(List.of(SCHEDULE_COURSES_EVENT_TOPIC));
+
+        ProducerFactory<String, ScheduleEvent> scheduleEventProducerFactory = new DefaultKafkaProducerFactory<>(producerProps);
+        scheduleEventKafkaTemplate = new KafkaTemplate<>(scheduleEventProducerFactory);
     }
 
     @AfterEach
@@ -169,6 +178,54 @@ class CourseServiceApplicationIT extends ContainersEnvironment {
 
         assertThat(consumerRecord.value().deleted()).containsExactly(course2.getId().toString());
         assertThat(consumerRecord.value().created()).containsExactly(newCourse.getId().toString());
+    }
+
+    @Test
+    void shouldDeleteCourses() {
+        // Given
+        UUID scheduleId = UUID.randomUUID();
+
+        Course course1 = Course.builder()
+                .name("Physics")
+                .scheduleId(scheduleId)
+                .courseType(CourseType.LAB)
+                .teachers("dr. Max")
+                .classroom("408MS")
+                .dayOfWeek(DayOfWeek.MONDAY)
+                .weekType(WeekType.EVEN)
+                .startsAt(LocalTime.of(10, 30))
+                .endsAt(LocalTime.of(12, 15))
+                .build();
+
+        Course course2 = Course.builder()
+                .name("C++")
+                .scheduleId(UUID.randomUUID())
+                .courseType(CourseType.LECTURE)
+                .teachers("dr. Henryk")
+                .classroom("CEK Room C")
+                .additionalInfo("contact teacher")
+                .dayOfWeek(DayOfWeek.WEDNESDAY)
+                .weekType(WeekType.EVERY)
+                .startsAt(LocalTime.of(14, 30))
+                .endsAt(LocalTime.of(16, 15))
+                .build();
+
+        courseRepository.saveAll(List.of(course1, course2));
+
+        ScheduleEvent scheduleEvent = ScheduleEvent.builder()
+                .scheduleId(scheduleId.toString())
+                .eventType(EventType.DELETE)
+                .build();
+
+        // When
+        scheduleEventKafkaTemplate.send(SCHEDULE_EVENT_TOPIC, scheduleEvent.toString(), scheduleEvent);
+
+        // Then
+        await()
+                .atMost(Duration.ofSeconds(10))
+                .untilAsserted(() ->
+                        assertThat(courseRepository.findAll()).containsExactly(course2)
+                );
     }
 
 }
