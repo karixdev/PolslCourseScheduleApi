@@ -64,5 +64,12 @@ keycloak:
 kafka:
   topics:
     schedule-domain: schedule.domain
+    schedule-domain-dlt: course-service.schedule.domain.dlt
     schedule-event: schedule.event
+    schedule-event-dlt: course-service.schedule.event.dlt
     schedule-courses-event: schedule.courses.event
+  config:
+    back-off:
+      interval: 0
+      max-attempts: 0
+      db-interval: 1000
