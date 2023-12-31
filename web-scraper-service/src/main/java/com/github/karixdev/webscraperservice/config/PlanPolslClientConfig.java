@@ -2,6 +2,7 @@ package com.github.karixdev.webscraperservice.config;
 
 import com.github.karixdev.webscraperservice.client.PlanPolslClient;
 import com.github.karixdev.webscraperservice.exception.PlanPolslUnavailableException;
+import io.micrometer.observation.ObservationRegistry;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,7 +16,8 @@ public class PlanPolslClientConfig {
 
     @Bean
     PlanPolslClient planPolslClient(
-            @Value("${plan-polsl-url}") String planPolslUrl
+            @Value("${plan-polsl-url}") String planPolslUrl,
+            ObservationRegistry observationRegistry
     ) {
         WebClient webClient = WebClient.builder()
                 .baseUrl(planPolslUrl)
@@ -23,6 +25,7 @@ public class PlanPolslClientConfig {
                     int statusCode = response.statusCode().value();
                     throw new PlanPolslUnavailableException(statusCode);
                 })
+                .observationRegistry(observationRegistry)
                 .build();
 
         HttpServiceProxyFactory factory =

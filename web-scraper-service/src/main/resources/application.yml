@@ -23,9 +23,26 @@ eureka:
     service-url:
       defaultZone: http://localhost:8761/eureka
 
+management:
+
+  tracing:
+    enabled: true
+    sampling:
+      probability: 1.0
+    propagation:
+      type: w3c
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
+
 plan-polsl-url: https://plan.polsl.pl/
 
 kafka:
+  observation:
+    producer:
+      enabled: true
+    consumer:
+      enabled: true
   topics:
     schedule-event: schedule.event
     course-raw: schedule.raw
@@ -37,3 +54,5 @@ kafka:
       interval:
         initial: 200
         max: 400
+
+logging.pattern.level: "%5p [${spring.application.name},%X{traceId:-},%X{spanId:-}]"

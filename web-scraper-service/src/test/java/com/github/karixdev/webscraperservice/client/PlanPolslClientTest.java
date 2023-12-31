@@ -4,9 +4,12 @@ import com.github.karixdev.webscraperservice.config.PlanPolslClientConfig;
 import com.github.karixdev.webscraperservice.exception.PlanPolslUnavailableException;
 import com.github.karixdev.webscraperservice.props.PlanPolslClientProperties;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
+import io.micrometer.observation.ObservationRegistry;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.autoconfigure.observation.ObservationAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -17,7 +20,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest(classes = {
         PlanPolslClient.class,
-        PlanPolslClientConfig.class
+        PlanPolslClientConfig.class,
+        ObservationAutoConfiguration.class
 })
 @WireMockTest(httpPort = 9999)
 class PlanPolslClientTest {

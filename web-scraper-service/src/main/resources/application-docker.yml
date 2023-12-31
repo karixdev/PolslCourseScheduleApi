@@ -14,3 +14,8 @@ eureka:
       defaultZone: ${EUREKA_HOST}:${EUREKA_PORT}/eureka
   instance:
     prefer-ip-address: true
+
+management:
+  zipkin:
+    tracing:
+      endpoint: http://${ZIPKIN_HOST}:${ZIPKIN_PORT}/api/v2/spans

@@ -13,7 +13,7 @@ public class ScheduleEventConsumer {
 
     private final ScheduleService service;
 
-    @KafkaListener(topics = "${kafka.topics.schedule-event}", groupId = "${spring.application.name}")
+    @KafkaListener(topics = "${kafka.topics.schedule-event}", groupId = "${spring.application.name}", containerFactory = "scheduleEventConcurrentKafkaListenerContainerFactory")
     public void consumeScheduleEvent(ConsumerRecord<String, ScheduleEvent> consumerRecord) {
         service.handleScheduleEvent(consumerRecord);
     }
