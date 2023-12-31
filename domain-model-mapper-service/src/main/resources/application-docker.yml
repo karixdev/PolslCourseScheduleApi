@@ -1,6 +1,14 @@
+server:
+  port: 8080
+
 spring:
   application:
     name: domain-model-mapper-service
 
   kafka:
     bootstrap-servers: ${BOOTSTRAP_SERVER_HOST}:${BOOTSTRAP_SERVER_PORT}
+
+management:
+  zipkin:
+    tracing:
+      endpoint: http://${ZIPKIN_HOST}:${ZIPKIN_PORT}/api/v2/spans

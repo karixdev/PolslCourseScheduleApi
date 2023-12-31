@@ -13,7 +13,7 @@ public class ScheduleRawConsumer {
 
     private final CourseService courseService;
 
-    @KafkaListener(topics = "${kafka.topics.schedule-raw}", groupId = "${spring.application.name}")
+    @KafkaListener(topics = "${kafka.topics.schedule-raw}", groupId = "${spring.application.name}", containerFactory = "scheduleRawConcurrentKafkaListenerContainerFactory")
     public void consumeScheduleRaw(ConsumerRecord<String, ScheduleRaw> consumerRecord) {
         courseService.handleScheduleRaw(consumerRecord);
     }

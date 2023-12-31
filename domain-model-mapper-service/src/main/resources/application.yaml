@@ -1,3 +1,6 @@
+server:
+  port: 8083
+
 spring:
   application:
     name: domain-model-mapper-service
@@ -15,7 +18,23 @@ spring:
     security:
       protocol: PLAINTEXT
 
+management:
+  tracing:
+    enabled: true
+    sampling:
+      probability: 1.0
+    propagation:
+      type: w3c
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
+
 kafka:
+  observation:
+    producer:
+      enabled: true
+    consumer:
+      enabled: true
   topics:
     schedule-raw: schedule.raw
     schedule-domain: schedule.domain
@@ -24,3 +43,5 @@ kafka:
     back-off:
       interval: 0
       max-attempts: 0
+
+logging.pattern.level: "%5p [${spring.application.name},%X{traceId:-},%X{spanId:-}]"

@@ -140,7 +140,7 @@ services:
 
   # web-scraper-service
   web-scraper-service:
-    image: karix02/polsl-course-schedule-api-web-scraper-service:1.0.0
+    image: karix02/polsl-course-schedule-api-web-scraper-service:1.1.0
     container_name: web-scraper-service
     restart: always
     environment:
@@ -149,6 +149,8 @@ services:
       BOOTSTRAP_SERVER_PORT: 9092
       EUREKA_HOST: discovery-server
       EUREKA_PORT: 8761
+      ZIPKIN_HOST: jaeger
+      ZIPKIN_PORT: 9411
     depends_on:
       - discovery-server
       - api-gateway
@@ -156,12 +158,14 @@ services:
 
   # domain-model-mapper-service
   domain-model-mapper-service:
-    image: karix02/polsl-course-schedule-api-domain-model-mapper-service:1.0.0
+    image: karix02/polsl-course-schedule-api-domain-model-mapper-service:1.1.0
     container_name: domain-model-mapper-service
     restart: always
     environment:
       BOOTSTRAP_SERVER_HOST: broker
       BOOTSTRAP_SERVER_PORT: 9092
+      ZIPKIN_HOST: jaeger
+      ZIPKIN_PORT: 9411
     depends_on:
       - broker
 

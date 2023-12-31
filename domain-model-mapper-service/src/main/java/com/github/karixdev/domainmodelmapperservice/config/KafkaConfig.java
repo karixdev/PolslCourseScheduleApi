@@ -18,61 +18,75 @@ import org.springframework.util.backoff.FixedBackOff;
 @Configuration
 public class KafkaConfig {
 
-    @Bean
-    ProducerFactory<String, ScheduleDomain> scheduleDomainProducerFactory(KafkaProperties properties) {
-        return new DefaultKafkaProducerFactory<>(properties.buildProducerProperties());
-    }
+	@Bean
+	ProducerFactory<String, ScheduleDomain> scheduleDomainProducerFactory(KafkaProperties properties) {
+		return new DefaultKafkaProducerFactory<>(properties.buildProducerProperties());
+	}
 
-    @Bean
-    KafkaTemplate<String, ScheduleDomain> scheduleDomainKafkaTemplate (ProducerFactory<String, ScheduleDomain> factory) {
-        return new KafkaTemplate<>(factory);
-    }
+	@Bean
+	KafkaTemplate<String, ScheduleDomain> scheduleDomainKafkaTemplate(
+			ProducerFactory<String, ScheduleDomain> factory,
+			@Value("${kafka.observation.producer.enabled}") Boolean isObservationEnabled
+	) {
+		KafkaTemplate<String, ScheduleDomain> kafkaTemplate = new KafkaTemplate<>(factory);
+		kafkaTemplate.setObservationEnabled(isObservationEnabled);
 
-    @Bean
-    ConsumerFactory<String, ScheduleRaw> scheduleRawConsumerFactory(KafkaProperties properties) {
-        return new DefaultKafkaConsumerFactory<>(properties.buildConsumerProperties());
-    }
+		return kafkaTemplate;
+	}
 
-    @Bean
-    ConcurrentKafkaListenerContainerFactory<String, ScheduleRaw> scheduleRawConcurrentKafkaListenerContainerFactory(
-            ConsumerFactory<String, ScheduleRaw> consumerFactory,
-            DefaultErrorHandler errorHandler
-    ) {
-        ConcurrentKafkaListenerContainerFactory<String, ScheduleRaw> factory =
-                new ConcurrentKafkaListenerContainerFactory<>();
+	@Bean
+	ConsumerFactory<String, ScheduleRaw> scheduleRawConsumerFactory(KafkaProperties properties) {
+		return new DefaultKafkaConsumerFactory<>(properties.buildConsumerProperties());
+	}
 
-        factory.setConsumerFactory(consumerFactory);
-        factory.setCommonErrorHandler(errorHandler);
+	@Bean
+	ConcurrentKafkaListenerContainerFactory<String, ScheduleRaw> scheduleRawConcurrentKafkaListenerContainerFactory(
+			ConsumerFactory<String, ScheduleRaw> consumerFactory,
+			DefaultErrorHandler errorHandler,
+			@Value("${kafka.observation.consumer.enabled}") Boolean isObservationEnabled
+	) {
+		ConcurrentKafkaListenerContainerFactory<String, ScheduleRaw> factory =
+				new ConcurrentKafkaListenerContainerFactory<>();
 
-        return factory;
-    }
+		factory.setConsumerFactory(consumerFactory);
+		factory.setCommonErrorHandler(errorHandler);
+		factory.getContainerProperties().setObservationEnabled(isObservationEnabled);
 
-    @Bean
-    ProducerFactory<String, ScheduleRaw> scheduleRawProducerFactory(KafkaProperties properties) {
-        return new DefaultKafkaProducerFactory<>(properties.buildProducerProperties());
-    }
+		return factory;
+	}
 
-    @Bean
-    KafkaTemplate<String, ScheduleRaw> scheduleRawKafkaTemplate(ProducerFactory<String, ScheduleRaw> producerFactory) {
-        return new KafkaTemplate<>(producerFactory);
-    }
+	@Bean
+	ProducerFactory<String, ScheduleRaw> scheduleRawProducerFactory(KafkaProperties properties) {
+		return new DefaultKafkaProducerFactory<>(properties.buildProducerProperties());
+	}
 
-    @Bean
-    DefaultErrorHandler scheduleRawErrorHandler(
-            @Value("${kafka.topics.dlt}") String dlt,
-            @Value("${kafka.config.back-off.interval}") long interval,
-            @Value("${kafka.config.back-off.max-attempts}") long maxAttempts,
-            KafkaTemplate<String, ScheduleRaw> kafkaTemplate
-    ) {
-        DeadLetterPublishingRecoverer recover =
-                new DeadLetterPublishingRecoverer(kafkaTemplate, (cr, e) -> new TopicPartition(dlt, cr.partition()));
+	@Bean
+	KafkaTemplate<String, ScheduleRaw> scheduleRawKafkaTemplate(
+			ProducerFactory<String, ScheduleRaw> producerFactory,
+			@Value("${kafka.observation.consumer.enabled}") Boolean isObservationEnabled
+	) {
+		KafkaTemplate<String, ScheduleRaw> kafkaTemplate = new KafkaTemplate<>(producerFactory);
+		kafkaTemplate.setObservationEnabled(isObservationEnabled);
 
-        FixedBackOff bo = new FixedBackOff(interval, maxAttempts);
-        DefaultErrorHandler handler = new DefaultErrorHandler(recover, bo);
+		return kafkaTemplate;
+	}
 
-        handler.setRetryListeners((cr, e, v) -> log.info("Consuming attempt {} after exception: {}", v, e.getClass().getName()));
+	@Bean
+	DefaultErrorHandler scheduleRawErrorHandler(
+			@Value("${kafka.topics.dlt}") String dlt,
+			@Value("${kafka.config.back-off.interval}") long interval,
+			@Value("${kafka.config.back-off.max-attempts}") long maxAttempts,
+			KafkaTemplate<String, ScheduleRaw> kafkaTemplate
+	) {
+		DeadLetterPublishingRecoverer recover =
+				new DeadLetterPublishingRecoverer(kafkaTemplate, (cr, e) -> new TopicPartition(dlt, cr.partition()));
 
-        return handler;
-    }
+		FixedBackOff bo = new FixedBackOff(interval, maxAttempts);
+		DefaultErrorHandler handler = new DefaultErrorHandler(recover, bo);
+
+		handler.setRetryListeners((cr, e, v) -> log.info("Consuming attempt {} after exception: {}", v, e.getClass().getName()));
+
+		return handler;
+	}
 
 }

@@ -1,0 +1,10 @@
+management:
+  tracing:
+    enabled: false
+
+kafka:
+  observation:
+    producer:
+      enabled: false
+    consumer:
+      enabled: false
