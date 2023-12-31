@@ -178,7 +178,7 @@ services:
       - '5432:5432'
 
   schedule-service:
-    image: schedule-service
+    image: schedule-service:1.1.0
     container_name: schedule-service
     restart: always
     environment:
@@ -192,6 +192,8 @@ services:
       POSTGRES_PASSWORD: root
       KEYCLOAK_HOST: keycloak
       KEYCLOAK_PORT: 8000
+      ZIPKIN_HOST: jaeger
+      ZIPKIN_PORT: 9411
     depends_on:
       - schedule-service-postgres
       - discovery-server
