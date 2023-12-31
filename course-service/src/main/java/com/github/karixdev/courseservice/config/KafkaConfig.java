@@ -29,9 +29,13 @@ public class KafkaConfig {
 
     @Bean
     KafkaTemplate<String, ScheduleDomain> scheduleDomainKafkaTemplate(
-            ProducerFactory<String, ScheduleDomain> factory
+            ProducerFactory<String, ScheduleDomain> factory,
+            @Value("${kafka.observation.producer.enabled}") Boolean isObservationEnabled
     ) {
-        return new KafkaTemplate<>(factory);
+        KafkaTemplate<String, ScheduleDomain> kafkaTemplate = new KafkaTemplate<>(factory);
+        kafkaTemplate.setObservationEnabled(isObservationEnabled);
+
+        return kafkaTemplate;
     }
 
     @Bean
@@ -48,7 +52,8 @@ public class KafkaConfig {
             @Value("${kafka.topics.schedule-domain-dlt}") String dlt,
             @Value("${kafka.config.back-off.interval}") Long interval,
             @Value("${kafka.config.back-off.max-attempts}") Long maxAttempts,
-            @Value("${kafka.config.back-off.db-interval}") Long dbInterval
+            @Value("${kafka.config.back-off.db-interval}") Long dbInterval,
+            @Value("${kafka.observation.consumer.enabled}") Boolean isObservationEnabled
     ) {
         ConcurrentKafkaListenerContainerFactory<String, ScheduleDomain> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
@@ -61,6 +66,8 @@ public class KafkaConfig {
                 maxAttempts,
                 dbInterval
         ));
+
+        factory.getContainerProperties().setObservationEnabled(isObservationEnabled);
 
         return factory;
     }
@@ -79,7 +86,8 @@ public class KafkaConfig {
             @Value("${kafka.topics.schedule-event-dlt}") String dlt,
             @Value("${kafka.config.back-off.interval}") Long interval,
             @Value("${kafka.config.back-off.max-attempts}") Long maxAttempts,
-            @Value("${kafka.config.back-off.db-interval}") Long dbInterval
+            @Value("${kafka.config.back-off.db-interval}") Long dbInterval,
+            @Value("${kafka.observation.consumer.enabled}") Boolean isObservationEnabled
     ) {
         ConcurrentKafkaListenerContainerFactory<String, ScheduleEvent> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
@@ -93,6 +101,8 @@ public class KafkaConfig {
                 dbInterval
         ));
 
+        factory.getContainerProperties().setObservationEnabled(isObservationEnabled);
+
         return factory;
     }
 
@@ -105,9 +115,13 @@ public class KafkaConfig {
 
     @Bean
     KafkaTemplate<String, ScheduleEvent> scheduleEventKafkaTemplate(
-            ProducerFactory<String, ScheduleEvent> factory
+            ProducerFactory<String, ScheduleEvent> factory,
+            @Value("${kafka.observation.producer.enabled}") Boolean isObservationEnabled
     ) {
-        return new KafkaTemplate<>(factory);
+        KafkaTemplate<String, ScheduleEvent> kafkaTemplate = new KafkaTemplate<>(factory);
+        kafkaTemplate.setObservationEnabled(isObservationEnabled);
+
+        return kafkaTemplate;
     }
 
     @Bean
@@ -119,9 +133,13 @@ public class KafkaConfig {
 
     @Bean
     KafkaTemplate<String, ScheduleCoursesEvent> scheduleCoursesEventKafkaTemplate(
-            ProducerFactory<String, ScheduleCoursesEvent> factory
+            ProducerFactory<String, ScheduleCoursesEvent> factory,
+            @Value("${kafka.observation.producer.enabled}") Boolean isObservationEnabled
     ) {
-        return new KafkaTemplate<>(factory);
+        KafkaTemplate<String, ScheduleCoursesEvent> kafkaTemplate = new KafkaTemplate<>(factory);
+        kafkaTemplate.setObservationEnabled(isObservationEnabled);
+
+        return kafkaTemplate;
     }
 
     <K, V> DefaultErrorHandler defaultErrorHandler(

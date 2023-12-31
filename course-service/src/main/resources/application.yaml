@@ -48,6 +48,17 @@ eureka:
   instance:
     hostname: localhost
 
+management:
+  tracing:
+    enabled: true
+    sampling:
+      probability: 1.0
+    propagation:
+      type: w3c
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
+
 schedule-service:
   base-url: http://schedule-service
 
@@ -62,6 +73,11 @@ keycloak:
   realm: polsl-course-api
 
 kafka:
+  observation:
+    producer:
+      enabled: true
+    consumer:
+      enabled: true
   topics:
     schedule-domain: schedule.domain
     schedule-domain-dlt: course-service.schedule.domain.dlt
@@ -73,3 +89,5 @@ kafka:
       interval: 0
       max-attempts: 0
       db-interval: 1000
+
+logging.pattern.level: "%5p [${spring.application.name},%X{traceId:-},%X{spanId:-}]"

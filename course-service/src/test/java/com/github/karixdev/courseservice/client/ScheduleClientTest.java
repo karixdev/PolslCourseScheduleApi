@@ -7,6 +7,7 @@ import com.github.karixdev.courseservice.testconfig.WebClientTestConfig;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.autoconfigure.observation.ObservationAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -21,7 +22,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @SpringBootTest(classes = {
         ScheduleClient.class,
         ScheduleClientConfig.class,
-        WebClientTestConfig.class
+        WebClientTestConfig.class,
+        ObservationAutoConfiguration.class
 })
 @WireMockTest(httpPort = 9999)
 class ScheduleClientTest {

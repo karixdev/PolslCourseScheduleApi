@@ -22,7 +22,7 @@ public class ScheduleDomainConsumer {
     private final CourseService courseService;
     private final CourseMapper courseMapper;
 
-    @KafkaListener(topics = "${kafka.topics.schedule-domain}", groupId = "${spring.application.name}-schedule-domain")
+    @KafkaListener(topics = "${kafka.topics.schedule-domain}", groupId = "${spring.application.name}-schedule-domain", containerFactory = "scheduleDomainConcurrentKafkaListenerContainerFactory")
     public void consumeScheduleDomain(ConsumerRecord<String, ScheduleDomain> consumerRecord) {
         ScheduleDomain value = consumerRecord.value();
 

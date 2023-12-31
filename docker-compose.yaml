@@ -219,7 +219,7 @@ services:
 
   course-service:
     container_name: course-service
-    image: karix02/polsl-course-schedule-api-course-service:1.0.0
+    image: karix02/polsl-course-schedule-api-course-service:1.1.0
     restart: always
     environment:
       BOOTSTRAP_SERVER_HOST: broker
@@ -232,6 +232,8 @@ services:
       POSTGRES_PASSWORD: root
       KEYCLOAK_HOST: keycloak
       KEYCLOAK_PORT: 8000
+      ZIPKIN_HOST: jaeger
+      ZIPKIN_PORT: 9411
     depends_on:
       - course-service-postgres
       - discovery-server
