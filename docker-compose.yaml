@@ -101,6 +101,17 @@ services:
       - start-dev
       - --import-realm
 
+  # jaeger
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: jaeger
+    environment:
+      COLLECTOR_ZIPKIN_HOST_PORT: 9411
+    ports:
+      - "16686:16686"
+      - "6831:6831/udp"
+      - "9411:9411"
+
   # discovery-server
   discovery-server:
     container_name: 'discovery-server'
