@@ -6,3 +6,12 @@ spring:
 eureka:
   client:
     enabled: false
+
+management:
+  tracing:
+    enabled: false
+
+kafka:
+  observation:
+    producer:
+      enabled: false

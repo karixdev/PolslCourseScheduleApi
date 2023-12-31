@@ -10,6 +10,7 @@ import com.github.karixdev.scheduleservice.producer.ScheduleEventProducer;
 import com.github.karixdev.scheduleservice.repository.ScheduleRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,6 +18,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ScheduleService {
@@ -44,6 +46,7 @@ public class ScheduleService {
 
     public List<ScheduleResponse> findAll(Set<UUID> ids) {
         List<Schedule> schedules = repository.findAllOrderBySemesterAndGroupNumberAsc();
+        log.info("{}", schedules);
 
         if (ids != null && !ids.isEmpty()) {
             schedules = schedules.stream()
