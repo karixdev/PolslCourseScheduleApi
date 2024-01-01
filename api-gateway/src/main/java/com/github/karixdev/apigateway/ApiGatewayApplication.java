@@ -18,7 +18,7 @@ public class ApiGatewayApplication {
 		return builder.routes()
 				.route(r -> r.path("/api/schedules/**").uri("lb://schedule-service"))
 				.route(r -> r.path("/api/webhooks/**").uri("lb://webhook-service"))
-				.route(r -> r.path("/api/course-service/**").uri("lb://course-service"))
+				.route(r -> r.path("/api/courses/**").uri("lb://course-service"))
 				.route(r -> r.path("/api/notifications/**").uri("lb://notification-service"))
 
 				.route(r -> r.path("/course-service/v3/api-docs").uri("lb://course-service"))
