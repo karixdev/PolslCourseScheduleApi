@@ -2,6 +2,7 @@ package com.github.karixdev.courseservice.client;
 
 import com.github.karixdev.commonservice.exception.HttpServiceClientException;
 import com.github.karixdev.commonservice.exception.HttpServiceClientServerException;
+import io.micrometer.observation.ObservationRegistry;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -21,7 +22,8 @@ public class ScheduleClientConfig {
 
     @Bean
     ScheduleClient scheduleClient(
-            @Value("${schedule-service.base-url}") String baseUrl
+            @Value("${schedule-service.base-url}") String baseUrl,
+            ObservationRegistry observationRegistry
     ) {
         WebClient webClient = webClientBuilder
                 .baseUrl(baseUrl)
@@ -31,6 +33,7 @@ public class ScheduleClientConfig {
                 .defaultStatusHandler(HttpStatusCode::is4xxClientError, resp -> {
                     throw new HttpServiceClientException(SERVICE_NAME, resp.statusCode());
                 })
+                .observationRegistry(observationRegistry)
                 .build();
 
         HttpServiceProxyFactory factory =
