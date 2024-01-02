@@ -126,7 +126,7 @@ services:
 
   # api-gateway
   api-gateway:
-    image: api-gateway
+    image: karix02/polsl-course-schedule-api-api-gateway:1.1.0
     container_name: api-gateway
     restart: always
     ports:
