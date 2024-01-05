@@ -41,6 +41,15 @@ spring:
     security:
       protocol: PLAINTEXT
 
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      authentication-database: admin
+      username: root
+      password: root
+      database: webhook-service
+
 eureka:
   client:
     service-url:
