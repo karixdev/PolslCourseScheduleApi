@@ -53,3 +53,6 @@ management:
 keycloak:
   server-url: http://localhost:8000
   realm: polsl-course-api
+
+schedule-service:
+  base-url: http://schedule-service
