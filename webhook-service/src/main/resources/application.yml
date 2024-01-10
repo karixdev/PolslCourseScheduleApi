@@ -56,3 +56,7 @@ keycloak:
 
 schedule-service:
   base-url: http://schedule-service
+
+discord-webhook:
+  base-url: https://discord.com/api
+  welcome-message: "Hello!"

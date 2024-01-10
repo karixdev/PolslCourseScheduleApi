@@ -4,6 +4,7 @@ import com.github.karixdev.commonservice.exception.HttpServiceClientException;
 import com.github.karixdev.commonservice.exception.HttpServiceClientServerException;
 import com.github.karixdev.webhookservice.client.ScheduleServiceClient;
 import io.micrometer.observation.ObservationRegistry;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,7 +18,7 @@ public class ScheduleServiceClientConfig {
 
 	@Bean
 	ScheduleServiceClient scheduleServiceClient(
-			WebClient.Builder webClientBuilder,
+			@Qualifier("proxyWebClient") WebClient.Builder webClientBuilder,
 			ObservationRegistry observationRegistry,
 			@Value("${schedule-service.base-url}") String baseUrl
 	) {

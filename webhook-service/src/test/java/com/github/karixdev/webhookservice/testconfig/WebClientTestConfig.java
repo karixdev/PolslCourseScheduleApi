@@ -11,7 +11,7 @@ public class WebClientTestConfig {
 
 	@Primary
 	@Bean
-	WebClient.Builder webClientBuilder() {
+	WebClient.Builder proxyWebClient() {
 		return WebClient.builder();
 	}
 

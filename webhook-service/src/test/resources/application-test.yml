@@ -1,0 +1,16 @@
+server:
+  error:
+    include-message: always
+
+spring:
+  main:
+    allow-bean-definition-overriding: true
+
+management:
+  tracing:
+    enabled: false
+
+eureka:
+  client:
+    enabled: false
+
