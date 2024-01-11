@@ -2,6 +2,7 @@ package com.github.karixdev.webhookservice.document;
 
 import lombok.*;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.LinkedHashSet;
@@ -25,6 +26,7 @@ public class Webhook {
 	@Builder.Default
 	private Set<UUID> schedulesIds = new LinkedHashSet<>();
 
+	@Indexed(unique = true)
 	private String discordWebhookUrl;
 
 	@Override
