@@ -22,7 +22,10 @@ public class SecurityConfig {
 	};
 
 	@Bean
-	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+	SecurityFilterChain securityFilterChain(
+			HttpSecurity http,
+			RealmRoleConverter realmRoleConverter
+	) throws Exception {
 		return http
 				.csrf(AbstractHttpConfigurer::disable)
 				.cors(AbstractHttpConfigurer::disable)
@@ -31,14 +34,21 @@ public class SecurityConfig {
 						.anyRequest().authenticated()
 				)
 				.oauth2ResourceServer(config -> config
-						.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtConverter()))
+						.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtConverter(realmRoleConverter)))
 				)
 				.build();
 	}
 
-	Converter<Jwt, ? extends AbstractAuthenticationToken> jwtConverter() {
+	@Bean
+	RealmRoleConverter realmRoleConverter() {
+		return new RealmRoleConverter();
+	}
+
+	Converter<Jwt, ? extends AbstractAuthenticationToken> jwtConverter(
+			RealmRoleConverter realmRoleConverter
+	) {
 		JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
-		converter.setJwtGrantedAuthoritiesConverter(new RealmRoleConverter());
+		converter.setJwtGrantedAuthoritiesConverter(realmRoleConverter);
 
 		return converter;
 	}

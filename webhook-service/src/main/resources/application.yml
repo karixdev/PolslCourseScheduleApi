@@ -60,3 +60,7 @@ schedule-service:
 discord-webhook:
   base-url: https://discord.com/api
   welcome-message: "Hello!"
+
+pagination:
+  defaults:
+    page-size: 10

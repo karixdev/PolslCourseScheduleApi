@@ -19,6 +19,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.IntStream;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -241,6 +242,116 @@ class WebhookControllerIT extends ContainersEnvironment {
 		assertThat(webhook.getDiscordWebhookUrl()).isEqualTo(url);
 		assertThat(webhook.getAddedBy()).isEqualTo(userId);
 		assertThat(webhook.getSchedulesIds()).isEqualTo(Set.of(scheduleId));
+	}
+
+	@Test
+	void shouldNotRetrieveWebhooksForUnauthorizedUser() {
+		webClient.get().uri("/api/webhooks")
+				.exchange()
+				.expectStatus().isUnauthorized();
+	}
+
+	@Test
+	void shouldNotRetrieveWebhooksGivenInvalidPaginationParams() {
+		webClient.get().uri("/api/webhooks?page=-1&pageSize=0")
+				.header("Authorization", getUserBearer())
+				.exchange()
+				.expectStatus().isBadRequest();
+	}
+
+	@Test
+	void shouldRetrievePaginatedListOfWebhooksPaginationParams() {
+		String bearer = getUserBearer();
+		String userId = getUserId(bearer);
+
+		seedDBWithWebhooks(userId, 10, 0);
+
+		webClient.get().uri("/api/webhooks")
+				.header("Authorization", bearer)
+				.exchange()
+				.expectStatus().isOk()
+				.expectBody()
+				.jsonPath("$.totalElements").isEqualTo(10)
+				.jsonPath("$.totalPages").isEqualTo(1)
+				.jsonPath("$.number").isEqualTo(0)
+				.jsonPath("$.numberOfElements").isEqualTo(10)
+				.jsonPath("$.content").isNotEmpty();
+	}
+
+	@Test
+	void shouldRetrievePaginatedListOfWebhooksAddedByUser() {
+		String bearer = getUserBearer();
+		String userId = getUserId(bearer);
+
+		seedDBWithWebhooks(userId, 10, 0);
+		seedDBWithWebhooks("otherUserId", 10, 0);
+
+		webClient.get().uri("/api/webhooks?page=0&pageSize=5")
+				.header("Authorization", bearer)
+				.exchange()
+				.expectStatus().isOk()
+				.expectBody()
+				.jsonPath("$.totalElements").isEqualTo(10)
+				.jsonPath("$.totalPages").isEqualTo(2)
+				.jsonPath("$.number").isEqualTo(0)
+				.jsonPath("$.numberOfElements").isEqualTo(5)
+				.jsonPath("$.content").isNotEmpty()
+				.jsonPath("$.content.[0].addedBy").isEqualTo(userId)
+				.jsonPath("$.content.[1].addedBy").isEqualTo(userId)
+				.jsonPath("$.content.[2].addedBy").isEqualTo(userId)
+				.jsonPath("$.content.[3].addedBy").isEqualTo(userId)
+				.jsonPath("$.content.[4].addedBy").isEqualTo(userId);
+
+		webClient.get().uri("/api/webhooks?page=1&pageSize=5")
+				.header("Authorization", bearer)
+				.exchange()
+				.expectStatus().isOk()
+				.expectBody()
+				.jsonPath("$.totalElements").isEqualTo(10)
+				.jsonPath("$.totalPages").isEqualTo(2)
+				.jsonPath("$.number").isEqualTo(1)
+				.jsonPath("$.numberOfElements").isEqualTo(5)
+				.jsonPath("$.content").isNotEmpty()
+				.jsonPath("$.content.[0].addedBy").isEqualTo(userId)
+				.jsonPath("$.content.[1].addedBy").isEqualTo(userId)
+				.jsonPath("$.content.[2].addedBy").isEqualTo(userId)
+				.jsonPath("$.content.[3].addedBy").isEqualTo(userId)
+				.jsonPath("$.content.[4].addedBy").isEqualTo(userId);
+	}
+
+	@Test
+	void shouldRetrieveAllWebhooksWithPaginationForAdmin() {
+		seedDBWithWebhooks("userId1", 1, 0);
+		seedDBWithWebhooks("userId2", 1, 1);
+
+		webClient.get().uri("/api/webhooks?page=0&pageSize=5")
+				.header("Authorization", getAdminBearer())
+				.exchange()
+				.expectStatus().isOk()
+				.expectBody()
+				.jsonPath("$.totalElements").isEqualTo(2)
+				.jsonPath("$.totalPages").isEqualTo(1)
+				.jsonPath("$.number").isEqualTo(0)
+				.jsonPath("$.numberOfElements").isEqualTo(2)
+				.jsonPath("$.content").isNotEmpty();
+	}
+
+	private void seedDBWithWebhooks(String author, int count, int idx) {
+		webhookRepository.saveAll(
+				IntStream.range(0, count)
+						.mapToObj(i ->
+								Webhook.builder()
+										.addedBy(author)
+										.discordWebhookUrl("url-%d-%d".formatted(idx, i))
+										.schedulesIds(Set.of(UUID.randomUUID()))
+										.build()
+						)
+						.toList()
+		);
+	}
+
+	private static String getAdminBearer() {
+		return "Bearer %s".formatted(KeycloakUtils.getAdminToken(keycloakContainer.getAuthServerUrl()));
 	}
 
 	private static String getUserBearer() {

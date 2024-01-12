@@ -1,6 +1,8 @@
 package com.github.karixdev.webhookservice.repository;
 
 import com.github.karixdev.webhookservice.document.Webhook;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -17,5 +19,12 @@ public interface WebhookRepository extends MongoRepository<Webhook, String> {
 			}
 			""")
 	Optional<Webhook> findByDiscordWebhookUrl(@Param("url") String url);
+
+	@Query("""
+			{
+				"addedBy": :#{#addedBy}
+			}
+			""")
+	Page<Webhook> findByAddedBy(@Param("addedBy") String addedBy, Pageable pageable);
 
 }

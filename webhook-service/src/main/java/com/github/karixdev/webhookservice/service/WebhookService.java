@@ -11,6 +11,8 @@ import com.github.karixdev.webhookservice.model.DiscordWebhookParameters;
 import com.github.karixdev.webhookservice.repository.WebhookRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +28,8 @@ public class WebhookService {
 	private final WebhookMapper mapper;
 	private final DiscordWebhookService discordWebhookService;
 	private final ScheduleService scheduleService;
+	private final SecurityService securityService;
+	private final PaginationService paginationService;
 
 	@Transactional
 	public WebhookResponse create(WebhookRequest request, Jwt jwt) {
@@ -61,6 +65,19 @@ public class WebhookService {
 		repository.save(webhook);
 
 		return mapper.mapToResponse(webhook);
+	}
+
+	public Page<WebhookResponse> findAll(Jwt jwt, Integer page, Integer pageSize) {
+		PageRequest pageRequest = paginationService.getPageRequest(page, pageSize);
+
+		String userId = securityService.getUserId(jwt);
+
+		Page<Webhook> webhooks = securityService.isAdmin(jwt)
+				? repository.findAll(pageRequest)
+				: repository.findByAddedBy(userId, pageRequest);
+
+
+		return mapper.mapToResponsePage(webhooks);
 	}
 
 }

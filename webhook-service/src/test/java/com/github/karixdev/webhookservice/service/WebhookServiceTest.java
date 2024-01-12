@@ -13,16 +13,19 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.oauth2.jwt.Jwt;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
 import static com.github.karixdev.webhookservice.matcher.DeepWebhookArgumentMatcher.deepWebhookEq;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class WebhookServiceTest {
@@ -41,6 +44,12 @@ class WebhookServiceTest {
 
 	@Mock
 	ScheduleService scheduleService;
+
+	@Mock
+	SecurityService securityService;
+
+	@Mock
+	PaginationService paginationService;
 
 	@Mock
 	Jwt jwt;
@@ -149,6 +158,84 @@ class WebhookServiceTest {
 
 		verify(repository).save(deepWebhookEq(createdWebhook));
 		verify(mapper).mapToResponse(deepWebhookEq(createdWebhook));
+	}
+
+	@Test
+	void GivenNormalUserJwtAndPageAndPageSize_WhenFindAll_ThenRetrievesWebhooksAddedByUserAndMapsIntoPageResponse() {
+		// Given
+		int page = 0;
+		int pageSize = 10;
+
+		PageRequest pageRequest = PageRequest.of(page, pageSize);
+
+		String userId = "userId";
+
+		Page<Webhook> pageImpl = new PageImpl<>(List.of(
+				Webhook.builder()
+						.id("id")
+						.addedBy(userId)
+						.schedulesIds(Set.of(UUID.randomUUID()))
+						.discordWebhookUrl("url")
+						.build()
+		));
+
+		when(paginationService.getPageRequest(page, pageSize))
+				.thenReturn(pageRequest);
+
+		when(securityService.getUserId(jwt))
+				.thenReturn(userId);
+
+		when(securityService.isAdmin(jwt))
+				.thenReturn(false);
+
+		when(repository.findByAddedBy(userId, pageRequest))
+				.thenReturn(pageImpl);
+
+		// When
+		underTest.findAll(jwt, page, pageSize);
+
+		// Then
+		verify(repository).findByAddedBy(userId, pageRequest);
+		verify(mapper).mapToResponsePage(pageImpl);
+	}
+
+	@Test
+	void GivenNormalUserJwtAndPageAndPageSize_WhenFindAll_ThenRetrievesAllWebhooksAndMapsIntoPageResponse() {
+		// Given
+		int page = 0;
+		int pageSize = 10;
+
+		PageRequest pageRequest = PageRequest.of(page, pageSize);
+
+		String userId = "userId";
+
+		Page<Webhook> pageImpl = new PageImpl<>(List.of(
+				Webhook.builder()
+						.id("id")
+						.addedBy(userId)
+						.schedulesIds(Set.of(UUID.randomUUID()))
+						.discordWebhookUrl("url")
+						.build()
+		));
+
+		when(paginationService.getPageRequest(page, pageSize))
+				.thenReturn(pageRequest);
+
+		when(securityService.getUserId(jwt))
+				.thenReturn(userId);
+
+		when(securityService.isAdmin(jwt))
+				.thenReturn(true);
+
+		when(repository.findAll(pageRequest))
+				.thenReturn(pageImpl);
+
+		// When
+		underTest.findAll(jwt, page, pageSize);
+
+		// Then
+		verify(repository).findAll(pageRequest);
+		verify(mapper).mapToResponsePage(pageImpl);
 	}
 
 }
