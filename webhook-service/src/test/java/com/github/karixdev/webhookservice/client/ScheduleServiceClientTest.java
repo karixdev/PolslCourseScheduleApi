@@ -77,7 +77,7 @@ class ScheduleServiceClientTest {
 		Set<ScheduleResponse> result = underTest.find(Set.of(id1, id2));
 
 		// Then
-		assertThat(result).containsExactly(
+		assertThat(result).containsExactlyInAnyOrder(
 				ScheduleResponse.builder()
 						.id(id1)
 						.name("Plan1")
