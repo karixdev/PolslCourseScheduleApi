@@ -1,5 +1,7 @@
 package com.github.karixdev.webhookservice.service;
 
+import com.github.karixdev.commonservice.exception.ForbiddenAccessException;
+import com.github.karixdev.commonservice.exception.ResourceNotFoundException;
 import com.github.karixdev.webhookservice.document.Webhook;
 import com.github.karixdev.webhookservice.dto.WebhookRequest;
 import com.github.karixdev.webhookservice.exception.CollectionContainingNotExistingScheduleException;
@@ -236,6 +238,266 @@ class WebhookServiceTest {
 		// Then
 		verify(repository).findAll(pageRequest);
 		verify(mapper).mapToResponsePage(pageImpl);
+	}
+
+	@Test
+	void GivenIdOfNotExistingWebhook_WhenUpdate_ThenThrowsResourceNotFoundException() {
+		// Given
+		String id = "id";
+		WebhookRequest request = WebhookRequest.builder().build();
+
+		when(repository.findById(id)).thenReturn(Optional.empty());
+
+		// When & Then
+		assertThatThrownBy(() -> underTest.update(id, request, jwt))
+				.isInstanceOf(ResourceNotFoundException.class);
+	}
+
+	@Test
+	void GivenIdAndUsersWhoIsNotOwnerJwt_WhenUpdate_ThenThrowsForbiddenAccessException() {
+		// Given
+		String id = "id";
+		WebhookRequest request = WebhookRequest.builder().build();
+
+		when(repository.findById(id))
+				.thenReturn(Optional.of(
+						Webhook.builder()
+								.id(id)
+								.addedBy("otherUserId")
+								.build()
+				));
+
+		when(securityService.getUserId(jwt)).thenReturn("userId");
+		when(securityService.isAdmin(jwt)).thenReturn(false);
+
+		// When & Then
+		assertThatThrownBy(() -> underTest.update(id, request, jwt))
+				.isInstanceOf(ForbiddenAccessException.class);
+	}
+
+	@Test
+	void GivenNewUrlThatIsAlreadyTakenByOtherWebhook_WhenUpdate_ThenThrowsUnavailableDiscordWebhookUrlException() {
+		// Given
+		String id = "id";
+		WebhookRequest request = WebhookRequest.builder()
+				.discordWebhookUrl("url-2")
+				.build();
+
+		when(repository.findById(id))
+				.thenReturn(Optional.of(
+						Webhook.builder()
+								.id(id)
+								.discordWebhookUrl("url-1")
+								.addedBy("userId")
+								.build()
+				));
+
+		when(securityService.getUserId(jwt)).thenReturn("userId");
+		when(securityService.isAdmin(jwt)).thenReturn(false);
+
+		when(repository.findByDiscordWebhookUrl("url-2"))
+				.thenReturn(Optional.of(Webhook.builder().build()));
+
+		// When & Then
+		assertThatThrownBy(() -> underTest.update(id, request, jwt))
+				.isInstanceOf(UnavailableDiscordWebhookUrlException.class);
+	}
+
+	@Test
+	void GivenNewUrlOfNotExistingDiscordWebhook_WhenUpdate_ThenThrowsNotExistingDiscordWebhookException() {
+		// Given
+		String id = "id";
+		WebhookRequest request = WebhookRequest.builder()
+				.discordWebhookUrl("url")
+				.schedulesIds(Set.of())
+				.build();
+
+		when(repository.findById(id))
+				.thenReturn(Optional.of(
+						Webhook.builder()
+								.id(id)
+								.discordWebhookUrl("url-x")
+								.addedBy("userId")
+								.build()
+				));
+
+		when(securityService.getUserId(jwt)).thenReturn("userId");
+		when(securityService.isAdmin(jwt)).thenReturn(false);
+
+		when(discordWebhookService.getParametersFromUrl("url"))
+				.thenReturn(new DiscordWebhookParameters("id", "token"));
+
+		when(discordWebhookService.doesWebhookExist("id", "token")).thenReturn(false);
+
+		// When & Then
+		assertThatThrownBy(() -> underTest.update(id, request, jwt))
+				.isInstanceOf(NotExistingDiscordWebhookException.class);
+	}
+
+	@Test
+	void GivenSchedulesIdsContainingNotExistingSchedules_WhenUpdate_ThenThrowsCollectionContainingNotExistingScheduleException() {
+		// Given
+		String id = "id";
+		UUID scheduleId = UUID.randomUUID();
+
+		WebhookRequest request = WebhookRequest.builder()
+				.discordWebhookUrl("url")
+				.schedulesIds(Set.of(scheduleId))
+				.build();
+
+		when(repository.findById(id))
+				.thenReturn(Optional.of(
+						Webhook.builder()
+								.id(id)
+								.discordWebhookUrl("url")
+								.addedBy("userId")
+								.build()
+				));
+
+		when(securityService.getUserId(jwt)).thenReturn("userId");
+		when(securityService.isAdmin(jwt)).thenReturn(false);
+
+		when(discordWebhookService.getParametersFromUrl("url"))
+				.thenReturn(new DiscordWebhookParameters("id", "token"));
+
+		when(scheduleService.doSchedulesExist(Set.of(scheduleId))).thenReturn(false);
+
+		// When & Then
+		assertThatThrownBy(() -> underTest.update(id, request, jwt))
+				.isInstanceOf(CollectionContainingNotExistingScheduleException.class);
+	}
+
+	@Test
+	void GivenIdOfOwnedWebhookAndRequestWithNotChangedUrlAndSchedulesIds_WhenUpdate_ThenNeverMakesHttpCallDoesNotChangeOwnerAndFinallyMapsIntoResponse() {
+		// Given
+		String id = "id";
+		UUID scheduleId = UUID.randomUUID();
+
+		WebhookRequest request = WebhookRequest.builder()
+				.discordWebhookUrl("url")
+				.schedulesIds(Set.of(scheduleId))
+				.addedBy("otherId")
+				.build();
+
+		Webhook webhook = Webhook.builder()
+				.id(id)
+				.schedulesIds(Set.of(scheduleId))
+				.discordWebhookUrl("url")
+				.addedBy("userId")
+				.build();
+
+		when(repository.findById(id)).thenReturn(Optional.of(webhook));
+
+		when(securityService.getUserId(jwt)).thenReturn("userId");
+		when(securityService.isAdmin(jwt)).thenReturn(false);
+
+		when(discordWebhookService.getParametersFromUrl("url"))
+				.thenReturn(new DiscordWebhookParameters("id", "token"));
+
+		// When
+		underTest.update(id, request, jwt);
+
+		// Then
+		verify(discordWebhookService, never()).doesWebhookExist(any(), any());
+		verify(scheduleService, never()).doSchedulesExist(any());
+
+		verify(mapper).mapToResponse(deepWebhookEq(webhook));
+	}
+
+	@Test
+	void GivenIdOfOwnedWebhookAndRequestWithChangedUrlAndSchedulesIds_WhenUpdate_ThenMakesHttpCallDoesNotChangeOwnerAndFinallyMapsIntoResponse() {
+		// Given
+		String id = "id";
+		UUID scheduleId1 = UUID.randomUUID();
+		UUID scheduleId2 = UUID.randomUUID();
+
+		WebhookRequest request = WebhookRequest.builder()
+				.discordWebhookUrl("url-2")
+				.schedulesIds(Set.of(scheduleId1, scheduleId2))
+				.addedBy("otherId")
+				.build();
+
+		Webhook webhook = Webhook.builder()
+				.id(id)
+				.schedulesIds(Set.of(scheduleId1))
+				.discordWebhookUrl("url")
+				.addedBy("userId")
+				.build();
+
+		when(repository.findById(id)).thenReturn(Optional.of(webhook));
+
+		when(securityService.getUserId(jwt)).thenReturn("userId");
+		when(securityService.isAdmin(jwt)).thenReturn(false);
+
+		when(repository.findByDiscordWebhookUrl("url-2")).thenReturn(Optional.empty());
+
+		when(discordWebhookService.getParametersFromUrl("url-2"))
+				.thenReturn(new DiscordWebhookParameters("id", "token"));
+
+		when(discordWebhookService.doesWebhookExist("id", "token")).thenReturn(true);
+		when(scheduleService.doSchedulesExist(Set.of(scheduleId2))).thenReturn(true);
+
+		// When
+		underTest.update(id, request, jwt);
+
+		// Then
+		Webhook expectedWebhook = Webhook.builder()
+				.id(id)
+				.schedulesIds(Set.of(scheduleId1, scheduleId2))
+				.discordWebhookUrl("url-2")
+				.addedBy("userId")
+				.build();
+
+		verify(repository).save(deepWebhookEq(expectedWebhook));
+		verify(mapper).mapToResponse(deepWebhookEq(expectedWebhook));
+	}
+
+	@Test
+	void GivenIdOfNotOwnedByAdminWebhook_WhenUpdate_ThenAdminUpdatesWebhookAndCanChangeOwner() {
+		// Given
+		String id = "id";
+		UUID scheduleId1 = UUID.randomUUID();
+		UUID scheduleId2 = UUID.randomUUID();
+
+		WebhookRequest request = WebhookRequest.builder()
+				.discordWebhookUrl("url-2")
+				.schedulesIds(Set.of(scheduleId1, scheduleId2))
+				.addedBy("otherId2")
+				.build();
+
+		Webhook webhook = Webhook.builder()
+				.id(id)
+				.schedulesIds(Set.of(scheduleId1))
+				.discordWebhookUrl("url")
+				.addedBy("otherUserId")
+				.build();
+
+		when(repository.findById(id)).thenReturn(Optional.of(webhook));
+
+		when(securityService.getUserId(jwt)).thenReturn("userId");
+		when(securityService.isAdmin(jwt)).thenReturn(true);
+
+		when(repository.findByDiscordWebhookUrl("url-2")).thenReturn(Optional.empty());
+
+		when(discordWebhookService.getParametersFromUrl("url-2"))
+				.thenReturn(new DiscordWebhookParameters("id", "token"));
+
+		when(discordWebhookService.doesWebhookExist("id", "token")).thenReturn(true);
+		when(scheduleService.doSchedulesExist(Set.of(scheduleId2))).thenReturn(true);
+
+		// When
+		underTest.update(id, request, jwt);
+
+		// Then
+		Webhook expectedWebhook = Webhook.builder()
+				.id(id)
+				.schedulesIds(Set.of(scheduleId1, scheduleId2))
+				.discordWebhookUrl("url-2")
+				.addedBy("otherId2")
+				.build();
+
+		verify(repository).save(deepWebhookEq(expectedWebhook));
+		verify(mapper).mapToResponse(deepWebhookEq(expectedWebhook));
 	}
 
 }

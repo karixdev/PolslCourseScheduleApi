@@ -1,5 +1,7 @@
 package com.github.karixdev.webhookservice.service;
 
+import com.github.karixdev.commonservice.exception.ForbiddenAccessException;
+import com.github.karixdev.commonservice.exception.ResourceNotFoundException;
 import com.github.karixdev.webhookservice.document.Webhook;
 import com.github.karixdev.webhookservice.dto.WebhookRequest;
 import com.github.karixdev.webhookservice.dto.WebhookResponse;
@@ -17,7 +19,10 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -31,10 +36,13 @@ public class WebhookService {
 	private final SecurityService securityService;
 	private final PaginationService paginationService;
 
+	private static final String DISCORD_WEBHOOK_URl_FIELD_NAME = "discordWebhookUrl";
+	private static final String SCHEDULES_IDS_URl_FIELD_NAME = "discordWebhookUrl";
+
 	@Transactional
 	public WebhookResponse create(WebhookRequest request, Jwt jwt) {
 		if (repository.findByDiscordWebhookUrl(request.discordWebhookUrl()).isPresent()) {
-			throw new UnavailableDiscordWebhookUrlException("discordWebhookUrl");
+			throw new UnavailableDiscordWebhookUrlException(DISCORD_WEBHOOK_URl_FIELD_NAME);
 		}
 
 		DiscordWebhookParameters parameters = discordWebhookService.getParametersFromUrl(request.discordWebhookUrl());
@@ -46,15 +54,8 @@ public class WebhookService {
 
 		CompletableFuture.allOf(doesWebhookExistTask, doSchedulesExistTask).join();
 
-		boolean doesWebhookExist = doesWebhookExistTask.join();
-		if (!doesWebhookExist) {
-			throw new NotExistingDiscordWebhookException("discordWebhookUrl");
-		}
-
-		boolean doSchedulesExist = doSchedulesExistTask.join();
-		if (!doSchedulesExist) {
-			throw new CollectionContainingNotExistingScheduleException("schedulesIds");
-		}
+		validateExistenceOfWebhook(doesWebhookExistTask);
+		validateExistenceOfSchedules(doSchedulesExistTask);
 
 		Webhook webhook = Webhook.builder()
 				.addedBy(jwt.getSubject())
@@ -78,6 +79,70 @@ public class WebhookService {
 
 
 		return mapper.mapToResponsePage(webhooks);
+	}
+
+	@Transactional
+	public WebhookResponse update(String id, WebhookRequest request, Jwt jwt) {
+		Webhook webhook = repository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Webhook with provided id not found"));
+
+		boolean isAdmin = securityService.isAdmin(jwt);
+
+		String owner = webhook.getAddedBy();
+		String userId = securityService.getUserId(jwt);
+
+		if (!isAdmin && !owner.equals(userId)) {
+			throw new ForbiddenAccessException("You are not owner of webhook with provided id");
+		}
+
+		String discordWebhookUrl = request.discordWebhookUrl();
+		boolean isDiscordWebhookUrlNew = !discordWebhookUrl.equals(webhook.getDiscordWebhookUrl());
+
+		if (isDiscordWebhookUrlNew && repository.findByDiscordWebhookUrl(discordWebhookUrl).isPresent()) {
+			throw new UnavailableDiscordWebhookUrlException(DISCORD_WEBHOOK_URl_FIELD_NAME);
+		}
+
+		Set<UUID> newSchedulesIds = request.schedulesIds().stream()
+				.filter(scheduleId -> !webhook.getSchedulesIds().contains(scheduleId))
+				.collect(Collectors.toSet());
+
+		DiscordWebhookParameters parameters = discordWebhookService.getParametersFromUrl(discordWebhookUrl);
+
+		CompletableFuture<Boolean> doesWebhookExistTask =
+				CompletableFuture.supplyAsync(() ->
+						!isDiscordWebhookUrlNew || discordWebhookService.doesWebhookExist(parameters.id(), parameters.token()));
+
+		CompletableFuture<Boolean> doSchedulesExistTask =
+				CompletableFuture.supplyAsync(() ->
+						newSchedulesIds.isEmpty() || scheduleService.doSchedulesExist(newSchedulesIds));
+
+		CompletableFuture.allOf(doesWebhookExistTask, doSchedulesExistTask).join();
+
+		validateExistenceOfWebhook(doesWebhookExistTask);
+		validateExistenceOfSchedules(doSchedulesExistTask);
+
+		webhook.setDiscordWebhookUrl(discordWebhookUrl);
+		webhook.setSchedulesIds(request.schedulesIds());
+
+		if (isAdmin && request.addedBy() != null) {
+			webhook.setAddedBy(request.addedBy());
+		}
+
+		repository.save(webhook);
+
+		return mapper.mapToResponse(webhook);
+	}
+
+	private void validateExistenceOfWebhook(CompletableFuture<Boolean> task) {
+		if (Boolean.FALSE.equals(task.join())) {
+			throw new NotExistingDiscordWebhookException(DISCORD_WEBHOOK_URl_FIELD_NAME);
+		}
+	}
+
+	private void validateExistenceOfSchedules(CompletableFuture<Boolean> task) {
+		if (Boolean.FALSE.equals(task.join())) {
+			throw new CollectionContainingNotExistingScheduleException(SCHEDULES_IDS_URl_FIELD_NAME);
+		}
 	}
 
 }

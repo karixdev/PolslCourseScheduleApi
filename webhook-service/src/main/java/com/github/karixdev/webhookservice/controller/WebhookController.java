@@ -39,4 +39,16 @@ public class WebhookController {
 		);
 	}
 
+	@PutMapping("/{id}")
+	ResponseEntity<WebhookResponse> update(
+			@PathVariable(name = "id") String id,
+			@RequestBody @Valid WebhookRequest request,
+			@AuthenticationPrincipal Jwt jwt
+	) {
+		return new ResponseEntity<>(
+				service.update(id, request, jwt),
+				HttpStatus.OK
+		);
+	}
+
 }
