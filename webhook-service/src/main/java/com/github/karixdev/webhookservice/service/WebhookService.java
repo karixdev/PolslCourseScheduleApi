@@ -83,17 +83,8 @@ public class WebhookService {
 
 	@Transactional
 	public WebhookResponse update(String id, WebhookRequest request, Jwt jwt) {
-		Webhook webhook = repository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("Webhook with provided id not found"));
-
-		boolean isAdmin = securityService.isAdmin(jwt);
-
-		String owner = webhook.getAddedBy();
-		String userId = securityService.getUserId(jwt);
-
-		if (!isAdmin && !owner.equals(userId)) {
-			throw new ForbiddenAccessException("You are not owner of webhook with provided id");
-		}
+		Webhook webhook = findByIdOrElseThrow(id);
+		validateIfUserCanAccessWebhook(webhook, jwt);
 
 		String discordWebhookUrl = request.discordWebhookUrl();
 		boolean isDiscordWebhookUrlNew = !discordWebhookUrl.equals(webhook.getDiscordWebhookUrl());
@@ -124,13 +115,37 @@ public class WebhookService {
 		webhook.setDiscordWebhookUrl(discordWebhookUrl);
 		webhook.setSchedulesIds(request.schedulesIds());
 
-		if (isAdmin && request.addedBy() != null) {
+		if (securityService.isAdmin(jwt) && request.addedBy() != null) {
 			webhook.setAddedBy(request.addedBy());
 		}
 
 		repository.save(webhook);
 
 		return mapper.mapToResponse(webhook);
+	}
+
+	@Transactional
+	public void delete(String id, Jwt jwt) {
+		Webhook webhook = findByIdOrElseThrow(id);
+		validateIfUserCanAccessWebhook(webhook, jwt);
+
+		repository.delete(webhook);
+	}
+
+	private Webhook findByIdOrElseThrow(String id) {
+		return repository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Webhook with provided id not found"));
+	}
+
+	private void validateIfUserCanAccessWebhook(Webhook webhook, Jwt jwt) {
+		boolean isOwner = webhook.getAddedBy().equals(securityService.getUserId(jwt));
+		boolean isAdmin = securityService.isAdmin(jwt);
+
+		if (isOwner || isAdmin) {
+			return;
+		}
+
+		throw new ForbiddenAccessException("You are not owner of webhook with provided id");
 	}
 
 	private void validateExistenceOfWebhook(CompletableFuture<Boolean> task) {

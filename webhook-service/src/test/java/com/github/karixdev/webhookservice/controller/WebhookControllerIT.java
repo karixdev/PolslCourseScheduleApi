@@ -639,6 +639,90 @@ class WebhookControllerIT extends ContainersEnvironment {
 		assertThat(updatedWebhook.getDiscordWebhookUrl()).isEqualTo(newUrl);
 	}
 
+	@Test
+	void shouldNotAllowWebhookDeletionWhenUnauthorized() {
+		webClient.delete().uri("/api/webhooks")
+				.exchange()
+				.expectStatus().isUnauthorized();
+	}
+
+	@Test
+	void shouldNotDeleteNotExistingWebhook() {
+		webhookRepository.save(
+				Webhook.builder()
+						.discordWebhookUrl("url")
+						.build()
+		);
+
+		webClient.delete().uri("/api/webhooks/123")
+				.header("Authorization", getUserBearer())
+				.exchange()
+				.expectStatus()
+				.isNotFound();
+
+		assertThat(webhookRepository.findAll()).hasSize(1);
+	}
+
+	@Test
+	void shouldNotDeleteWebhookIfUserIsNotItsOwner() {
+		Webhook webhook = Webhook.builder()
+				.discordWebhookUrl("url")
+				.addedBy("userId")
+				.build();
+
+		webhookRepository.save(webhook);
+
+		webClient.delete().uri("/api/webhooks/%s".formatted(webhook.getId()))
+				.header("Authorization", getUserBearer())
+				.exchange()
+				.expectStatus()
+				.isForbidden();
+
+		assertThat(webhookRepository.findAll()).hasSize(1);
+	}
+
+	@Test
+	void shouldUserDeleteHisWebhook() {
+		String bearer = getUserBearer();
+		String userId = getUserId(bearer);
+
+		Webhook webhook = Webhook.builder()
+				.discordWebhookUrl("url")
+				.addedBy(userId)
+				.build();
+
+		webhookRepository.save(webhook);
+
+		webClient.delete().uri("/api/webhooks/%s".formatted(webhook.getId()))
+				.header("Authorization", bearer)
+				.exchange()
+				.expectStatus()
+				.isNoContent();
+
+		assertThat(webhookRepository.findAll()).isEmpty();
+	}
+
+	@Test
+	void shouldAdminDeleteNotHisWebhook() {
+		String bearer = getAdminBearer();
+		String userId = getUserId(bearer);
+
+		Webhook webhook = Webhook.builder()
+				.discordWebhookUrl("url")
+				.addedBy("userId")
+				.build();
+
+		webhookRepository.save(webhook);
+
+		webClient.delete().uri("/api/webhooks/%s".formatted(webhook.getId()))
+				.header("Authorization", bearer)
+				.exchange()
+				.expectStatus()
+				.isNoContent();
+
+		assertThat(webhookRepository.findAll()).isEmpty();
+	}
+
 	private void seedDBWithWebhooks(String author, int count, int idx) {
 		webhookRepository.saveAll(
 				IntStream.range(0, count)

@@ -500,4 +500,81 @@ class WebhookServiceTest {
 		verify(mapper).mapToResponse(deepWebhookEq(expectedWebhook));
 	}
 
+	@Test
+	void GivenIdOfNotExistingWebhook_WhenDelete_ThenThrowsResourceNotFoundException() {
+		// Given
+		String id = "id";
+
+		when(repository.findById(id)).thenReturn(Optional.empty());
+
+		// When & Then
+		assertThatThrownBy(() -> underTest.delete(id, jwt))
+				.isInstanceOf(ResourceNotFoundException.class);
+	}
+
+	@Test
+	void GivenUserJwtWhoIsNotOwner_WhenDelete_ThenThrowsForbiddenAccessException() {
+		// Given
+		String id = "id";
+
+		when(repository.findById(id))
+				.thenReturn(Optional.of(
+						Webhook.builder()
+								.id(id)
+								.addedBy("otherUserId")
+								.build()
+				));
+
+		when(securityService.getUserId(jwt)).thenReturn("userId");
+		when(securityService.isAdmin(jwt)).thenReturn(false);
+
+		// When & Then
+		assertThatThrownBy(() -> underTest.delete(id, jwt))
+				.isInstanceOf(ForbiddenAccessException.class);
+	}
+
+	@Test
+	void GivenWebhookOwnerJwt_WhenDelete_ThenDeletesWebhook() {
+		// Given
+		String id = "id";
+
+		Webhook webhook = Webhook.builder()
+				.id(id)
+				.addedBy("userId")
+				.build();
+
+		when(repository.findById(id)).thenReturn(Optional.of(webhook));
+
+		when(securityService.getUserId(jwt)).thenReturn("userId");
+		when(securityService.isAdmin(jwt)).thenReturn(false);
+
+		// When
+		underTest.delete(id, jwt);
+
+		// Then
+		verify(repository).delete(webhook);
+	}
+
+	@Test
+	void GivenAdminJwtWhoIsNotOwnerOfWebhook_WhenDelete_ThenDeletesWebhook() {
+		// Given
+		String id = "id";
+
+		Webhook webhook = Webhook.builder()
+				.id(id)
+				.addedBy("otherUserId")
+				.build();
+
+		when(repository.findById(id)).thenReturn(Optional.of(webhook));
+
+		when(securityService.getUserId(jwt)).thenReturn("userId");
+		when(securityService.isAdmin(jwt)).thenReturn(true);
+
+		// When
+		underTest.delete(id, jwt);
+
+		// Then
+		verify(repository).delete(webhook);
+	}
+
 }

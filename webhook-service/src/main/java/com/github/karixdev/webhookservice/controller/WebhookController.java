@@ -51,4 +51,14 @@ public class WebhookController {
 		);
 	}
 
+	@DeleteMapping("/{id}")
+	ResponseEntity<WebhookResponse> delete(
+			@PathVariable(name = "id") String id,
+			@AuthenticationPrincipal Jwt jwt
+	) {
+		service.delete(id, jwt);
+
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+	}
+
 }
