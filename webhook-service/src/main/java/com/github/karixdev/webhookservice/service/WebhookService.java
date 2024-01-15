@@ -54,7 +54,7 @@ public class WebhookService {
 
 		CompletableFuture.allOf(doesWebhookExistTask, doSchedulesExistTask).join();
 
-		validateExistenceOfWebhook(doesWebhookExistTask);
+		validateExistenceOfDiscordWebhook(doesWebhookExistTask);
 		validateExistenceOfSchedules(doSchedulesExistTask);
 
 		Webhook webhook = Webhook.builder()
@@ -109,7 +109,7 @@ public class WebhookService {
 
 		CompletableFuture.allOf(doesWebhookExistTask, doSchedulesExistTask).join();
 
-		validateExistenceOfWebhook(doesWebhookExistTask);
+		validateExistenceOfDiscordWebhook(doesWebhookExistTask);
 		validateExistenceOfSchedules(doSchedulesExistTask);
 
 		webhook.setDiscordWebhookUrl(discordWebhookUrl);
@@ -148,7 +148,7 @@ public class WebhookService {
 		throw new ForbiddenAccessException("You are not owner of webhook with provided id");
 	}
 
-	private void validateExistenceOfWebhook(CompletableFuture<Boolean> task) {
+	private void validateExistenceOfDiscordWebhook(CompletableFuture<Boolean> task) {
 		if (Boolean.FALSE.equals(task.join())) {
 			throw new NotExistingDiscordWebhookException(DISCORD_WEBHOOK_URl_FIELD_NAME);
 		}

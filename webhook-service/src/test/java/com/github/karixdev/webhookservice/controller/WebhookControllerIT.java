@@ -704,9 +704,6 @@ class WebhookControllerIT extends ContainersEnvironment {
 
 	@Test
 	void shouldAdminDeleteNotHisWebhook() {
-		String bearer = getAdminBearer();
-		String userId = getUserId(bearer);
-
 		Webhook webhook = Webhook.builder()
 				.discordWebhookUrl("url")
 				.addedBy("userId")
@@ -715,7 +712,7 @@ class WebhookControllerIT extends ContainersEnvironment {
 		webhookRepository.save(webhook);
 
 		webClient.delete().uri("/api/webhooks/%s".formatted(webhook.getId()))
-				.header("Authorization", bearer)
+				.header("Authorization", getAdminBearer())
 				.exchange()
 				.expectStatus()
 				.isNoContent();
