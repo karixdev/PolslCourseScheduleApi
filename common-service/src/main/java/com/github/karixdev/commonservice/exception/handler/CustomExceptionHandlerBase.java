@@ -2,6 +2,7 @@ package com.github.karixdev.commonservice.exception.handler;
 
 import com.github.karixdev.commonservice.dto.ErrorResponse;
 import com.github.karixdev.commonservice.dto.ValidationErrorResponse;
+import com.github.karixdev.commonservice.exception.ForbiddenAccessException;
 import com.github.karixdev.commonservice.exception.ResourceNotFoundException;
 import com.github.karixdev.commonservice.exception.ValidationException;
 import org.springframework.http.HttpStatus;
@@ -36,6 +37,20 @@ public abstract class CustomExceptionHandlerBase {
                         constraints
                 ),
                 HttpStatus.BAD_REQUEST
+        );
+    }
+
+    @ExceptionHandler(ForbiddenAccessException.class)
+    public ResponseEntity<ErrorResponse> handleForbiddenAccessException(
+            ValidationException ex
+    ) {
+
+        return new ResponseEntity<>(
+                new ErrorResponse(
+                        HttpStatus.FORBIDDEN,
+                        ex.getMessage()
+                ),
+                HttpStatus.FORBIDDEN
         );
     }
 
