@@ -146,7 +146,7 @@ class WebhookServiceTest {
 		when(scheduleService.doSchedulesExist(schedulesIds))
 				.thenReturn(true);
 
-		when(jwt.getSubject()).thenReturn(userId);
+		when(securityService.getUserId(jwt)).thenReturn(userId);
 
 		// When
 		underTest.create(request, jwt);
@@ -357,9 +357,6 @@ class WebhookServiceTest {
 		when(securityService.getUserId(jwt)).thenReturn("userId");
 		when(securityService.isAdmin(jwt)).thenReturn(false);
 
-		when(discordWebhookService.getParametersFromUrl("url"))
-				.thenReturn(new DiscordWebhookParameters("id", "token"));
-
 		when(scheduleService.doSchedulesExist(Set.of(scheduleId))).thenReturn(false);
 
 		// When & Then
@@ -390,9 +387,6 @@ class WebhookServiceTest {
 
 		when(securityService.getUserId(jwt)).thenReturn("userId");
 		when(securityService.isAdmin(jwt)).thenReturn(false);
-
-		when(discordWebhookService.getParametersFromUrl("url"))
-				.thenReturn(new DiscordWebhookParameters("id", "token"));
 
 		// When
 		underTest.update(id, request, jwt);

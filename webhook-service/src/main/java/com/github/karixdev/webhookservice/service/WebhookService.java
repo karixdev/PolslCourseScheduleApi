@@ -37,20 +37,19 @@ public class WebhookService {
 	private final PaginationService paginationService;
 
 	private static final String DISCORD_WEBHOOK_URl_FIELD_NAME = "discordWebhookUrl";
-	private static final String SCHEDULES_IDS_URl_FIELD_NAME = "discordWebhookUrl";
+	private static final String SCHEDULES_IDS_URl_FIELD_NAME = "schedulesIds";
 
 	@Transactional
 	public WebhookResponse create(WebhookRequest request, Jwt jwt) {
-		if (repository.findByDiscordWebhookUrl(request.discordWebhookUrl()).isPresent()) {
+		String discordWebhookUrl = request.discordWebhookUrl();
+		if (repository.findByDiscordWebhookUrl(discordWebhookUrl).isPresent()) {
 			throw new UnavailableDiscordWebhookUrlException(DISCORD_WEBHOOK_URl_FIELD_NAME);
 		}
 
-		DiscordWebhookParameters parameters = discordWebhookService.getParametersFromUrl(request.discordWebhookUrl());
+		Set<UUID> schedulesIds = request.schedulesIds();
 
-		CompletableFuture<Boolean> doesWebhookExistTask =
-				CompletableFuture.supplyAsync(() -> discordWebhookService.doesWebhookExist(parameters.id(), parameters.token()));
-		CompletableFuture<Boolean> doSchedulesExistTask =
-				CompletableFuture.supplyAsync(() -> scheduleService.doSchedulesExist(request.schedulesIds()));
+		CompletableFuture<Boolean> doesWebhookExistTask = createDoesWebhookExistTask(discordWebhookUrl, true);
+		CompletableFuture<Boolean> doSchedulesExistTask = createDoSchedulesExistTask(schedulesIds);
 
 		CompletableFuture.allOf(doesWebhookExistTask, doSchedulesExistTask).join();
 
@@ -58,9 +57,9 @@ public class WebhookService {
 		validateExistenceOfSchedules(doSchedulesExistTask);
 
 		Webhook webhook = Webhook.builder()
-				.addedBy(jwt.getSubject())
-				.schedulesIds(request.schedulesIds())
-				.discordWebhookUrl(request.discordWebhookUrl())
+				.addedBy(securityService.getUserId(jwt))
+				.schedulesIds(schedulesIds)
+				.discordWebhookUrl(discordWebhookUrl)
 				.build();
 
 		repository.save(webhook);
@@ -93,19 +92,14 @@ public class WebhookService {
 			throw new UnavailableDiscordWebhookUrlException(DISCORD_WEBHOOK_URl_FIELD_NAME);
 		}
 
-		Set<UUID> newSchedulesIds = request.schedulesIds().stream()
+		Set<UUID> schedulesIds = request.schedulesIds();
+		Set<UUID> newSchedulesIds = schedulesIds.stream()
 				.filter(scheduleId -> !webhook.getSchedulesIds().contains(scheduleId))
 				.collect(Collectors.toSet());
 
-		DiscordWebhookParameters parameters = discordWebhookService.getParametersFromUrl(discordWebhookUrl);
 
-		CompletableFuture<Boolean> doesWebhookExistTask =
-				CompletableFuture.supplyAsync(() ->
-						!isDiscordWebhookUrlNew || discordWebhookService.doesWebhookExist(parameters.id(), parameters.token()));
-
-		CompletableFuture<Boolean> doSchedulesExistTask =
-				CompletableFuture.supplyAsync(() ->
-						newSchedulesIds.isEmpty() || scheduleService.doSchedulesExist(newSchedulesIds));
+		CompletableFuture<Boolean> doesWebhookExistTask = createDoesWebhookExistTask(discordWebhookUrl, isDiscordWebhookUrlNew);
+		CompletableFuture<Boolean> doSchedulesExistTask = createDoSchedulesExistTask(newSchedulesIds);
 
 		CompletableFuture.allOf(doesWebhookExistTask, doSchedulesExistTask).join();
 
@@ -113,7 +107,7 @@ public class WebhookService {
 		validateExistenceOfSchedules(doSchedulesExistTask);
 
 		webhook.setDiscordWebhookUrl(discordWebhookUrl);
-		webhook.setSchedulesIds(request.schedulesIds());
+		webhook.setSchedulesIds(schedulesIds);
 
 		if (securityService.isAdmin(jwt) && request.addedBy() != null) {
 			webhook.setAddedBy(request.addedBy());
@@ -130,6 +124,24 @@ public class WebhookService {
 		validateIfUserCanAccessWebhook(webhook, jwt);
 
 		repository.delete(webhook);
+	}
+
+	private CompletableFuture<Boolean> createDoesWebhookExistTask(String discordWebhookUrl, boolean isDiscordWebhookUrlNew) {
+		if (!isDiscordWebhookUrlNew) {
+			return CompletableFuture.supplyAsync(() -> true);
+		}
+
+		DiscordWebhookParameters parameters = discordWebhookService.getParametersFromUrl(discordWebhookUrl);
+
+		return CompletableFuture.supplyAsync(() -> discordWebhookService.doesWebhookExist(parameters.id(), parameters.token()));
+	}
+
+	private CompletableFuture<Boolean> createDoSchedulesExistTask(Set<UUID> schedulesIds) {
+		if (schedulesIds.isEmpty()) {
+			return CompletableFuture.supplyAsync(() -> true);
+		}
+
+		return CompletableFuture.supplyAsync(() -> scheduleService.doSchedulesExist(schedulesIds));
 	}
 
 	private Webhook findByIdOrElseThrow(String id) {
