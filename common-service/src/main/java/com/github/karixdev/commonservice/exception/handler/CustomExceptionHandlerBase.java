@@ -2,6 +2,7 @@ package com.github.karixdev.commonservice.exception.handler;
 
 import com.github.karixdev.commonservice.dto.ErrorResponse;
 import com.github.karixdev.commonservice.dto.ValidationErrorResponse;
+import com.github.karixdev.commonservice.exception.AppBaseException;
 import com.github.karixdev.commonservice.exception.ForbiddenAccessException;
 import com.github.karixdev.commonservice.exception.ResourceNotFoundException;
 import com.github.karixdev.commonservice.exception.ValidationException;
@@ -51,6 +52,19 @@ public abstract class CustomExceptionHandlerBase {
                         ex.getMessage()
                 ),
                 HttpStatus.FORBIDDEN
+        );
+    }
+
+    @ExceptionHandler(AppBaseException.class)
+    public ResponseEntity<ErrorResponse> handleAppBaseException(
+            AppBaseException ex
+    ) {
+        return new ResponseEntity<>(
+                new ErrorResponse(
+                        ex.getHttpStatus(),
+                        ex.getMessage()
+                ),
+                ex.getHttpStatus()
         );
     }
 
