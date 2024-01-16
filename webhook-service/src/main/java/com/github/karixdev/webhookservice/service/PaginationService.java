@@ -19,14 +19,14 @@ public class PaginationService {
 			page = 0;
 		}
 		if (page < 0) {
-			throw new InvalidPaginationParameterException("page", "page must be null or >= 0");
+			throw new InvalidPaginationParameterException("Pagination parameter page must be null or >= 0");
 		}
 
 		if (pageSize == null) {
 			pageSize = defaultPageSize;
 		}
 		if (pageSize <= 0) {
-			throw new InvalidPaginationParameterException("pageSize", "page must be null or >= 0");
+			throw new InvalidPaginationParameterException("Pagination parameter pageSize must be null or > 0");
 		}
 
 		return PageRequest.of(page, pageSize);

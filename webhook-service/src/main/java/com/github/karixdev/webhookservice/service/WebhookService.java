@@ -36,14 +36,11 @@ public class WebhookService {
 	private final SecurityService securityService;
 	private final PaginationService paginationService;
 
-	private static final String DISCORD_WEBHOOK_URl_FIELD_NAME = "discordWebhookUrl";
-	private static final String SCHEDULES_IDS_URl_FIELD_NAME = "schedulesIds";
-
 	@Transactional
 	public WebhookResponse create(WebhookRequest request, Jwt jwt) {
 		String discordWebhookUrl = request.discordWebhookUrl();
 		if (repository.findByDiscordWebhookUrl(discordWebhookUrl).isPresent()) {
-			throw new UnavailableDiscordWebhookUrlException(DISCORD_WEBHOOK_URl_FIELD_NAME);
+			throw new UnavailableDiscordWebhookUrlException();
 		}
 
 		Set<UUID> schedulesIds = request.schedulesIds();
@@ -89,7 +86,7 @@ public class WebhookService {
 		boolean isDiscordWebhookUrlNew = !discordWebhookUrl.equals(webhook.getDiscordWebhookUrl());
 
 		if (isDiscordWebhookUrlNew && repository.findByDiscordWebhookUrl(discordWebhookUrl).isPresent()) {
-			throw new UnavailableDiscordWebhookUrlException(DISCORD_WEBHOOK_URl_FIELD_NAME);
+			throw new UnavailableDiscordWebhookUrlException();
 		}
 
 		Set<UUID> schedulesIds = request.schedulesIds();
@@ -162,13 +159,13 @@ public class WebhookService {
 
 	private void validateExistenceOfDiscordWebhook(CompletableFuture<Boolean> task) {
 		if (Boolean.FALSE.equals(task.join())) {
-			throw new NotExistingDiscordWebhookException(DISCORD_WEBHOOK_URl_FIELD_NAME);
+			throw new NotExistingDiscordWebhookException();
 		}
 	}
 
 	private void validateExistenceOfSchedules(CompletableFuture<Boolean> task) {
 		if (Boolean.FALSE.equals(task.join())) {
-			throw new CollectionContainingNotExistingScheduleException(SCHEDULES_IDS_URl_FIELD_NAME);
+			throw new CollectionContainingNotExistingScheduleException();
 		}
 	}
 

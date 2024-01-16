@@ -3,6 +3,7 @@ package com.github.karixdev.webhookservice.service;
 import com.github.karixdev.commonservice.exception.HttpServiceClientException;
 import com.github.karixdev.webhookservice.client.DiscordWebhookClient;
 import com.github.karixdev.webhookservice.dto.DiscordWebhookRequest;
+import com.github.karixdev.webhookservice.exception.DiscordWebhookApiClientException;
 import com.github.karixdev.webhookservice.exception.InvalidDiscordWebhookUrlFormatException;
 import com.github.karixdev.webhookservice.model.DiscordWebhookParameters;
 import com.github.karixdev.webhookservice.validator.DiscordWebhookValidator;
@@ -38,7 +39,7 @@ public class DiscordWebhookService {
 			client.send(id, token, welcomeMsg);
 
 			return true;
-		} catch (HttpServiceClientException ex) {
+		} catch (DiscordWebhookApiClientException ex) {
 			log.error("Discord API returned client error while checking webhook existence: {}", ex.getMessage(), ex);
 			return false;
 		}
@@ -50,7 +51,7 @@ public class DiscordWebhookService {
 
 	public DiscordWebhookParameters getParametersFromUrl(String url) {
 		if (!validator.isUrlValid(url)) {
-			throw new InvalidDiscordWebhookUrlFormatException("discordWebhookUrl");
+			throw new InvalidDiscordWebhookUrlFormatException();
 		}
 
 		String[] split = url.split("/");

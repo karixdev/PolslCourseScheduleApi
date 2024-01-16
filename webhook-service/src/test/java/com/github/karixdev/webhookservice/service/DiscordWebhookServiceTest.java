@@ -1,8 +1,8 @@
 package com.github.karixdev.webhookservice.service;
 
-import com.github.karixdev.commonservice.exception.HttpServiceClientException;
 import com.github.karixdev.webhookservice.client.DiscordWebhookClient;
 import com.github.karixdev.webhookservice.dto.DiscordWebhookRequest;
+import com.github.karixdev.webhookservice.exception.DiscordWebhookApiClientException;
 import com.github.karixdev.webhookservice.exception.InvalidDiscordWebhookUrlFormatException;
 import com.github.karixdev.webhookservice.model.DiscordWebhookParameters;
 import com.github.karixdev.webhookservice.model.Embedded;
@@ -63,7 +63,7 @@ class DiscordWebhookServiceTest {
 				.content(welcomeMessageContent)
 				.build();
 
-		doThrow(HttpServiceClientException.class)
+		doThrow(DiscordWebhookApiClientException.class)
 				.when(client)
 				.send(id, token, welcomeMsg);
 

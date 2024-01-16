@@ -1,8 +1,8 @@
 package com.github.karixdev.webhookservice.config;
 
-import com.github.karixdev.commonservice.exception.HttpServiceClientException;
-import com.github.karixdev.commonservice.exception.HttpServiceClientServerException;
 import com.github.karixdev.webhookservice.client.DiscordWebhookClient;
+import com.github.karixdev.webhookservice.exception.DiscordWebhookApiClientException;
+import com.github.karixdev.webhookservice.exception.DiscordWebhookApiServerException;
 import io.micrometer.observation.ObservationRegistry;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -24,10 +24,10 @@ public class DiscordWebhookClientConfig {
 				.baseUrl(baseUrl)
 				.observationRegistry(observationRegistry)
 				.defaultStatusHandler(HttpStatusCode::is5xxServerError, resp -> {
-					throw new HttpServiceClientServerException("schedule-service", resp.statusCode());
+					throw new DiscordWebhookApiServerException(resp.statusCode());
 				})
 				.defaultStatusHandler(HttpStatusCode::is4xxClientError, resp -> {
-					throw new HttpServiceClientException("schedule-service", resp.statusCode());
+					throw new DiscordWebhookApiClientException(resp.statusCode());
 				})
 				.build();
 

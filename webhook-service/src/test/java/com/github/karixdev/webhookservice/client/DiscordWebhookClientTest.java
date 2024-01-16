@@ -1,9 +1,9 @@
 package com.github.karixdev.webhookservice.client;
 
-import com.github.karixdev.commonservice.exception.HttpServiceClientException;
-import com.github.karixdev.commonservice.exception.HttpServiceClientServerException;
 import com.github.karixdev.webhookservice.config.DiscordWebhookClientConfig;
 import com.github.karixdev.webhookservice.dto.DiscordWebhookRequest;
+import com.github.karixdev.webhookservice.exception.DiscordWebhookApiClientException;
+import com.github.karixdev.webhookservice.exception.DiscordWebhookApiServerException;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +51,7 @@ class DiscordWebhookClientTest {
 	}
 
 	@Test
-	void GivenDiscordIdAndTokenAndDiscordWebhookRequestsSuchDiscordRespondsWith5xxError_WhenSend_ThenHttpServiceClientServerExceptionIsThrown() {
+	void GivenDiscordIdAndTokenAndDiscordWebhookRequestsSuchDiscordRespondsWith5xxError_WhenSend_ThenDiscordWebhookApiServerException() {
 		// Given
 		String discordId = "123";
 		String token = "abc";
@@ -66,11 +66,11 @@ class DiscordWebhookClientTest {
 
 		// When & Then
 		assertThatThrownBy(() -> underTest.send(discordId, token, request))
-				.isInstanceOf(HttpServiceClientServerException.class);
+				.isInstanceOf(DiscordWebhookApiServerException.class);
 	}
 
 	@Test
-	void GivenDiscordIdAndTokenAndDiscordWebhookRequestsSuchDiscordRespondsWith4xxError_WhenSend_ThenHttpServiceClientServerExceptionIsThrown() {
+	void GivenDiscordIdAndTokenAndDiscordWebhookRequestsSuchDiscordRespondsWith4xxError_WhenSend_ThenDiscordWebhookApiClientException() {
 		// Given
 		String discordId = "123";
 		String token = "abc";
@@ -85,7 +85,7 @@ class DiscordWebhookClientTest {
 
 		// When & Then
 		assertThatThrownBy(() -> underTest.send(discordId, token, request))
-				.isInstanceOf(HttpServiceClientException.class);
+				.isInstanceOf(DiscordWebhookApiClientException.class);
 	}
 
 }
