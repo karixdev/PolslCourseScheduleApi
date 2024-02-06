@@ -61,6 +61,9 @@ discord-webhook:
   base-url: https://discord.com/api
   welcome-message: "Hello!"
 
+notification-service:
+  max-threads-num: 50
+
 pagination:
   defaults:
     page-size: 10
