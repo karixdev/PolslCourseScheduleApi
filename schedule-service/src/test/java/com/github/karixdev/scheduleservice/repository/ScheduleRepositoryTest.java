@@ -2,7 +2,6 @@ package com.github.karixdev.scheduleservice.repository;
 
 import com.github.karixdev.scheduleservice.ContainersEnvironment;
 import com.github.karixdev.scheduleservice.entity.Schedule;
-import com.github.karixdev.scheduleservice.repository.ScheduleRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -16,7 +15,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-public class ScheduleRepositoryTest extends ContainersEnvironment {
+class ScheduleRepositoryTest extends ContainersEnvironment {
+
     @Autowired
     ScheduleRepository underTest;
 
@@ -77,8 +77,7 @@ public class ScheduleRepositoryTest extends ContainersEnvironment {
         Optional<Schedule> result = underTest.findByName(name);
 
         // Then
-        assertThat(result).isPresent();
-        assertThat(result.get()).isEqualTo(schedule);
+        assertThat(result).contains(schedule);
     }
 
     @Test
@@ -127,4 +126,5 @@ public class ScheduleRepositoryTest extends ContainersEnvironment {
         assertThat(result.get(1)).isEqualTo(schedule1);
         assertThat(result.get(2)).isEqualTo(schedule3);
     }
+
 }

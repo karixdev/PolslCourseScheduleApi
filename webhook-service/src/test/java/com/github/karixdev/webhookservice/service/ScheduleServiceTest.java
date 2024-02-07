@@ -1,8 +1,8 @@
 package com.github.karixdev.webhookservice.service;
 
-import com.github.karixdev.webhookservice.client.ScheduleClient;
-import com.github.karixdev.webhookservice.dto.ScheduleResponse;
-import com.github.karixdev.webhookservice.exception.ResourceNotFoundException;
+import com.github.karixdev.commonservice.dto.schedule.ScheduleResponse;
+import com.github.karixdev.webhookservice.client.ScheduleServiceClient;
+import org.apache.zookeeper.Op;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -14,86 +14,90 @@ import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ScheduleServiceTest {
-    @InjectMocks
-    ScheduleService underTest;
 
-    @Mock
-    ScheduleClient client;
+	@InjectMocks
+	ScheduleService underTest;
 
-    @Test
-    void GivenNonExistingSchedules_WhenCheckingIfSchedulesExist_ThenReturnsFalse() {
-        // Given
-        UUID scheduleId1 = UUID.randomUUID();
-        UUID scheduleId2 = UUID.randomUUID();
-        Set<UUID> scheduleIds = Set.of(scheduleId1, scheduleId2);
+	@Mock
+	ScheduleServiceClient client;
 
-        Set<ScheduleResponse> retrievedSchedules = Set.of();
+	@Test
+	void GivenNonExistingSchedulesIds_WhenDoSchedulesExist_ThenReturnsFalse() {
+		// Given
+		UUID scheduleId1 = UUID.randomUUID();
+		UUID scheduleId2 = UUID.randomUUID();
+		Set<UUID> scheduleIds = Set.of(scheduleId1, scheduleId2);
 
-        when(client.findSelected(scheduleIds)).thenReturn(retrievedSchedules);
+		Set<ScheduleResponse> retrievedSchedules = Set.of(ScheduleResponse.builder().id(scheduleId1).build());
 
-        // When
-        boolean result = underTest.checkIfSchedulesExist(scheduleIds);
+		when(client.find(scheduleIds)).thenReturn(retrievedSchedules);
 
-        // Then
-        assertThat(result).isFalse();
-    }
+		// When
+		boolean result = underTest.doSchedulesExist(scheduleIds);
 
-    @Test
-    void GivenSomeNonExistingSchedules_WhenCheckingIfSchedulesExist_ThenReturnsFalse() {
-        // Given
-        UUID scheduleId1 = UUID.randomUUID();
-        UUID scheduleId2 = UUID.randomUUID();
-        Set<UUID> scheduleIds = Set.of(scheduleId1, scheduleId2);
+		// Then
+		assertThat(result).isFalse();
+	}
 
-        ScheduleResponse scheduleResponse1 = new ScheduleResponse(scheduleId1, "name");
-        Set<ScheduleResponse> retrievedSchedules = Set.of(scheduleResponse1);
+	@Test
+	void GivenExistingSchedulesIds_WhenDoSchedulesExist_ThenReturnsTrue() {
+		// Given
+		UUID scheduleId1 = UUID.randomUUID();
+		UUID scheduleId2 = UUID.randomUUID();
+		Set<UUID> scheduleIds = Set.of(scheduleId1, scheduleId2);
 
-        when(client.findSelected(scheduleIds)).thenReturn(retrievedSchedules);
+		Set<ScheduleResponse> retrievedSchedules = Set.of(
+				ScheduleResponse.builder().id(scheduleId1).build(),
+				ScheduleResponse.builder().id(scheduleId2).build()
+		);
 
-        // When
-        boolean result = underTest.checkIfSchedulesExist(scheduleIds);
+		when(client.find(scheduleIds)).thenReturn(retrievedSchedules);
 
-        // Then
-        assertThat(result).isFalse();
-    }
+		// When
+		boolean result = underTest.doSchedulesExist(scheduleIds);
 
-    @Test
-    void GivenScheduleIdOfNotExistingSchedule_WhenGetScheduleName_ThenThrowsResourceNotFoundException() {
-        // Given
-        UUID scheduleId = UUID.randomUUID();
+		// Then
+		assertThat(result).isTrue();
+	}
 
-        when(client.findById(eq(scheduleId)))
-                .thenReturn(Optional.empty());
+	@Test
+	void GivenScheduleIdThatScheduleServiceClientReturnsNotEmptyOptional_WhenGetScheduleName_ThenReturnsOptionalWithScheduleName() {
+		// Given
+		UUID id = UUID.randomUUID();
 
-        // When & Then
-        assertThatThrownBy(() -> underTest.getScheduleName(scheduleId))
-                .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessage("Schedule with id %s not found".formatted(scheduleId));
-    }
+		ScheduleResponse scheduleResponse = ScheduleResponse.builder()
+				.id(id)
+				.name("name")
+				.build();
 
-    @Test
-    void GivenScheduleId_WhenGetScheduleName_ThenReturnsScheduleName() {
-        // Given
-        UUID scheduleId = UUID.randomUUID();
+		when(client.findById(id)).thenReturn(Optional.of(scheduleResponse));
 
-        ScheduleResponse scheduleResponse = new ScheduleResponse(
-                scheduleId,
-                "name"
-        );
+		// When
+		Optional<String> result = underTest.getScheduleName(id);
 
-        when(client.findById(eq(scheduleId)))
-                .thenReturn(Optional.of(scheduleResponse));
+		// Then
+		assertThat(result)
+				.isPresent()
+				.contains(scheduleResponse.name());
+	}
 
-        // When
-        String result = underTest.getScheduleName(scheduleId);
+	@Test
+	void GivenScheduleIdThatScheduleServiceClientReturnsEmptyOptional_WhenGetScheduleName_ThenReturnsEmptyOptional() {
+		// Given
+		UUID id = UUID.randomUUID();
 
-        // Then
-        assertThat(result).isEqualTo(scheduleResponse.name());
-    }
+		when(client.findById(id)).thenReturn(Optional.empty());
+
+		// When
+		Optional<String> result = underTest.getScheduleName(id);
+
+		// Then
+		assertThat(result)
+				.isEmpty();
+	}
+
 }

@@ -1,56 +1,72 @@
 package com.github.karixdev.scheduleservice.job;
 
+import com.github.karixdev.commonservice.event.schedule.ScheduleEvent;
 import com.github.karixdev.scheduleservice.ContainersEnvironment;
 import com.github.karixdev.scheduleservice.entity.Schedule;
 import com.github.karixdev.scheduleservice.repository.ScheduleRepository;
 import com.github.karixdev.scheduleservice.service.ScheduleService;
+import org.apache.kafka.clients.consumer.Consumer;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.common.serialization.StringDeserializer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.amqp.rabbit.core.RabbitAdmin;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.kafka.core.ConsumerFactory;
+import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.support.serializer.JsonDeserializer;
+import org.springframework.kafka.test.utils.KafkaTestUtils;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
+import java.time.Duration;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.Map;
 
-import static com.github.karixdev.scheduleservice.props.ScheduleMQProperties.*;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class ScheduleJobIT extends ContainersEnvironment {
+
     @Autowired
     ScheduleService scheduleService;
 
     @Autowired
     ScheduleRepository scheduleRepository;
 
-    @Autowired
-    RabbitTemplate rabbitTemplate;
+    Consumer<String, ScheduleEvent> scheduleEventConsumer;
 
-    @Autowired
-    RabbitAdmin rabbitAdmin;
+    private static final String SCHEDULE_EVENT_TOPIC = "schedule.event";
 
     @DynamicPropertySource
     static void overrideScheduleJobCron(DynamicPropertyRegistry registry) {
         registry.add(
                 "schedule.job.cron",
-                () -> "*/10 * * * * *");
+                () -> "*/5 * * * * *");
     }
 
     @BeforeEach
     void setUp() {
-        rabbitAdmin.purgeQueue(SCHEDULE_UPDATE_QUEUE, true);
+        Map<String, Object> consumerProps = KafkaTestUtils.consumerProps(kafkaContainer.getBootstrapServers(), "schedule-domain-test-consumer", "true");
+        consumerProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        consumerProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
+        consumerProps.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, true);
+        consumerProps.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
+
+        ConsumerFactory<String, ScheduleEvent> consumerFactory = new DefaultKafkaConsumerFactory<>(consumerProps);
+        scheduleEventConsumer = consumerFactory.createConsumer();
+        scheduleEventConsumer.subscribe(List.of(SCHEDULE_EVENT_TOPIC));
     }
 
     @AfterEach
     void tearDown() {
         scheduleRepository.deleteAll();
+        scheduleEventConsumer.close();
     }
 
     @Test
@@ -82,13 +98,8 @@ public class ScheduleJobIT extends ContainersEnvironment {
                         .build()
         ));
 
-        await().atMost(40, TimeUnit.SECONDS)
-                .untilAsserted(() -> {
-                    int count = (int) rabbitAdmin
-                            .getQueueProperties(SCHEDULE_UPDATE_QUEUE)
-                            .get("QUEUE_MESSAGE_COUNT");
-
-                    assertThat(count).isEqualTo(3);
-                });
+        ConsumerRecords<String, ScheduleEvent> consumerRecords = KafkaTestUtils.getRecords(scheduleEventConsumer, Duration.ofSeconds(20));
+        assertThat(consumerRecords.count()).isEqualTo(3);
     }
+
 }

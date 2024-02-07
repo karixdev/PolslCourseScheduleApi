@@ -16,53 +16,49 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/webhooks")
 @RequiredArgsConstructor
 public class WebhookController {
-    private final WebhookService service;
 
-    @PostMapping
-    ResponseEntity<WebhookResponse> create(
-            @Valid @RequestBody WebhookRequest discordWebhookRequest,
-            @AuthenticationPrincipal Jwt jwt
-    ) {
-        return new ResponseEntity<>(
-                service.create(discordWebhookRequest, jwt),
-                HttpStatus.CREATED
-        );
-    }
+	private final WebhookService service;
 
-    @GetMapping
-    ResponseEntity<Page<WebhookResponse>> findAll(
-            @RequestParam(
-                    name = "page",
-                    required = false,
-                    defaultValue = "0"
-            ) Integer page,
-            @AuthenticationPrincipal Jwt jwt
-    ) {
-        return new ResponseEntity<>(
-                service.findAll(jwt, page),
-                HttpStatus.OK
-        );
-    }
+	@PostMapping
+	ResponseEntity<WebhookResponse> create(
+			@RequestBody @Valid WebhookRequest request,
+			@AuthenticationPrincipal Jwt jwt
+	) {
+		return new ResponseEntity<>(service.create(request, jwt), HttpStatus.CREATED);
+	}
 
-    @PutMapping("/{id}")
-    ResponseEntity<WebhookResponse> update(
-            @Valid @RequestBody WebhookRequest request,
-            @AuthenticationPrincipal Jwt jwt,
-            @PathVariable String id
-    ) {
-        return new ResponseEntity<>(
-                service.update(request, jwt, id),
-                HttpStatus.OK
-        );
-    }
+	@GetMapping
+	ResponseEntity<Page<WebhookResponse>> findAll(
+			@RequestParam(name = "page", required = false) Integer page,
+			@RequestParam(name = "pageSize", required = false) Integer pageSize,
+			@AuthenticationPrincipal Jwt jwt
+	) {
+		return new ResponseEntity<>(
+				service.findAll(jwt, page, pageSize),
+				HttpStatus.OK
+		);
+	}
 
-    @DeleteMapping("/{id}")
-    ResponseEntity<Void> delete(
-            @PathVariable(name = "id") String id,
-            @AuthenticationPrincipal Jwt jwt
-    ) {
-        service.delete(id, jwt);
+	@PutMapping("/{id}")
+	ResponseEntity<WebhookResponse> update(
+			@PathVariable(name = "id") String id,
+			@RequestBody @Valid WebhookRequest request,
+			@AuthenticationPrincipal Jwt jwt
+	) {
+		return new ResponseEntity<>(
+				service.update(id, request, jwt),
+				HttpStatus.OK
+		);
+	}
 
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
+	@DeleteMapping("/{id}")
+	ResponseEntity<WebhookResponse> delete(
+			@PathVariable(name = "id") String id,
+			@AuthenticationPrincipal Jwt jwt
+	) {
+		service.delete(id, jwt);
+
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+	}
+
 }

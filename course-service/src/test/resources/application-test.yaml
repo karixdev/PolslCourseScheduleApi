@@ -1,0 +1,29 @@
+spring:
+  main:
+    allow-bean-definition-overriding: true
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+
+schedule-service:
+  base-url: http://localhost:9999
+
+keycloak:
+  server-url: http://localhost:8000
+  realm: polsl-course-api
+
+eureka:
+  client:
+    enabled: false
+
+management:
+  tracing:
+    enabled: false
+
+kafka:
+  observation:
+    producer:
+      enabled: false
+    consumer:
+      enabled: false

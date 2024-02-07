@@ -1,12 +1,15 @@
 package com.github.karixdev.webscraperservice.client;
 
-import com.github.karixdev.webscraperservice.ContainersEnvironment;
+import com.github.karixdev.webscraperservice.config.PlanPolslClientConfig;
 import com.github.karixdev.webscraperservice.exception.PlanPolslUnavailableException;
 import com.github.karixdev.webscraperservice.props.PlanPolslClientProperties;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
+import io.micrometer.observation.ObservationRegistry;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.autoconfigure.observation.ObservationAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -14,11 +17,15 @@ import org.springframework.test.context.DynamicPropertySource;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
-@SpringBootTest(webEnvironment = RANDOM_PORT)
+@SpringBootTest(classes = {
+        PlanPolslClient.class,
+        PlanPolslClientConfig.class,
+        ObservationAutoConfiguration.class
+})
 @WireMockTest(httpPort = 9999)
-public class PlanPolslClientTest extends ContainersEnvironment {
+class PlanPolslClientTest {
+
     @Autowired
     PlanPolslClient underTest;
 
@@ -42,7 +49,6 @@ public class PlanPolslClientTest extends ContainersEnvironment {
                 .withQueryParam("wd",   equalTo(String.valueOf(wd)))
                 .withQueryParam("winH", equalTo(String.valueOf(PlanPolslClientProperties.WIN_W)))
                 .withQueryParam("winW", equalTo(String.valueOf(PlanPolslClientProperties.WIN_H)))
-
                 .willReturn(notFound())
         );
 
@@ -72,7 +78,6 @@ public class PlanPolslClientTest extends ContainersEnvironment {
                 .withQueryParam("wd",   equalTo(String.valueOf(wd)))
                 .withQueryParam("winH", equalTo(String.valueOf(PlanPolslClientProperties.WIN_W)))
                 .withQueryParam("winW", equalTo(String.valueOf(PlanPolslClientProperties.WIN_H)))
-
                 .willReturn(ok().withBody("""
                         <div class="cd">07:00-08:00</div>
                         <div class="coursediv" styles="left: 40px; top: 30px;" cw="20" ch="10">
@@ -103,4 +108,5 @@ public class PlanPolslClientTest extends ContainersEnvironment {
                         expectedResponse.getBytes()
                 ));
     }
+
 }

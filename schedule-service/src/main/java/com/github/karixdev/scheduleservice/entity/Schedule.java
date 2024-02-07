@@ -3,17 +3,20 @@ package com.github.karixdev.scheduleservice.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.Objects;
 import java.util.UUID;
 
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
-@Getter
-@Setter
+
 @Entity
 @Table(name = "schedule")
+@Getter
+@Setter
+@Builder
+@ToString
+@AllArgsConstructor
+@NoArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Schedule {
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(
@@ -22,6 +25,7 @@ public class Schedule {
             updatable = false
     )
     @Setter(AccessLevel.NONE)
+    @EqualsAndHashCode.Include
     private UUID id;
 
     @Column(
@@ -60,22 +64,4 @@ public class Schedule {
     )
     private Integer wd;
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Schedule schedule = (Schedule) o;
-        return Objects.equals(id, schedule.id) &&
-                Objects.equals(type, schedule.type) &&
-                Objects.equals(planPolslId, schedule.planPolslId) &&
-                Objects.equals(semester, schedule.semester) &&
-                Objects.equals(name, schedule.name) &&
-                Objects.equals(groupNumber, schedule.groupNumber) &&
-                Objects.equals(wd, schedule.wd);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, type, planPolslId, semester, name, groupNumber, wd);
-    }
 }

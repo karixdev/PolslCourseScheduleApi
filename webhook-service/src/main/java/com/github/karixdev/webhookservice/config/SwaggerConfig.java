@@ -16,36 +16,38 @@ import java.time.format.DateTimeFormatter;
 
 @Configuration
 public class SwaggerConfig {
-    private static final String OPEN_ID_SCHEME_NAME = "OpenId";
-    private static final String OPENID_CONFIG_FORMAT = "%s/realms/%s/.well-known/openid-configuration";
 
-    static {
-        Schema<LocalTime> schema = new Schema<>();
-        schema.example(LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")));
-        SpringDocUtils.getConfig().replaceWithSchema(LocalTime.class, schema);
-    }
+	private static final String OPEN_ID_SCHEME_NAME = "OpenId";
+	private static final String OPENID_CONFIG_FORMAT = "%s/realms/%s/.well-known/openid-configuration";
 
-    @Bean
-    OpenAPI openAPI(
-            @Value("${keycloak.server-url}") String serverUrl,
-            @Value("${keycloak.realm}") String realm
-    ) {
-        return new OpenAPI()
-                .info(new Info().title("course-service"))
-                .components(new Components()
-                        .addSecuritySchemes(
-                                OPEN_ID_SCHEME_NAME,
-                                createOpenIdScheme(serverUrl, realm)
-                        )
-                )
-                .addSecurityItem(new SecurityRequirement().addList(OPEN_ID_SCHEME_NAME));
-    }
+	static {
+		Schema<LocalTime> schema = new Schema<>();
+		schema.example(LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")));
+		SpringDocUtils.getConfig().replaceWithSchema(LocalTime.class, schema);
+	}
 
-    private SecurityScheme createOpenIdScheme(String serverUrl, String realm) {
-        String connectUrl = String.format(OPENID_CONFIG_FORMAT, serverUrl, realm);
+	@Bean
+	OpenAPI openAPI(
+			@Value("${keycloak.server-url}") String serverUrl,
+			@Value("${keycloak.realm}") String realm
+	) {
+		return new OpenAPI()
+				.info(new Info().title("course-service"))
+				.components(new Components()
+						.addSecuritySchemes(
+								OPEN_ID_SCHEME_NAME,
+								createOpenIdScheme(serverUrl, realm)
+						)
+				)
+				.addSecurityItem(new SecurityRequirement().addList(OPEN_ID_SCHEME_NAME));
+	}
 
-        return new SecurityScheme()
-                .type(SecurityScheme.Type.OPENIDCONNECT)
-                .openIdConnectUrl(connectUrl);
-    }
+	private SecurityScheme createOpenIdScheme(String serverUrl, String realm) {
+		String connectUrl = String.format(OPENID_CONFIG_FORMAT, serverUrl, realm);
+
+		return new SecurityScheme()
+				.type(SecurityScheme.Type.OPENIDCONNECT)
+				.openIdConnectUrl(connectUrl);
+	}
+
 }

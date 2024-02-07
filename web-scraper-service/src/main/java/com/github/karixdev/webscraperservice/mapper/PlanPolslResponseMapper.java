@@ -1,9 +1,9 @@
 package com.github.karixdev.webscraperservice.mapper;
 
-import com.github.karixdev.webscraperservice.model.CourseCell;
-import com.github.karixdev.webscraperservice.model.Link;
+import com.github.karixdev.commonservice.model.course.raw.CourseCell;
+import com.github.karixdev.commonservice.model.course.raw.Link;
+import com.github.karixdev.commonservice.model.schedule.raw.TimeCell;
 import com.github.karixdev.webscraperservice.model.PlanPolslResponse;
-import com.github.karixdev.webscraperservice.model.TimeCell;
 import com.github.karixdev.webscraperservice.props.PlanPolslMapperProperties;
 import com.github.karixdev.webscraperservice.service.HtmlElementService;
 import lombok.RequiredArgsConstructor;
@@ -45,7 +45,7 @@ public class PlanPolslResponseMapper {
         }
 
         Pattern pattern = Pattern.compile(
-                "[0-9]+:[0-9]+-[0-9]+:[0-9]+",
+                "\\d+:\\d+-\\d+:\\d+",
                 Pattern.CASE_INSENSITIVE);
 
         return pattern.matcher(text).matches();

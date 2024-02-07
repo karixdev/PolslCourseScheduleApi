@@ -1,9 +1,8 @@
 package com.github.karixdev.scheduleservice.controller;
 
-import com.github.karixdev.scheduleservice.dto.ErrorResponse;
-import com.github.karixdev.scheduleservice.dto.ScheduleRequest;
-import com.github.karixdev.scheduleservice.dto.ScheduleResponse;
-import com.github.karixdev.scheduleservice.dto.ValidationErrorResponse;
+import com.github.karixdev.commonservice.docs.schema.ErrorResponseSchema;
+import com.github.karixdev.commonservice.dto.schedule.ScheduleRequest;
+import com.github.karixdev.commonservice.dto.schedule.ScheduleResponse;
 import com.github.karixdev.scheduleservice.service.ScheduleService;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -23,6 +22,7 @@ import java.util.UUID;
 @RequestMapping("/api/schedules")
 @RequiredArgsConstructor
 public class ScheduleController {
+
     private final ScheduleService service;
 
     @ApiResponse(
@@ -33,7 +33,7 @@ public class ScheduleController {
     @ApiResponse(
             responseCode = "400",
             description = "Bad request",
-            content = @Content(schema = @Schema(implementation = ValidationErrorResponse.class))
+            content = @Content(schema = @Schema(implementation = ErrorResponseSchema.class))
     )
     @ApiResponse(
             responseCode = "401",
@@ -78,7 +78,7 @@ public class ScheduleController {
     @ApiResponse(
             responseCode = "404",
             description = "Not found",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            content = @Content(schema = @Schema(implementation = ErrorResponseSchema.class))
     )
     @GetMapping("/{id}")
     ResponseEntity<ScheduleResponse> findById(
@@ -93,17 +93,17 @@ public class ScheduleController {
     @ApiResponse(
             responseCode = "200",
             description = "OK",
-            content = @Content(schema = @Schema(implementation = ScheduleResponse.class))
+            content = @Content(schema = @Schema(implementation = ErrorResponseSchema.class))
     )
     @ApiResponse(
             responseCode = "400",
             description = "Bad request",
-            content = @Content(schema = @Schema(implementation = ValidationErrorResponse.class))
+            content = @Content(schema = @Schema(implementation = ErrorResponseSchema.class))
     )
     @ApiResponse(
             responseCode = "404",
             description = "Not found",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            content = @Content(schema = @Schema(implementation = ErrorResponseSchema.class))
     )
     @ApiResponse(
             responseCode = "401",
@@ -134,7 +134,7 @@ public class ScheduleController {
     @ApiResponse(
             responseCode = "404",
             description = "Not found",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            content = @Content(schema = @Schema(implementation = ErrorResponseSchema.class))
     )
     @ApiResponse(
             responseCode = "401",
@@ -163,7 +163,7 @@ public class ScheduleController {
     @ApiResponse(
             responseCode = "404",
             description = "Not found",
-            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+            content = @Content(schema = @Schema(implementation = ErrorResponseSchema.class))
     )
     @ApiResponse(
             responseCode = "401",
@@ -183,4 +183,5 @@ public class ScheduleController {
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
 }

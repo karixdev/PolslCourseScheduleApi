@@ -1,11 +1,10 @@
 package com.github.karixdev.scheduleservice.service;
 
-import com.github.karixdev.scheduleservice.dto.ScheduleRequest;
-import com.github.karixdev.scheduleservice.dto.ScheduleResponse;
+import com.github.karixdev.commonservice.dto.schedule.ScheduleRequest;
+import com.github.karixdev.commonservice.exception.ResourceNotFoundException;
+import com.github.karixdev.commonservice.exception.ValidationException;
 import com.github.karixdev.scheduleservice.entity.Schedule;
-import com.github.karixdev.scheduleservice.exception.ResourceNotFoundException;
-import com.github.karixdev.scheduleservice.exception.ValidationException;
-import com.github.karixdev.scheduleservice.message.ScheduleEventType;
+import com.github.karixdev.scheduleservice.mapper.ScheduleMapper;
 import com.github.karixdev.scheduleservice.producer.ScheduleEventProducer;
 import com.github.karixdev.scheduleservice.repository.ScheduleRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,14 +19,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class ScheduleServiceTest {
+class ScheduleServiceTest {
+
     @InjectMocks
     ScheduleService underTest;
 
@@ -36,6 +33,9 @@ public class ScheduleServiceTest {
 
     @Mock
     ScheduleEventProducer producer;
+
+    @Mock
+    ScheduleMapper mapper;
 
     Schedule schedule;
 
@@ -64,7 +64,7 @@ public class ScheduleServiceTest {
                 0
         );
 
-        when(repository.findByName(eq("schedule")))
+        when(repository.findByName("schedule"))
                 .thenReturn(Optional.of(schedule));
 
         // When & Then
@@ -84,10 +84,10 @@ public class ScheduleServiceTest {
                 4
         );
 
-        when(repository.findByName(eq("available")))
+        when(repository.findByName("available"))
                 .thenReturn(Optional.empty());
 
-        Schedule savedSchedule = Schedule.builder()
+        Schedule schedule = Schedule.builder()
                 .id(UUID.randomUUID())
                 .type(1)
                 .planPolslId(1999)
@@ -97,33 +97,13 @@ public class ScheduleServiceTest {
                 .wd(4)
                 .build();
 
-        when(repository.save(eq(Schedule.builder()
-                .type(1)
-                .planPolslId(1999)
-                .semester(1)
-                .groupNumber(1)
-                .name("available")
-                .wd(4)
-                .build())))
-                .thenReturn(savedSchedule);
+        when(mapper.mapToEntity(scheduleRequest)).thenReturn(schedule);
 
         // When
-        ScheduleResponse result = underTest.create(scheduleRequest);
+        underTest.create(scheduleRequest);
 
         // Then
-        assertThat(result.semester())
-                .isEqualTo(scheduleRequest.semester());
-        assertThat(result.name())
-                .isEqualTo(scheduleRequest.name());
-        assertThat(result.groupNumber())
-                .isEqualTo(scheduleRequest.groupNumber());
-        assertThat(result.id())
-                .isEqualTo(savedSchedule.getId());
-
-        verify(producer).produceScheduleEventMessage(
-                eq(schedule),
-                eq(ScheduleEventType.CREATE)
-        );
+        verify(mapper).mapToResponse(schedule);
     }
 
     @Test
@@ -131,7 +111,7 @@ public class ScheduleServiceTest {
         // Given
         UUID id = UUID.randomUUID();
 
-        when(repository.findById(eq(id)))
+        when(repository.findById(id))
                 .thenReturn(Optional.empty());
 
         // When & Then
@@ -148,17 +128,14 @@ public class ScheduleServiceTest {
         // Given
         UUID id = schedule.getId();
 
-        when(repository.findById(eq(id)))
+        when(repository.findById(id))
                 .thenReturn(Optional.of(schedule));
 
         // When
-        ScheduleResponse result = underTest.findById(id);
+        underTest.findById(id);
 
         // Then
-        assertThat(result.groupNumber()).isEqualTo(schedule.getGroupNumber());
-        assertThat(result.name()).isEqualTo(schedule.getName());
-        assertThat(result.id()).isEqualTo(schedule.getId());
-        assertThat(result.semester()).isEqualTo(schedule.getSemester());
+        verify(mapper).mapToResponse(schedule);
     }
 
     @Test
@@ -174,8 +151,7 @@ public class ScheduleServiceTest {
                 0
         );
 
-        when(repository.findById(eq(id)))
-                .thenReturn(Optional.empty());
+        when(repository.findById(id)).thenReturn(Optional.empty());
 
         // When & Then
         assertThatThrownBy(() -> underTest.update(id, scheduleRequest))
@@ -199,18 +175,11 @@ public class ScheduleServiceTest {
                 0
         );
 
-        when(repository.findById(eq(id)))
+        when(repository.findById(id))
                 .thenReturn(Optional.of(schedule));
 
-        when(repository.findByName(eq(scheduleRequest.name())))
-                .thenReturn(Optional.of(Schedule.builder()
-                        .id(UUID.randomUUID())
-                        .type(0)
-                        .planPolslId(101)
-                        .semester(2)
-                        .groupNumber(3)
-                        .name("schedule-name")
-                        .build()));
+        when(repository.findByName(scheduleRequest.name()))
+                .thenReturn(Optional.of(Schedule.builder().build()));
 
         // When & Then
         assertThatThrownBy(() -> underTest.update(id, scheduleRequest))
@@ -230,40 +199,18 @@ public class ScheduleServiceTest {
                 0
         );
 
-        when(repository.findById(eq(id)))
+        when(repository.findById(id))
                 .thenReturn(Optional.of(schedule));
 
-        when(repository.findByName(eq(scheduleRequest.name())))
+        when(repository.findByName(scheduleRequest.name()))
                 .thenReturn(Optional.of(schedule));
 
         // When
-        ScheduleResponse result = underTest.update(id, scheduleRequest);
+        underTest.update(id, scheduleRequest);
 
-        // Then
-        verify(repository).save(eq(schedule));
-
-        assertThat(schedule.getName())
-                .isEqualTo(scheduleRequest.name());
-        assertThat(schedule.getType())
-                .isEqualTo(scheduleRequest.type());
-        assertThat(schedule.getPlanPolslId())
-                .isEqualTo(scheduleRequest.planPolslId());
-        assertThat(schedule.getSemester())
-                .isEqualTo(scheduleRequest.semester());
-        assertThat(schedule.getGroupNumber())
-                .isEqualTo(scheduleRequest.groupNumber());
-
-        assertThat(result.name())
-                .isEqualTo(scheduleRequest.name());
-        assertThat(result.semester())
-                .isEqualTo(scheduleRequest.semester());
-        assertThat(result.groupNumber())
-                .isEqualTo(scheduleRequest.groupNumber());
-
-        verify(producer).produceScheduleEventMessage(
-                eq(schedule),
-                eq(ScheduleEventType.UPDATE)
-        );
+        // The
+        verify(mapper).mapToResponse(schedule);
+        verify(producer).produceScheduleUpdateEvent(schedule);
     }
 
     @Test
@@ -271,7 +218,7 @@ public class ScheduleServiceTest {
         // Given
         UUID id = UUID.randomUUID();
 
-        when(repository.findById(eq(id)))
+        when(repository.findById(id))
                 .thenReturn(Optional.empty());
 
         // When & Then
@@ -288,19 +235,15 @@ public class ScheduleServiceTest {
         // Given
         UUID id = schedule.getId();
 
-        when(repository.findById(eq(id)))
+        when(repository.findById(id))
                 .thenReturn(Optional.of(schedule));
 
         // When
         underTest.delete(id);
 
         // Then
-        verify(repository).delete(eq(schedule));
-
-        verify(producer).produceScheduleEventMessage(
-                eq(schedule),
-                eq(ScheduleEventType.DELETE)
-        );
+        verify(repository).delete(schedule);
+        verify(producer).produceScheduleDeleteEvent(schedule);
     }
 
     @Test
@@ -308,7 +251,7 @@ public class ScheduleServiceTest {
         // Given
         UUID id = UUID.randomUUID();
 
-        when(repository.findById(eq(id)))
+        when(repository.findById(id))
                 .thenReturn(Optional.empty());
 
         // When & Then
@@ -325,17 +268,14 @@ public class ScheduleServiceTest {
         // Given
         UUID id = UUID.randomUUID();
 
-        when(repository.findById(eq(id)))
+        when(repository.findById(id))
                 .thenReturn(Optional.of(schedule));
 
         // When
         underTest.requestScheduleCoursesUpdate(id);
 
         // Then
-        verify(producer).produceScheduleEventMessage(
-                eq(schedule),
-                eq(ScheduleEventType.UPDATE)
-        );
+        verify(producer).produceScheduleUpdateEvent(schedule);
     }
 
     @Test
@@ -343,7 +283,7 @@ public class ScheduleServiceTest {
         // Given
         Set<UUID> ids = Set.of();
 
-        var schedule1 = Schedule.builder()
+        Schedule schedule1 = Schedule.builder()
                 .id(UUID.randomUUID())
                 .type(0)
                 .planPolslId(1)
@@ -351,7 +291,7 @@ public class ScheduleServiceTest {
                 .groupNumber(3)
                 .name("schedule-1")
                 .build();
-        var schedule2 = Schedule.builder()
+        Schedule schedule2 = Schedule.builder()
                 .id(UUID.randomUUID())
                 .type(0)
                 .planPolslId(2)
@@ -359,7 +299,7 @@ public class ScheduleServiceTest {
                 .groupNumber(3)
                 .name("schedule-2")
                 .build();
-        var schedule3 = Schedule.builder()
+        Schedule schedule3 = Schedule.builder()
                 .id(UUID.randomUUID())
                 .type(0)
                 .planPolslId(3)
@@ -372,35 +312,12 @@ public class ScheduleServiceTest {
                 .thenReturn(List.of(schedule1, schedule2, schedule3));
 
         // When
-        List<ScheduleResponse> result = underTest.findAll(ids);
+        underTest.findAll(ids);
 
         // Then
-        assertThat(result).contains(
-                new ScheduleResponse(
-                        schedule1.getId(),
-                        schedule1.getSemester(),
-                        schedule1.getName(),
-                        schedule1.getGroupNumber()
-                )
-        );
-
-        assertThat(result).contains(
-                new ScheduleResponse(
-                        schedule2.getId(),
-                        schedule2.getSemester(),
-                        schedule2.getName(),
-                        schedule2.getGroupNumber()
-                )
-        );
-
-        assertThat(result).contains(
-                new ScheduleResponse(
-                        schedule3.getId(),
-                        schedule3.getSemester(),
-                        schedule3.getName(),
-                        schedule3.getGroupNumber()
-                )
-        );
+        verify(mapper).mapToResponse(schedule1);
+        verify(mapper).mapToResponse(schedule2);
+        verify(mapper).mapToResponse(schedule3);
     }
 
     @Test
@@ -437,34 +354,12 @@ public class ScheduleServiceTest {
                 .thenReturn(List.of(schedule1, schedule2, schedule3));
 
         // When
-        List<ScheduleResponse> result = underTest.findAll(ids);
+        underTest.findAll(ids);
 
         // Then
-        assertThat(result).contains(
-                new ScheduleResponse(
-                        schedule1.getId(),
-                        schedule1.getSemester(),
-                        schedule1.getName(),
-                        schedule1.getGroupNumber()
-                )
-        );
-
-        assertThat(result).doesNotContain(
-                new ScheduleResponse(
-                        schedule2.getId(),
-                        schedule2.getSemester(),
-                        schedule2.getName(),
-                        schedule2.getGroupNumber()
-                )
-        );
-
-        assertThat(result).contains(
-                new ScheduleResponse(
-                        schedule3.getId(),
-                        schedule3.getSemester(),
-                        schedule3.getName(),
-                        schedule3.getGroupNumber()
-                )
-        );
+        verify(mapper).mapToResponse(schedule1);
+        verify(mapper, never()).mapToResponse(schedule2);
+        verify(mapper).mapToResponse(schedule3);
     }
+
 }

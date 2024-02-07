@@ -12,7 +12,8 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class CourseMapperTest {
+class CourseMapperTest {
+
     CourseMapper underTest = new CourseMapper();
 
     @Test

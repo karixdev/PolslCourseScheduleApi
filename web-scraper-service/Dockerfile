@@ -1,10 +1,5 @@
-FROM maven:3.8.7-eclipse-temurin-17 AS builder
-
-COPY pom.xml /app/
-COPY src /app/src
-RUN mvn -f /app/pom.xml clean package -DskipTests
-
-FROM eclipse-temurin:17-jdk-alpine
-COPY --from=builder /app/target/*.jar app.jar
-EXPOSE 8081
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ARG JAVA_VERSION=17
+FROM openjdk:${JAVA_VERSION}
+COPY target/*.jar app.jar
+EXPOSE 8080
+CMD ["java","-jar","/app.jar"]

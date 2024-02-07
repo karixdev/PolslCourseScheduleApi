@@ -1,84 +1,93 @@
 package com.github.karixdev.webhookservice.service;
 
-import com.github.karixdev.webhookservice.converter.RealmRoleConverter;
+import com.github.karixdev.commonservice.converter.RealmRoleConverter;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
 class SecurityServiceTest {
-    @InjectMocks
-    SecurityService underTest;
 
-    @Mock
-    RealmRoleConverter realmRoleConverter;
+	@InjectMocks
+	SecurityService underTest;
 
-    @Test
-    void GivenJwtSuchThatRealmRoleConverterReturnsNull_WhenIsAdmin_ThenReturnsFalse() {
-        // Given
-        Jwt jwt = new Jwt(
-                "token",
-                Instant.now(),
-                Instant.now().plus(1, ChronoUnit.HOURS),
-                Map.of(
-                        "alg", "HS256",
-                        "typ", "JWT"
-                ),
-                Map.of(
-                        "subject", "xyz"
-                )
-        );
+	@Mock
+	RealmRoleConverter realmRoleConverter;
 
-        when(realmRoleConverter.convert(eq(jwt)))
-                .thenReturn(null);
+	@Test
+	void GivenJwtWithNullAuthorities_WhenIsAdmin_ThenReturnsFalse() {
+		// Given
+		Jwt jwt = mock(Jwt.class);
 
-        // When
-        boolean result = underTest.isAdmin(jwt);
+		Mockito.when(realmRoleConverter.convert(jwt))
+				.thenReturn(null);
 
-        // Then
-        assertThat(result).isFalse();
-    }
+		// When
+		boolean result = underTest.isAdmin(jwt);
 
-    @Test
-    void GivenJwtContainingAdminRole_WhenIsAdmin_ThenReturnsTrue() {
-        // Given
-        Jwt jwt = new Jwt(
-                "token",
-                Instant.now(),
-                Instant.now().plus(1, ChronoUnit.HOURS),
-                Map.of(
-                        "alg", "HS256",
-                        "typ", "JWT"
-                ),
-                Map.of("realm_access", Map.of(
-                        "roles", List.of("admin", "user"))
-                )
-        );
+		// Then
+		assertThat(result).isFalse();
+	}
 
-        when(realmRoleConverter.convert(eq(jwt)))
-                .thenReturn(Set.of(
-                        new SimpleGrantedAuthority("ROLE_user"),
-                        new SimpleGrantedAuthority("ROLE_admin")
-                ));
+	@Test
+	void GivenJwtWithoutAdminRole_WhenIsAdmin_ThenReturnsFalse() {
+		// Given
+		Jwt jwt = mock(Jwt.class);
 
-        // When
-        boolean result = underTest.isAdmin(jwt);
+		Mockito.when(realmRoleConverter.convert(jwt))
+				.thenReturn(List.of(
+						new SimpleGrantedAuthority("ROLE_user")
+				));
 
-        // Then
-        assertThat(result).isTrue();
-    }
+		// When
+		boolean result = underTest.isAdmin(jwt);
+
+		// Then
+		assertThat(result).isFalse();
+	}
+
+	@Test
+	void GivenJwtWithAdminRole_WhenIsAdmin_ThenReturnsTrue() {
+		// Given
+		Jwt jwt = mock(Jwt.class);
+
+		Mockito.when(realmRoleConverter.convert(jwt))
+				.thenReturn(List.of(
+						new SimpleGrantedAuthority("ROLE_admin")
+				));
+
+		// When
+		boolean result = underTest.isAdmin(jwt);
+
+		// Then
+		assertThat(result).isTrue();
+	}
+
+	@Test
+	void GivenJwt_WhenGetUserId_ThenReturnsUserId() {
+		// Given
+		Jwt jwt = mock(Jwt.class);
+		String userId = "userId";
+
+		Mockito.when(jwt.getSubject()).thenReturn(userId);
+
+		// When
+		String result = underTest.getUserId(jwt);
+
+		// Then
+		assertThat(result).isEqualTo(userId);
+	}
+
+
 }

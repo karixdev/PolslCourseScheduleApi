@@ -1,15 +1,16 @@
 package com.github.karixdev.scheduleservice.service;
 
-import com.github.karixdev.scheduleservice.dto.ScheduleRequest;
-import com.github.karixdev.scheduleservice.dto.ScheduleResponse;
+import com.github.karixdev.commonservice.dto.schedule.ScheduleRequest;
+import com.github.karixdev.commonservice.dto.schedule.ScheduleResponse;
+import com.github.karixdev.commonservice.exception.ResourceNotFoundException;
+import com.github.karixdev.commonservice.exception.ValidationException;
 import com.github.karixdev.scheduleservice.entity.Schedule;
-import com.github.karixdev.scheduleservice.exception.ResourceNotFoundException;
-import com.github.karixdev.scheduleservice.exception.ValidationException;
-import com.github.karixdev.scheduleservice.message.ScheduleEventType;
+import com.github.karixdev.scheduleservice.mapper.ScheduleMapper;
 import com.github.karixdev.scheduleservice.producer.ScheduleEventProducer;
 import com.github.karixdev.scheduleservice.repository.ScheduleRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,11 +18,14 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ScheduleService {
+
     private final ScheduleRepository repository;
     private final ScheduleEventProducer producer;
+    private final ScheduleMapper mapper;
 
     @Transactional
     public ScheduleResponse create(ScheduleRequest scheduleRequest) {
@@ -32,73 +36,40 @@ public class ScheduleService {
             );
         }
 
-        Schedule schedule = repository.save(Schedule.builder()
-                .type(scheduleRequest.type())
-                .planPolslId(scheduleRequest.planPolslId())
-                .semester(scheduleRequest.semester())
-                .name(scheduleRequest.name())
-                .groupNumber(scheduleRequest.groupNumber())
-                .wd(scheduleRequest.wd())
-                .build());
+        Schedule schedule = mapper.mapToEntity(scheduleRequest);
+        repository.save(schedule);
 
-        producer.produceScheduleEventMessage(
-                schedule,
-                ScheduleEventType.CREATE
-        );
+        producer.produceScheduleCreateEvent(schedule);
 
-        return new ScheduleResponse(
-                schedule.getId(),
-                schedule.getSemester(),
-                schedule.getName(),
-                schedule.getGroupNumber()
-        );
+        return mapper.mapToResponse(schedule);
     }
 
     public List<ScheduleResponse> findAll(Set<UUID> ids) {
         List<Schedule> schedules = repository.findAllOrderBySemesterAndGroupNumberAsc();
+        log.info("{}", schedules);
 
-        if (ids != null && ids.size() > 0) {
+        if (ids != null && !ids.isEmpty()) {
             schedules = schedules.stream()
                     .filter(schedule -> ids.contains(schedule.getId()))
                     .toList();
         }
 
-        return schedules.stream()
-                .map(schedule -> new ScheduleResponse(
-                        schedule.getId(),
-                        schedule.getSemester(),
-                        schedule.getName(),
-                        schedule.getGroupNumber()
-                ))
-                .toList();
+        return schedules.stream().map(mapper::mapToResponse).toList();
     }
 
     public ScheduleResponse findById(UUID id) {
-        Schedule schedule = findByIdOrElseThrow(id, false);
-
-        return new ScheduleResponse(
-                schedule.getId(),
-                schedule.getSemester(),
-                schedule.getName(),
-                schedule.getGroupNumber()
-        );
+        Schedule schedule = findByIdOrElseThrow(id);
+        return mapper.mapToResponse(schedule);
     }
 
-    public Schedule findByIdOrElseThrow(UUID id, boolean eagerLoad) {
-        Optional<Schedule> optionalSchedule = repository.findById(id);
-
-        return optionalSchedule.orElseThrow(() -> {
-            throw new ResourceNotFoundException(
-                    String.format(
-                            "Schedule with id %s not found",
-                            id)
-            );
-        });
+    private Schedule findByIdOrElseThrow(UUID id) {
+        String exceptionMsg = String.format("Schedule with id %s not found", id);
+        return repository.findById(id).orElseThrow(() -> new ResourceNotFoundException(exceptionMsg));
     }
 
     @Transactional
     public ScheduleResponse update(UUID id, ScheduleRequest scheduleRequest) {
-        Schedule schedule = findByIdOrElseThrow(id, false);
+        Schedule schedule = findByIdOrElseThrow(id);
 
         Optional<Schedule> scheduleWithName = repository.findByName(scheduleRequest.name());
 
@@ -116,48 +87,26 @@ public class ScheduleService {
         schedule.setGroupNumber(scheduleRequest.groupNumber());
         schedule.setWd(scheduleRequest.wd());
 
-        repository.save(schedule);
+        producer.produceScheduleUpdateEvent(schedule);
 
-        producer.produceScheduleEventMessage(
-                schedule,
-                ScheduleEventType.UPDATE
-        );
-
-        return new ScheduleResponse(
-                schedule.getId(),
-                schedule.getSemester(),
-                schedule.getName(),
-                schedule.getGroupNumber()
-        );
+        return mapper.mapToResponse(schedule);
     }
 
     @Transactional
     public void delete(UUID id) {
-        Schedule schedule = findByIdOrElseThrow(id, false);
+        Schedule schedule = findByIdOrElseThrow(id);
 
         repository.delete(schedule);
-
-        producer.produceScheduleEventMessage(
-                schedule,
-                ScheduleEventType.DELETE
-        );
+        producer.produceScheduleDeleteEvent(schedule);
     }
 
     public void requestScheduleCoursesUpdate(UUID id) {
-        Schedule schedule = findByIdOrElseThrow(id, false);
-
-        producer.produceScheduleEventMessage(
-                schedule,
-                ScheduleEventType.UPDATE
-        );
-
+        Schedule schedule = findByIdOrElseThrow(id);
+        producer.produceScheduleUpdateEvent(schedule);
     }
 
     public void requestScheduleCoursesUpdateForAll() {
-        repository.findAll().forEach(schedule ->
-                producer.produceScheduleEventMessage(
-                        schedule,
-                        ScheduleEventType.UPDATE
-                ));
+        repository.findAll().forEach(producer::produceScheduleUpdateEvent);
     }
+
 }

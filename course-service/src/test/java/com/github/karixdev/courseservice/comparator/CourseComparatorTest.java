@@ -8,7 +8,8 @@ import java.time.LocalTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class CourseComparatorTest {
+class CourseComparatorTest {
+
     CourseComparator underTest = new CourseComparator();
 
     @Test

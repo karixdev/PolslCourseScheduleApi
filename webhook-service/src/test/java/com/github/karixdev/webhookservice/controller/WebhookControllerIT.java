@@ -1,792 +1,750 @@
 package com.github.karixdev.webhookservice.controller;
 
 import com.github.karixdev.webhookservice.ContainersEnvironment;
-import com.github.karixdev.webhookservice.document.DiscordWebhook;
 import com.github.karixdev.webhookservice.document.Webhook;
 import com.github.karixdev.webhookservice.repository.WebhookRepository;
-import com.github.karixdev.webhookservice.service.SecurityService;
 import com.github.karixdev.webhookservice.testconfig.WebClientTestConfig;
+import com.github.karixdev.webhookservice.utils.KeycloakUtils;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
-@WireMockTest(httpPort = 9999)
-@AutoConfigureMockMvc
 @ContextConfiguration(classes = {WebClientTestConfig.class})
-public class WebhookControllerIT extends ContainersEnvironment {
-    @Autowired
-    WebTestClient webClient;
-
-    @Autowired
-    WebhookRepository webhookRepository;
-
-    @Autowired
-    MockMvc mockMvc;
-
-    @Autowired
-    SecurityService securityService;
-
-    @DynamicPropertySource
-    static void overrideBaseUrls(DynamicPropertyRegistry registry) {
-        registry.add(
-                "discord-api.base-url",
-                () -> "http://localhost:9999");
-        registry.add(
-                "schedule-service.base-url",
-                () -> "http://localhost:9999");
-        registry.add(
-                "notification-service.base-url",
-                () -> "http://localhost:9999");
-    }
-
-    @BeforeEach
-    void setUp() {
-        webhookRepository.deleteAll();
-    }
-
-    @Test
-    void shouldNotCreateWebhookWhenProvidedInvalidUrl() {
-        UUID id1 = UUID.randomUUID();
-
-        String payload = """
-                {
-                    "url": "https://not-valid-url.com",
-                    "schedules": ["%s"]
-                }
-                """.formatted(id1.toString());
-
-        String token = getAdminToken();
-
-        webClient.post().uri("/api/webhooks")
-                .header(
-                        "Authorization",
-                        "Bearer " + token
-                )
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(payload)
-                .exchange()
-                .expectStatus().isBadRequest();
-
-        assertThat(webhookRepository.findAll()).isEmpty();
-    }
-
-    @Test
-    void shouldNotCreateWebhook() {
-        UUID scheduleId = UUID.randomUUID();
-        Set<UUID> schedules = Set.of(scheduleId);
-
-        webhookRepository.save(
-                Webhook.builder()
-                        .discordWebhook(new DiscordWebhook(
-                                "discordApiId",
-                                "token"
-                        ))
-                        .schedules(schedules)
-                        .build()
-        );
-
-        String payload = """
-                {
-                    "url": "https://discord.com/api/webhooks/discordApiId/token",
-                    "schedules": ["%s"]
-                }
-                """.formatted(scheduleId.toString());
-
-        String token = getAdminToken();
-
-        webClient.post().uri("/api/webhooks")
-                .header(
-                        "Authorization",
-                        "Bearer " + token
-                )
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(payload)
-                .exchange()
-                .expectStatus().isBadRequest();
-
-        assertThat(webhookRepository.findAll())
-                .hasSize(1);
-    }
-
-    @Test
-    void shouldNotCreateWebhookWhenProvidedNotExistingSchedules() {
-        UUID id1 = UUID.randomUUID();
-        UUID id2 = UUID.randomUUID();
-
-        stubFor(
-                get(urlPathEqualTo("/api/schedules"))
-                        .withQueryParam("ids", havingExactly(
-                                id1.toString(),
-                                id2.toString()
-                        ))
-                        .willReturn(ok()
-                                .withHeader(
-                                        "Content-Type",
-                                        "application/json"
-                                )
-                                .withBody("""
-                                        [
-                                            {
-                                                "id": "%s"
-                                            }
-                                        ]
-                                        """.formatted(id1)
-                                )
-                        )
-        );
-
-        String payload = """
-                {
-                    "url": "https://discord.com/api/webhooks/discordApiId/token",
-                    "schedules": ["%s", "%s"]
-                }
-                """.formatted(id1.toString(), id2.toString());
-
-        String token = getAdminToken();
-
-        webClient.post().uri("/api/webhooks")
-                .header(
-                        "Authorization",
-                        "Bearer " + token
-                )
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(payload)
-                .exchange()
-                .expectStatus().isBadRequest();
-
-        assertThat(webhookRepository.findAll()).isEmpty();
-    }
-
-    @Test
-    void shouldNotCreateWebhookWhenProvidedNotWorkingWebhookUrl() {
-        UUID id1 = UUID.randomUUID();
-
-        stubFor(
-                get(urlPathEqualTo("/api/schedules"))
-                        .withQueryParam("ids", havingExactly(
-                                id1.toString()
-                        ))
-                        .willReturn(ok()
-                                .withHeader(
-                                        "Content-Type",
-                                        "application/json"
-                                )
-                                .withBody("""
-                                        [
-                                            {
-                                                "id": "%s"
-                                            }
-                                        ]
-                                        """.formatted(id1)
-                                )
-                        )
-        );
-
-        stubFor(
-                post(urlPathEqualTo("/webhooks/discordApiId/token"))
-                        .willReturn(badRequest())
-        );
-
-        String payload = """
-                {
-                    "url": "https://discord.com/api/webhooks/discordApiId/token",
-                    "schedules": ["%s"]
-                }
-                """.formatted(id1.toString());
-
-        String token = getAdminToken();
-
-        webClient.post().uri("/api/webhooks")
-                .header(
-                        "Authorization",
-                        "Bearer " + token
-                )
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(payload)
-                .exchange()
-                .expectStatus().isBadRequest();
-
-        assertThat(webhookRepository.findAll()).isEmpty();
-    }
-
-    @Test
-    void shouldCreateWebhook() {
-        UUID id1 = UUID.randomUUID();
-
-        Set<UUID> schedules = Set.of(id1);
-
-        stubFor(
-                get(urlPathEqualTo("/api/schedules"))
-                        .withQueryParam("ids", havingExactly(
-                                id1.toString()
-                        ))
-                        .willReturn(ok()
-                                .withHeader(
-                                        "Content-Type",
-                                        "application/json"
-                                )
-                                .withBody("""
-                                        [
-                                            {
-                                                "id": "%s"
-                                            }
-                                        ]
-                                        """.formatted(id1)
-                                )
-                        )
-        );
-
-        stubFor(
-                post(urlPathEqualTo("/api/notifications/discordApiId/token"))
-                        .willReturn(noContent())
-        );
-
-        String payload = """
-                {
-                    "url": "https://discord.com/api/webhooks/discordApiId/token",
-                    "schedules": ["%s"]
-                }
-                """.formatted(id1.toString());
-
-        String token = getAdminToken();
-
-        webClient.post().uri("/api/webhooks")
-                .header(
-                        "Authorization",
-                        "Bearer " + token
-                )
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(payload)
-                .exchange()
-                .expectStatus().isCreated();
-
-        List<Webhook> resultList =
-                webhookRepository.findAll();
-
-        assertThat(resultList)
-                .hasSize(1);
-
-        Webhook result = resultList.get(0);
-
-        assertThat(result.getDiscordWebhook())
-                .isEqualTo(new DiscordWebhook(
-                        "discordApiId",
-                        "token"
-                ));
-        assertThat(result.getSchedules())
-                .isEqualTo(schedules);
-    }
-
-    @Test
-    void shouldRetrievePaginatedCoursesForAdmin() {
-        String adminToken = getAdminToken();
-        String userToken = getUserToken();
-
-        UUID id = UUID.randomUUID();
-
-        seedDatabase(1, 19, adminToken, id);
-        seedDatabase(20, 25, userToken, id);
-
-        webClient.get().uri("/api/webhooks")
-                .header(
-                        "Authorization",
-                        "Bearer " + adminToken
-                )
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("numberOfElements").isEqualTo(10)
-                .jsonPath("totalElements").isEqualTo(25)
-                .jsonPath("size").isEqualTo(10)
-                .jsonPath("pageable.offset").isEqualTo(0)
-                .jsonPath("totalPages").isEqualTo(3)
-                .jsonPath("first").isEqualTo(true);
-
-        webClient.get().uri("/api/webhooks?page=1")
-                .header(
-                        "Authorization",
-                        "Bearer " + adminToken
-                )
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("numberOfElements").isEqualTo(10)
-                .jsonPath("pageable.offset").isEqualTo(10)
-                .jsonPath("pageable.pageNumber").isEqualTo(1);
-
-        webClient.get().uri("/api/webhooks?page=2")
-                .header(
-                        "Authorization",
-                        "Bearer " + adminToken
-                )
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("numberOfElements").isEqualTo(5)
-                .jsonPath("pageable.offset").isEqualTo(20)
-                .jsonPath("pageable.pageNumber").isEqualTo(2)
-                .jsonPath("last").isEqualTo(true);
-    }
-
-    @Test
-    void shouldRetrievePaginatedCoursesForUser() {
-        String adminToken = getAdminToken();
-        String userToken = getUserToken();
-
-        UUID id = UUID.randomUUID();
-
-        seedDatabase(1, 13, userToken, id);
-        seedDatabase(14, 2, adminToken, id);
-
-        webClient.get().uri("/api/webhooks")
-                .header(
-                        "Authorization",
-                        "Bearer " + userToken
-                )
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("numberOfElements").isEqualTo(10)
-                .jsonPath("totalElements").isEqualTo(13)
-                .jsonPath("size").isEqualTo(10)
-                .jsonPath("pageable.offset").isEqualTo(0)
-                .jsonPath("totalPages").isEqualTo(2)
-                .jsonPath("first").isEqualTo(true);
-
-        webClient.get().uri("/api/webhooks?page=1")
-                .header(
-                        "Authorization",
-                        "Bearer " + userToken
-                )
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("numberOfElements").isEqualTo(3)
-                .jsonPath("pageable.pageNumber").isEqualTo(1)
-                .jsonPath("pageable.offset").isEqualTo(10)
-                .jsonPath("last").isEqualTo(true);
-    }
-
-    @Test
-    void shouldNotDeleteNotExistingWebhook() {
-        String token = getUserToken();
-
-        seedDatabase(1, 1, token, UUID.randomUUID());
-
-        webClient.delete().uri("/api/webhooks/123")
-                .header(
-                        "Authorization",
-                        "Bearer " + token
-                )
-                .exchange()
-                .expectStatus().isNotFound();
-
-        assertThat(webhookRepository.findAll()).hasSize(1);
-    }
-
-    @Test
-    void shouldNotDeleteNotOwnedWebhookForUser() {
-        String token = getUserToken();
-
-        seedDatabase(1, 1, getAdminToken(), UUID.randomUUID());
-
-        String id = webhookRepository.findAll().get(0).getId();
-
-        webClient.delete().uri("/api/webhooks/%s".formatted(id))
-                .header(
-                        "Authorization",
-                        "Bearer " + token
-                )
-                .exchange()
-                .expectStatus().isForbidden();
-
-
-        assertThat(webhookRepository.findAll()).hasSize(1);
-    }
-
-    @ParameterizedTest
-    @MethodSource("ownerSenderValues")
-    void shouldDeleteWebhookForOwnerUserAndNotOwnerAdmin(String ownerToken, String senderToken) {
-        seedDatabase(1, 2, ownerToken, UUID.randomUUID());
-
-        List<Webhook> currentWebhooks = webhookRepository.findAll();
-
-        String id = currentWebhooks.get(1).getId();
-
-        webClient.delete().uri("/api/webhooks/" + id)
-                .header(
-                        "Authorization",
-                        "Bearer " + senderToken
-                )
-                .exchange()
-                .expectStatus().isNoContent();
-
-        List<Webhook> resultWebhooks = webhookRepository.findAll();
-
-        assertThat(resultWebhooks).hasSize(1);
-        assertThat(resultWebhooks.get(0)).isEqualTo(currentWebhooks.get(0));
-    }
-
-    @Test
-    void shouldNotUpdateNotExistingWebhook() {
-        String token = getUserToken();
-
-        String payload = """
-                {
-                    "url": "https://discord.com/api/webhooks/discordApiId/token",
-                    "schedules": ["%s"]
-                }
-                """.formatted(UUID.randomUUID());
-
-        seedDatabase(1, 1, token, UUID.randomUUID());
-
-        webClient.put().uri("/api/webhooks/123")
-                .header(
-                        "Authorization",
-                        "Bearer " + token
-                )
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(payload)
-                .exchange()
-                .expectStatus().isNotFound();
-    }
-
-    @Test
-    void shouldNotUpdateNotOwnedWebhookForUser() {
-        String token = getUserToken();
-
-        seedDatabase(1, 1, getAdminToken(), UUID.randomUUID());
-
-        String id = webhookRepository.findAll().get(0).getId();
-
-        String payload = """
-                {
-                    "url": "https://discord.com/api/webhooks/discordApiId/token",
-                    "schedules": ["%s"]
-                }
-                """.formatted(UUID.randomUUID());
-
-        webClient.put().uri("/api/webhooks/%s".formatted(id))
-                .header(
-                        "Authorization",
-                        "Bearer " + token
-                )
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(payload)
-                .exchange()
-                .expectStatus().isForbidden();
-
-
-        assertThat(webhookRepository.findAll()).hasSize(1);
-    }
-
-    @Test
-    void shouldNotUpdateWebhookWhenProvidedUrlWithUnavailableToken() {
-        String token = getUserToken();
-
-        UUID scheduleId = UUID.randomUUID();
-
-        seedDatabase(1, 2, token, scheduleId);
-
-        Webhook webhookBefore = webhookRepository.findAll().get(0);
-
-        String payload = """
-                {
-                    "url": "https://discord.com/api/webhooks/discordApiId2/token2",
-                    "schedules": ["%s"]
-                }
-                """.formatted(UUID.randomUUID());
-
-        stubFor(
-                get(urlPathEqualTo("/api/schedules"))
-                        .withQueryParam("ids", havingExactly(
-                                scheduleId.toString()
-                        ))
-                        .willReturn(ok()
-                                .withHeader(
-                                        "Content-Type",
-                                        "application/json"
-                                )
-                                .withBody("""
-                                        [
-                                            {
-                                                "id": "%s"
-                                            }
-                                        ]
-                                        """.formatted(scheduleId)
-                                )
-                        )
-        );
-
-        webClient.put().uri("/api/webhooks/%s".formatted(webhookBefore.getId()))
-                .header(
-                        "Authorization",
-                        "Bearer " + token
-                )
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(payload)
-                .exchange()
-                .expectStatus().isBadRequest();
-
-        List<Webhook> result = webhookRepository.findAll();
-
-        assertThat(result).hasSize(2);
-        assertThat(result.get(0)).isEqualTo(webhookBefore);
-    }
-
-    @Test
-    void shouldNotUpdateWebhookWhenProvidedNotExistingSchedules() {
-        UUID id1 = UUID.randomUUID();
-        UUID id2 = UUID.randomUUID();
-
-        stubFor(
-                get(urlPathEqualTo("/api/schedules"))
-                        .withQueryParam("ids", havingExactly(
-                                id1.toString(),
-                                id2.toString()
-                        ))
-                        .willReturn(ok()
-                                .withHeader(
-                                        "Content-Type",
-                                        "application/json"
-                                )
-                                .withBody("""
-                                        [
-                                            {
-                                                "id": "%s"
-                                            }
-                                        ]
-                                        """.formatted(id1)
-                                )
-                        )
-        );
-
-        String token = getUserToken();
-
-        seedDatabase(1, 2, token, UUID.randomUUID());
-
-        Webhook WebhookBefore = webhookRepository.findAll().get(0);
-
-        String payload = """
-                {
-                    "url": "https://discord.com/api/webhooks/discordApiId3/token3",
-                    "schedules": ["%s", "%s"]
-                }
-                """.formatted(id1, id2);
-
-        webClient.put().uri("/api/webhooks/%s".formatted(WebhookBefore.getId()))
-                .header(
-                        "Authorization",
-                        "Bearer " + token
-                )
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(payload)
-                .exchange()
-                .expectStatus().isBadRequest();
-
-        List<Webhook> result = webhookRepository.findAll();
-
-        assertThat(result).hasSize(2);
-        assertThat(result.get(0)).isEqualTo(WebhookBefore);
-    }
-
-    @Test
-    void shouldNotUpdateWebhookWhenProvidedNotWorkingWebhookUrl() {
-        String token = getUserToken();
-
-        seedDatabase(1, 2, token, UUID.randomUUID());
-
-        Webhook WebhookBefore = webhookRepository.findAll().get(0);
-
-
-        stubFor(
-                post(urlPathEqualTo("/api/notifications/discordApiId/token"))
-                        .willReturn(badRequest())
-        );
-
-        String payload = """
-                {
-                    "url": "https://discord.com/api/webhooks/discordApiId/token",
-                    "schedules": ["%s"]
-                }
-                """.formatted(WebhookBefore.getSchedules().stream().toList().get(0));
-
-        webClient.post().uri("/api/webhooks")
-                .header(
-                        "Authorization",
-                        "Bearer " + token
-                )
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(payload)
-                .exchange()
-                .expectStatus().isBadRequest();
-
-        List<Webhook> result = webhookRepository.findAll();
-
-        assertThat(result).hasSize(2);
-        assertThat(result.get(0)).isEqualTo(WebhookBefore);
-    }
-
-    @ParameterizedTest
-    @MethodSource("ownerSenderValues")
-    void shouldUpdateWebhookForOwnerUserAndNotOwnerAdmin(String ownerToken, String senderToken) {
-        seedDatabase(1, 2, ownerToken, UUID.randomUUID());
-
-        Webhook WebhookBefore = webhookRepository.findAll().get(0);
-
-        String newWebhookUrl = "https://discord.com/api/webhooks/discordApiId3/token3";
-
-        UUID newSchedule = UUID.randomUUID();
-
-        stubFor(
-                get(urlPathEqualTo("/api/schedules"))
-                        .withQueryParam("ids", havingExactly(
-                                newSchedule.toString()
-                        ))
-                        .willReturn(ok()
-                                .withHeader(
-                                        "Content-Type",
-                                        "application/json"
-                                )
-                                .withBody("""
-                                        [
-                                            {
-                                                "id": "%s"
-                                            }
-                                        ]
-                                        """.formatted(newSchedule)
-                                )
-                        )
-        );
-
-        stubFor(
-                post(urlPathEqualTo("/webhooks/discordApiId3/token3"))
-                        .willReturn(ok())
-        );
-
-        String payload = """
-                {
-                    "url": "%s",
-                    "schedules": ["%s", "%s"]
-                }
-                """.formatted(
-                newWebhookUrl,
-                WebhookBefore.getSchedules()
-                        .stream()
-                        .toList()
-                        .get(0),
-                newSchedule);
-
-        webClient.put().uri("/api/webhooks/" + WebhookBefore.getId())
-                .header(
-                        "Authorization",
-                        "Bearer " + senderToken
-                )
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(payload)
-                .exchange()
-                .expectStatus().isOk();
-
-
-        List<Webhook> result = webhookRepository.findAll();
-
-        assertThat(result).hasSize(2);
-
-        Webhook resultWebhook = result.get(0);
-
-        assertThat(resultWebhook.getDiscordWebhook())
-                .isEqualTo(new DiscordWebhook(
-                        "discordApiId3",
-                        "token3"
-                ));
-
-        Set<UUID> expectedSchedules = new HashSet<>(WebhookBefore.getSchedules());
-        expectedSchedules.add(newSchedule);
-
-        assertThat(resultWebhook.getSchedules())
-                .isEqualTo(expectedSchedules);
-    }
-
-    private static Stream<Arguments> ownerSenderValues() {
-        // Put tokens in variables, so we don't make call to Keycloak everytime
-        String userToken = getUserToken();
-        String adminToken = getAdminToken();
-
-        return Stream.of(
-                Arguments.of(userToken, userToken),
-                Arguments.of(userToken, adminToken)
-        );
-    }
-
-    private void seedDatabase(int start, int end, String token, UUID scheduleId) {
-        stubFor(
-                get(urlPathEqualTo("/api/schedules"))
-                        .withQueryParam("ids", havingExactly(
-                                scheduleId.toString()
-                        ))
-                        .willReturn(ok()
-                                .withHeader(
-                                        "Content-Type",
-                                        "application/json"
-                                )
-                                .withBody("""
-                                        [
-                                            {
-                                                "id": "%s"
-                                            }
-                                        ]
-                                        """.formatted(scheduleId)
-                                )
-                        )
-        );
-
-        stubFor(
-                post(urlPathMatching("/[A-Za-z0-9]+/[A-Za-z0-9]+/[A-Za-z0-9]+/[A-Za-z0-9]+"))
-                        .willReturn(noContent())
-        );
-
-        IntStream.rangeClosed(start, end)
-                .forEach(i -> {
-                    String payload = """
-                            {
-                                "url": "https://discord.com/api/webhooks/discordApiId%d/token%d",
-                                "schedules": ["%s"]
-                            }
-                            """.formatted(i, i, scheduleId.toString());
-
-                    webClient.post().uri("/api/webhooks")
-                            .header(
-                                    "Authorization",
-                                    "Bearer " + token
-                            )
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .bodyValue(payload)
-                            .exchange()
-                            .expectStatus().isCreated();
-                });
-    }
+@WireMockTest(httpPort = 9999)
+class WebhookControllerIT extends ContainersEnvironment {
+
+	@Autowired
+	WebTestClient webClient;
+
+	@Autowired
+	WebhookRepository webhookRepository;
+
+	@DynamicPropertySource
+	static void overrideDiscordWebhookProperties(DynamicPropertyRegistry registry) {
+		registry.add("discord-webhook.base-url", () -> "http://localhost:9999/api");
+	}
+
+	@DynamicPropertySource
+	static void overrideScheduleServiceProperties(DynamicPropertyRegistry registry) {
+		registry.add("schedule-service.base-url", () -> "http://localhost:9999");
+	}
+
+	@AfterEach
+	void tearDown() {
+		webhookRepository.deleteAll();
+	}
+
+	@Test
+	void shouldNotAllowUnauthorizedUserToCreateWebhook() {
+		webClient.post().uri("/api/webhooks")
+				.exchange()
+				.expectStatus().isUnauthorized();
+	}
+
+	@Test
+	void shouldNotCreateWebhookWithDuplicatedDiscordWebhookUrl() {
+		String url = "http://localhost:9999/api/webhooks/123/abc";
+
+		Webhook webhook = Webhook.builder()
+				.schedulesIds(Set.of(UUID.randomUUID()))
+				.addedBy("user")
+				.discordWebhookUrl(url)
+				.build();
+		webhookRepository.save(webhook);
+
+		String body = """
+				{
+					"schedulesIds": ["%s"],
+					"discordWebhookUrl": "%s"
+				}
+				""".formatted(UUID.randomUUID(), url);
+
+		webClient.post().uri("/api/webhooks")
+				.header("Authorization", getUserBearer())
+				.contentType(MediaType.APPLICATION_JSON)
+				.bodyValue(body)
+				.exchange()
+				.expectStatus().isBadRequest();
+
+		assertThat(webhookRepository.findAll()).containsExactly(webhook);
+	}
+
+	@Test
+	void shouldNotCreateWebhookWithInvalidDiscordWebhookUrl() {
+		String url = "http://localhost:9999/api/webhooks/abc123/abc%";
+
+		String body = """
+				{
+					"schedulesIds": ["%s"],
+					"discordWebhookUrl": "%s"
+				}
+				""".formatted(UUID.randomUUID(), url);
+
+		webClient.post().uri("/api/webhooks")
+				.header("Authorization", getUserBearer())
+				.contentType(MediaType.APPLICATION_JSON)
+				.bodyValue(body)
+				.exchange()
+				.expectStatus().isBadRequest();
+
+		assertThat(webhookRepository.findAll()).isEmpty();
+	}
+
+	@Test
+	void shouldNotCreateWebhookWithNotExistingDiscordWebhookUrl() {
+		String url = "http://localhost:9999/api/webhooks/123/abc";
+		UUID scheduleId = UUID.randomUUID();
+
+		String body = """
+				{
+					"schedulesIds": ["%s"],
+					"discordWebhookUrl": "%s"
+				}
+				""".formatted(scheduleId, url);
+
+		stubFor(
+				post(urlPathEqualTo("/api/webhooks/123/abc")).willReturn(badRequest())
+		);
+
+		stubFor(
+				get(urlPathEqualTo("/api/schedules"))
+						.withQueryParam("ids", havingExactly(scheduleId.toString()))
+						.willReturn(ok()
+								.withHeader("Content-Type", "application/json")
+								.withBody("""
+										[
+											{
+												"id": "%s"
+											}
+										]
+										""".formatted(scheduleId))
+						)
+		);
+
+		webClient.post().uri("/api/webhooks")
+				.header("Authorization", getUserBearer())
+				.contentType(MediaType.APPLICATION_JSON)
+				.bodyValue(body)
+				.exchange()
+				.expectStatus().isBadRequest();
+
+		assertThat(webhookRepository.findAll()).isEmpty();
+	}
+
+	@Test
+	void shouldNotCreateWebhookWithNotExistingScheduleId() {
+		String url = "http://localhost:9999/api/webhooks/123/abc";
+		UUID scheduleId = UUID.randomUUID();
+
+		String body = """
+				{
+					"schedulesIds": ["%s"],
+					"discordWebhookUrl": "%s"
+				}
+				""".formatted(scheduleId, url);
+
+		stubFor(
+				post(urlPathEqualTo("/api/webhooks/123/abc")).willReturn(noContent())
+		);
+
+		stubFor(
+				get(urlPathEqualTo("/api/schedules"))
+						.withQueryParam("ids", havingExactly(scheduleId.toString()))
+						.willReturn(ok()
+								.withHeader("Content-Type", "application/json")
+								.withBody("[]")
+						)
+		);
+
+		webClient.post().uri("/api/webhooks")
+				.header("Authorization", getUserBearer())
+				.contentType(MediaType.APPLICATION_JSON)
+				.bodyValue(body)
+				.exchange()
+				.expectStatus().isBadRequest();
+
+		assertThat(webhookRepository.findAll()).isEmpty();
+	}
+
+	@Test
+	void shouldCreateWebhook() {
+		String url = "http://localhost:9999/api/webhooks/123/abc";
+		UUID scheduleId = UUID.randomUUID();
+
+		String body = """
+				{
+					"schedulesIds": ["%s"],
+					"discordWebhookUrl": "%s"
+				}
+				""".formatted(scheduleId, url);
+
+		stubFor(
+				post(urlPathEqualTo("/api/webhooks/123/abc")).willReturn(noContent())
+		);
+
+		stubFor(
+				get(urlPathEqualTo("/api/schedules"))
+						.withQueryParam("ids", havingExactly(scheduleId.toString()))
+						.willReturn(ok()
+								.withHeader("Content-Type", "application/json")
+								.withBody("""
+										[
+											{
+												"id": "%s",
+												"semester": 3,
+												"name": "Plan",
+												"groupNumber": 4
+											}
+										]
+										""".formatted(scheduleId))
+						)
+		);
+
+		String bearer = getUserBearer();
+		String userId = getUserId(bearer);
+
+		webClient.post().uri("/api/webhooks")
+				.header("Authorization", bearer)
+				.contentType(MediaType.APPLICATION_JSON)
+				.bodyValue(body)
+				.exchange()
+				.expectStatus().isCreated()
+				.expectBody()
+				.jsonPath("$.id").isNotEmpty()
+				.jsonPath("$.schedulesIds").isArray()
+				.jsonPath("$.schedulesIds").isNotEmpty()
+				.jsonPath("$.schedulesIds.[0]").isEqualTo(scheduleId.toString())
+				.jsonPath("$.addedBy").isEqualTo(userId)
+				.jsonPath("$.discordWebhookUrl").isEqualTo(url);
+
+		List<Webhook> results = webhookRepository.findAll();
+		assertThat(results).hasSize(1);
+
+		Webhook webhook = results.get(0);
+		assertThat(webhook.getId()).isNotEmpty();
+		assertThat(webhook.getDiscordWebhookUrl()).isEqualTo(url);
+		assertThat(webhook.getAddedBy()).isEqualTo(userId);
+		assertThat(webhook.getSchedulesIds()).isEqualTo(Set.of(scheduleId));
+	}
+
+	@Test
+	void shouldNotRetrieveWebhooksForUnauthorizedUser() {
+		webClient.get().uri("/api/webhooks")
+				.exchange()
+				.expectStatus().isUnauthorized();
+	}
+
+	@Test
+	void shouldNotRetrieveWebhooksGivenInvalidPaginationParams() {
+		webClient.get().uri("/api/webhooks?page=-1&pageSize=0")
+				.header("Authorization", getUserBearer())
+				.exchange()
+				.expectStatus().isBadRequest();
+	}
+
+	@Test
+	void shouldRetrievePaginatedListOfWebhooksPaginationParams() {
+		String bearer = getUserBearer();
+		String userId = getUserId(bearer);
+
+		seedDBWithWebhooks(userId, 10, 0);
+
+		webClient.get().uri("/api/webhooks")
+				.header("Authorization", bearer)
+				.exchange()
+				.expectStatus().isOk()
+				.expectBody()
+				.jsonPath("$.totalElements").isEqualTo(10)
+				.jsonPath("$.totalPages").isEqualTo(1)
+				.jsonPath("$.number").isEqualTo(0)
+				.jsonPath("$.numberOfElements").isEqualTo(10)
+				.jsonPath("$.content").isNotEmpty();
+	}
+
+	@Test
+	void shouldRetrievePaginatedListOfWebhooksAddedByUser() {
+		String bearer = getUserBearer();
+		String userId = getUserId(bearer);
+
+		seedDBWithWebhooks(userId, 10, 0);
+		seedDBWithWebhooks("otherUserId", 10, 0);
+
+		webClient.get().uri("/api/webhooks?page=0&pageSize=5")
+				.header("Authorization", bearer)
+				.exchange()
+				.expectStatus().isOk()
+				.expectBody()
+				.jsonPath("$.totalElements").isEqualTo(10)
+				.jsonPath("$.totalPages").isEqualTo(2)
+				.jsonPath("$.number").isEqualTo(0)
+				.jsonPath("$.numberOfElements").isEqualTo(5)
+				.jsonPath("$.content").isNotEmpty()
+				.jsonPath("$.content.[0].addedBy").isEqualTo(userId)
+				.jsonPath("$.content.[1].addedBy").isEqualTo(userId)
+				.jsonPath("$.content.[2].addedBy").isEqualTo(userId)
+				.jsonPath("$.content.[3].addedBy").isEqualTo(userId)
+				.jsonPath("$.content.[4].addedBy").isEqualTo(userId);
+
+		webClient.get().uri("/api/webhooks?page=1&pageSize=5")
+				.header("Authorization", bearer)
+				.exchange()
+				.expectStatus().isOk()
+				.expectBody()
+				.jsonPath("$.totalElements").isEqualTo(10)
+				.jsonPath("$.totalPages").isEqualTo(2)
+				.jsonPath("$.number").isEqualTo(1)
+				.jsonPath("$.numberOfElements").isEqualTo(5)
+				.jsonPath("$.content").isNotEmpty()
+				.jsonPath("$.content.[0].addedBy").isEqualTo(userId)
+				.jsonPath("$.content.[1].addedBy").isEqualTo(userId)
+				.jsonPath("$.content.[2].addedBy").isEqualTo(userId)
+				.jsonPath("$.content.[3].addedBy").isEqualTo(userId)
+				.jsonPath("$.content.[4].addedBy").isEqualTo(userId);
+	}
+
+	@Test
+	void shouldRetrieveAllWebhooksWithPaginationForAdmin() {
+		seedDBWithWebhooks("userId1", 1, 0);
+		seedDBWithWebhooks("userId2", 1, 1);
+
+		webClient.get().uri("/api/webhooks?page=0&pageSize=5")
+				.header("Authorization", getAdminBearer())
+				.exchange()
+				.expectStatus().isOk()
+				.expectBody()
+				.jsonPath("$.totalElements").isEqualTo(2)
+				.jsonPath("$.totalPages").isEqualTo(1)
+				.jsonPath("$.number").isEqualTo(0)
+				.jsonPath("$.numberOfElements").isEqualTo(2)
+				.jsonPath("$.content").isNotEmpty();
+	}
+
+	@Test
+	void shouldNotAllowUpdatingWebhookWhenUnauthorized() {
+		webClient.put().uri("/api/webhooks/id")
+				.exchange()
+				.expectStatus().isUnauthorized();
+	}
+
+	@Test
+	void shouldNotBeAbleToUpdateNotExistingWebhook() {
+		webhookRepository.save(Webhook.builder().discordWebhookUrl("url").build());
+
+		String body = """
+				{
+					"schedulesIds": ["%s"],
+					"discordWebhookUrl": "%s"
+				}
+				""".formatted(UUID.randomUUID(), "url");
+
+		webClient.put().uri("/api/webhooks/123")
+				.header("Authorization", getUserBearer())
+				.contentType(MediaType.APPLICATION_JSON)
+				.bodyValue(body)
+				.exchange()
+				.expectStatus().isNotFound();
+	}
+
+	@Test
+	void shouldNotBeAbleToUpdateNotOwnerWebhook() {
+		Webhook webhook = Webhook.builder()
+				.addedBy("otherUserId")
+				.build();
+
+		String body = """
+				{
+					"schedulesIds": ["%s"],
+					"discordWebhookUrl": "%s"
+				}
+				""".formatted(UUID.randomUUID(), "url");
+
+
+		webhookRepository.save(webhook);
+
+		webClient.put().uri("/api/webhooks/%s".formatted(webhook.getId()))
+				.header("Authorization", getUserBearer())
+				.contentType(MediaType.APPLICATION_JSON)
+				.bodyValue(body)
+				.exchange()
+				.expectStatus().isForbidden();
+	}
+
+	@Test
+	void shouldNotUpdateWebhookWithAlreadyTakenUrl() {
+		String bearer = getUserBearer();
+		String userId = getUserId(bearer);
+
+		Webhook webhook = Webhook.builder()
+				.addedBy(userId)
+				.discordWebhookUrl("url-1")
+				.build();
+
+		webhookRepository.saveAll(List.of(
+				webhook,
+				Webhook.builder()
+						.discordWebhookUrl("url-2")
+						.build()
+		));
+
+		String body = """
+				{
+					"schedulesIds": ["%s"],
+					"discordWebhookUrl": "%s"
+				}
+				""".formatted(UUID.randomUUID(), "url-2");
+
+		webClient.put().uri("/api/webhooks/%s".formatted(webhook.getId()))
+				.header("Authorization", bearer)
+				.contentType(MediaType.APPLICATION_JSON)
+				.bodyValue(body)
+				.exchange()
+				.expectStatus().isBadRequest();
+	}
+
+	@Test
+	void shouldNotUpdateWebhookWithNotExistingWebhook() {
+		String bearer = getUserBearer();
+		String userId = getUserId(bearer);
+
+		Webhook webhook = Webhook.builder()
+				.addedBy(userId)
+				.discordWebhookUrl("url-1")
+				.build();
+
+		webhookRepository.save(webhook);
+
+		String newUrl = "http://localhost:9999/api/webhooks/123/abc";
+		UUID scheduleId = UUID.randomUUID();
+
+		String body = """
+				{
+					"schedulesIds": ["%s"],
+					"discordWebhookUrl": "%s"
+				}
+				""".formatted(scheduleId, newUrl);
+
+		stubFor(
+				post(urlPathEqualTo("/api/webhooks/123/abc")).willReturn(badRequest())
+		);
+
+		stubFor(
+				get(urlPathEqualTo("/api/schedules"))
+						.withQueryParam("ids", havingExactly(scheduleId.toString()))
+						.willReturn(ok()
+								.withHeader("Content-Type", "application/json")
+								.withBody("[]")
+						)
+		);
+
+		webClient.put().uri("/api/webhooks/%s".formatted(webhook.getId()))
+				.header("Authorization", bearer)
+				.contentType(MediaType.APPLICATION_JSON)
+				.bodyValue(body)
+				.exchange()
+				.expectStatus().isBadRequest();
+	}
+
+	@Test
+	void shouldNotUpdateWebhookWithNotExistingSchedule() {
+		String bearer = getUserBearer();
+		String userId = getUserId(bearer);
+
+		Webhook webhook = Webhook.builder()
+				.addedBy(userId)
+				.discordWebhookUrl("url-1")
+				.build();
+
+		webhookRepository.save(webhook);
+
+		String newUrl = "http://localhost:9999/api/webhooks/123/abc";
+		UUID scheduleId = UUID.randomUUID();
+
+		String body = """
+				{
+					"schedulesIds": ["%s"],
+					"discordWebhookUrl": "%s"
+				}
+				""".formatted(scheduleId, newUrl);
+
+		stubFor(
+				post(urlPathEqualTo("/api/webhooks/123/abc")).willReturn(noContent())
+		);
+
+		stubFor(
+				get(urlPathEqualTo("/api/schedules"))
+						.withQueryParam("ids", havingExactly(scheduleId.toString()))
+						.willReturn(ok()
+								.withHeader("Content-Type", "application/json")
+								.withBody("[]")
+						)
+		);
+
+		webClient.put().uri("/api/webhooks/%s".formatted(webhook.getId()))
+				.header("Authorization", bearer)
+				.contentType(MediaType.APPLICATION_JSON)
+				.bodyValue(body)
+				.exchange()
+				.expectStatus().isBadRequest();
+	}
+
+	@Test
+	void shouldUpdateOwnedWebhookByUser() {
+		String bearer = getUserBearer();
+		String userId = getUserId(bearer);
+
+		Webhook webhook = Webhook.builder()
+				.addedBy(userId)
+				.discordWebhookUrl("url-1")
+				.build();
+
+		webhookRepository.save(webhook);
+
+		String newUrl = "http://localhost:9999/api/webhooks/123/abc";
+		UUID scheduleId = UUID.randomUUID();
+
+		String body = """
+				{
+					"schedulesIds": ["%s"],
+					"discordWebhookUrl": "%s"
+				}
+				""".formatted(scheduleId, newUrl);
+
+		stubFor(
+				post(urlPathEqualTo("/api/webhooks/123/abc")).willReturn(noContent())
+		);
+
+		stubFor(
+				get(urlPathEqualTo("/api/schedules"))
+						.withQueryParam("ids", havingExactly(scheduleId.toString()))
+						.willReturn(ok()
+								.withHeader("Content-Type", "application/json")
+								.withBody("""
+										[
+											{
+												"id": "%s",
+												"semester": 3,
+												"name": "Plan",
+												"groupNumber": 4
+											}
+										]
+										""".formatted(scheduleId))
+						)
+		);
+
+		webClient.put().uri("/api/webhooks/%s".formatted(webhook.getId()))
+				.header("Authorization", bearer)
+				.contentType(MediaType.APPLICATION_JSON)
+				.bodyValue(body)
+				.exchange()
+				.expectStatus().isOk()
+				.expectBody()
+				.jsonPath("$.id").isEqualTo(webhook.getId())
+				.jsonPath("$.schedulesIds").isArray()
+				.jsonPath("$.schedulesIds").isNotEmpty()
+				.jsonPath("$.schedulesIds.[0]").isEqualTo(scheduleId.toString())
+				.jsonPath("$.addedBy").isEqualTo(userId)
+				.jsonPath("$.discordWebhookUrl").isEqualTo(newUrl);
+
+		List<Webhook> webhooks = webhookRepository.findAll();
+		assertThat(webhooks).hasSize(1);
+
+		Webhook updatedWebhook = webhooks.get(0);
+		assertThat(updatedWebhook.getId()).isEqualTo(webhook.getId());
+		assertThat(updatedWebhook.getSchedulesIds()).isEqualTo(Set.of(scheduleId));
+		assertThat(updatedWebhook.getAddedBy()).isEqualTo(userId);
+		assertThat(updatedWebhook.getDiscordWebhookUrl()).isEqualTo(newUrl);
+	}
+
+	@Test
+	void shouldUpdateWebhookForAdminWhoIsNotOwner() {
+		Webhook webhook = Webhook.builder()
+				.addedBy("userId")
+				.discordWebhookUrl("url-1")
+				.build();
+
+		webhookRepository.save(webhook);
+
+		String newUrl = "http://localhost:9999/api/webhooks/123/abc";
+		UUID scheduleId = UUID.randomUUID();
+		String newOwner = "newOwner";
+
+		String body = """
+				{
+					"schedulesIds": ["%s"],
+					"discordWebhookUrl": "%s",
+					"addedBy": "%s"
+				}
+				""".formatted(scheduleId, newUrl, newOwner);
+
+		stubFor(
+				post(urlPathEqualTo("/api/webhooks/123/abc")).willReturn(noContent())
+		);
+
+		stubFor(
+				get(urlPathEqualTo("/api/schedules"))
+						.withQueryParam("ids", havingExactly(scheduleId.toString()))
+						.willReturn(ok()
+								.withHeader("Content-Type", "application/json")
+								.withBody("""
+										[
+											{
+												"id": "%s",
+												"semester": 3,
+												"name": "Plan",
+												"groupNumber": 4
+											}
+										]
+										""".formatted(scheduleId))
+						)
+		);
+
+		webClient.put().uri("/api/webhooks/%s".formatted(webhook.getId()))
+				.header("Authorization", getAdminBearer())
+				.contentType(MediaType.APPLICATION_JSON)
+				.bodyValue(body)
+				.exchange()
+				.expectStatus().isOk()
+				.expectBody()
+				.jsonPath("$.id").isEqualTo(webhook.getId())
+				.jsonPath("$.schedulesIds").isArray()
+				.jsonPath("$.schedulesIds").isNotEmpty()
+				.jsonPath("$.schedulesIds.[0]").isEqualTo(scheduleId.toString())
+				.jsonPath("$.addedBy").isEqualTo(newOwner)
+				.jsonPath("$.discordWebhookUrl").isEqualTo(newUrl);
+
+		List<Webhook> webhooks = webhookRepository.findAll();
+		assertThat(webhooks).hasSize(1);
+
+		Webhook updatedWebhook = webhooks.get(0);
+		assertThat(updatedWebhook.getId()).isEqualTo(webhook.getId());
+		assertThat(updatedWebhook.getSchedulesIds()).isEqualTo(Set.of(scheduleId));
+		assertThat(updatedWebhook.getAddedBy()).isEqualTo(newOwner);
+		assertThat(updatedWebhook.getDiscordWebhookUrl()).isEqualTo(newUrl);
+	}
+
+	@Test
+	void shouldNotAllowWebhookDeletionWhenUnauthorized() {
+		webClient.delete().uri("/api/webhooks")
+				.exchange()
+				.expectStatus().isUnauthorized();
+	}
+
+	@Test
+	void shouldNotDeleteNotExistingWebhook() {
+		webhookRepository.save(
+				Webhook.builder()
+						.discordWebhookUrl("url")
+						.build()
+		);
+
+		webClient.delete().uri("/api/webhooks/123")
+				.header("Authorization", getUserBearer())
+				.exchange()
+				.expectStatus()
+				.isNotFound();
+
+		assertThat(webhookRepository.findAll()).hasSize(1);
+	}
+
+	@Test
+	void shouldNotDeleteWebhookIfUserIsNotItsOwner() {
+		Webhook webhook = Webhook.builder()
+				.discordWebhookUrl("url")
+				.addedBy("userId")
+				.build();
+
+		webhookRepository.save(webhook);
+
+		webClient.delete().uri("/api/webhooks/%s".formatted(webhook.getId()))
+				.header("Authorization", getUserBearer())
+				.exchange()
+				.expectStatus()
+				.isForbidden();
+
+		assertThat(webhookRepository.findAll()).hasSize(1);
+	}
+
+	@Test
+	void shouldUserDeleteHisWebhook() {
+		String bearer = getUserBearer();
+		String userId = getUserId(bearer);
+
+		Webhook webhook = Webhook.builder()
+				.discordWebhookUrl("url")
+				.addedBy(userId)
+				.build();
+
+		webhookRepository.save(webhook);
+
+		webClient.delete().uri("/api/webhooks/%s".formatted(webhook.getId()))
+				.header("Authorization", bearer)
+				.exchange()
+				.expectStatus()
+				.isNoContent();
+
+		assertThat(webhookRepository.findAll()).isEmpty();
+	}
+
+	@Test
+	void shouldAdminDeleteNotHisWebhook() {
+		Webhook webhook = Webhook.builder()
+				.discordWebhookUrl("url")
+				.addedBy("userId")
+				.build();
+
+		webhookRepository.save(webhook);
+
+		webClient.delete().uri("/api/webhooks/%s".formatted(webhook.getId()))
+				.header("Authorization", getAdminBearer())
+				.exchange()
+				.expectStatus()
+				.isNoContent();
+
+		assertThat(webhookRepository.findAll()).isEmpty();
+	}
+
+	private void seedDBWithWebhooks(String author, int count, int idx) {
+		webhookRepository.saveAll(
+				IntStream.range(0, count)
+						.mapToObj(i ->
+								Webhook.builder()
+										.addedBy(author)
+										.discordWebhookUrl("url-%d-%d".formatted(idx, i))
+										.schedulesIds(Set.of(UUID.randomUUID()))
+										.build()
+						)
+						.toList()
+		);
+	}
+
+	private static String getAdminBearer() {
+		return "Bearer %s".formatted(KeycloakUtils.getAdminToken(keycloakContainer.getAuthServerUrl()));
+	}
+
+	private static String getUserBearer() {
+		return "Bearer %s".formatted(KeycloakUtils.getUserToken(keycloakContainer.getAuthServerUrl()));
+	}
+
+	private static String getUserId(String bearer) {
+		String token = bearer.substring("Bearer ".length());
+		return KeycloakUtils.getUserId(keycloakContainer.getAuthServerUrl(), token);
+	}
+
 }

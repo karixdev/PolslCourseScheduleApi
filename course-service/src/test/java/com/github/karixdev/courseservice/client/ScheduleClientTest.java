@@ -1,16 +1,14 @@
 package com.github.karixdev.courseservice.client;
 
-import com.github.karixdev.courseservice.ContainersEnvironment;
-import com.github.karixdev.courseservice.dto.ScheduleResponse;
-import com.github.karixdev.courseservice.exception.ScheduleServiceClientException;
-import com.github.karixdev.courseservice.exception.ScheduleServiceServerException;
+import com.github.karixdev.commonservice.exception.HttpServiceClientException;
+import com.github.karixdev.commonservice.exception.HttpServiceClientServerException;
+import com.github.karixdev.commonservice.dto.schedule.ScheduleResponse;
 import com.github.karixdev.courseservice.testconfig.WebClientTestConfig;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.autoconfigure.observation.ObservationAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
@@ -20,12 +18,16 @@ import java.util.UUID;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
-@ContextConfiguration(classes = {WebClientTestConfig.class})
-@SpringBootTest(webEnvironment = RANDOM_PORT)
+@SpringBootTest(classes = {
+        ScheduleClient.class,
+        ScheduleClientConfig.class,
+        WebClientTestConfig.class,
+        ObservationAutoConfiguration.class
+})
 @WireMockTest(httpPort = 9999)
-public class ScheduleClientTest extends ContainersEnvironment {
+class ScheduleClientTest {
+
     @Autowired
     ScheduleClient underTest;
 
@@ -46,7 +48,7 @@ public class ScheduleClientTest extends ContainersEnvironment {
         );
 
         assertThatThrownBy(() -> underTest.findById(id))
-                .isInstanceOf(ScheduleServiceServerException.class);
+                .isInstanceOf(HttpServiceClientServerException.class);
     }
 
     @Test
@@ -59,7 +61,7 @@ public class ScheduleClientTest extends ContainersEnvironment {
         );
 
         assertThatThrownBy(() -> underTest.findById(id))
-                .isInstanceOf(ScheduleServiceClientException.class);
+                .isInstanceOf(HttpServiceClientException.class);
     }
 
     @Test
@@ -87,4 +89,5 @@ public class ScheduleClientTest extends ContainersEnvironment {
         assertThat(result).isPresent();
         assertThat(result.get().id()).isEqualTo(id);
     }
+
 }

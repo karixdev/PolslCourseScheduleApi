@@ -1,66 +1,127 @@
 package com.github.karixdev.webhookservice.service;
 
-import com.github.karixdev.webhookservice.document.DiscordWebhook;
+import com.github.karixdev.webhookservice.client.DiscordWebhookClient;
+import com.github.karixdev.webhookservice.dto.DiscordWebhookRequest;
+import com.github.karixdev.webhookservice.exception.DiscordWebhookApiClientException;
+import com.github.karixdev.webhookservice.exception.InvalidDiscordWebhookUrlFormatException;
+import com.github.karixdev.webhookservice.model.DiscordWebhookParameters;
+import com.github.karixdev.webhookservice.model.Embedded;
+import com.github.karixdev.webhookservice.validator.DiscordWebhookValidator;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.*;
 
 class DiscordWebhookServiceTest {
-    DiscordWebhookService underTest = new DiscordWebhookService();
 
-    @Test
-    void GivenInvalidDiscordWebhookUrl_WhenIsNotValidDiscordWebhookUrl_ThenReturnsTrue() {
-        // Given
-        String url = "https://discord.com/not-valid";
+	DiscordWebhookService underTest;
 
-        // When
-        boolean result = underTest.isNotValidDiscordWebhookUrl(url);
+	DiscordWebhookClient client;
 
-        // Then
-        assertThat(result).isTrue();
-    }
+	DiscordWebhookValidator validator;
 
-    @Test
-    void GivenValidDiscordWebhookUrl_WhenIsNotValidDiscordWebhookUrl_ThenReturnsFalse() {
-        // Given
-        String url = "https://discord.com/api/webhooks/discordId/token";
+	String welcomeMessageContent;
 
-        // When
-        boolean result = underTest.isNotValidDiscordWebhookUrl(url);
+	@BeforeEach
+	void setUp() {
+		welcomeMessageContent = "welcome";
+		client = mock(DiscordWebhookClient.class);
+		validator = mock(DiscordWebhookValidator.class);
 
-        // Then
-        assertThat(result).isFalse();
-    }
+		underTest = new DiscordWebhookService(client, validator, welcomeMessageContent);
+	}
 
-    @Test
-    void GivenDiscordWebhookUrl_ThenGetDiscordWebhookFromUrl_ThenReturnsCorrectDiscordWebhook() {
-        // Given
-        String url = "https://discord.com/api/webhooks/discordId/token";
+	@Test
+	void GivenIdAndTokenSuchWebhookIsSentSuccessfully_WhenDoesWebhookExist_ThenSendWebhookAndReturnsTrue() {
+		// Given
+		String id = "id";
+		String token = "token";
 
-        // When
-        DiscordWebhook result = underTest.getDiscordWebhookFromUrl(url);
+		DiscordWebhookRequest expectedWelcomeMsg = DiscordWebhookRequest.builder()
+				.content(welcomeMessageContent)
+				.build();
 
-        // Then
-        DiscordWebhook expected = new DiscordWebhook(
-                "discordId",
-                "token"
-        );
+		// When
+		boolean result = underTest.doesWebhookExist(id, token);
 
-        assertThat(result).isEqualTo(expected);
-    }
+		// Then
+		assertThat(result).isTrue();
+		verify(client).send(id, token, expectedWelcomeMsg);
+	}
 
-    @Test
-    void GivenDiscordWebhook_WhenTransformDiscordWebhookIntoUrl_ThenReturnsCorrectUrl() {
-        // Given
-        DiscordWebhook discordWebhook = new DiscordWebhook(
-                "discordId",
-                "token"
-        );
+	@Test
+	void GivenIdAndTokenSuchWebhookIsSentUnsuccessfullyAndHttpServiceClientExceptionIsThrown_WhenDoesWebhookExist_ThenReturnsFalse() {
+		// Given
+		String id = "id";
+		String token = "token";
 
-        // When
-        String result = underTest.transformDiscordWebhookIntoUrl(discordWebhook);
+		DiscordWebhookRequest welcomeMsg = DiscordWebhookRequest.builder()
+				.content(welcomeMessageContent)
+				.build();
 
-        // Then
-        assertThat(result).isEqualTo("https://discord.com/api/webhooks/discordId/token");
-    }
+		doThrow(DiscordWebhookApiClientException.class)
+				.when(client)
+				.send(id, token, welcomeMsg);
+
+		// When
+		boolean result = underTest.doesWebhookExist(id, token);
+
+		// Then
+		assertThat(result).isFalse();
+	}
+
+	@Test
+	void GivenIdAndTokenAndRequest_WhenSend_ThenWebhookIsSend() {
+		// Given
+		String id = "id";
+		String token = "token";
+
+		DiscordWebhookRequest request = DiscordWebhookRequest.builder()
+				.content("content")
+				.embeds(List.of(
+						Embedded.builder()
+								.title("title")
+								.color(123)
+								.description("desc")
+								.build()
+				))
+				.build();
+
+		// When
+		underTest.send(id, token, request);
+
+		// Then
+		verify(client).send(id, token, request);
+	}
+
+	@Test
+	void GivenInvalidDiscordWebhookUrl_WhenGetParametersFromUrl_ThenThrowsInvalidDiscordWebhookUrlFormatException() {
+		// Given
+		String url = "invalid";
+
+		when(validator.isUrlValid(url)).thenReturn(false);
+
+		// When & Then
+		assertThatThrownBy(() -> underTest.getParametersFromUrl(url))
+				.isInstanceOf(InvalidDiscordWebhookUrlFormatException.class);
+	}
+
+	@Test
+	void GivenValidDiscordWebhookUrl_WhenGetParametersFromUrl_ThenReturnsCorrectDiscordWebhookParameters() {
+		// Given
+		String url = "https://dc.com/api/webhooks/discordId/token";
+
+		when(validator.isUrlValid(url)).thenReturn(true);
+
+		// When
+		DiscordWebhookParameters result = underTest.getParametersFromUrl(url);
+
+		// Then
+		assertThat(result).isEqualTo(new DiscordWebhookParameters("discordId", "token"));
+	}
+
 }

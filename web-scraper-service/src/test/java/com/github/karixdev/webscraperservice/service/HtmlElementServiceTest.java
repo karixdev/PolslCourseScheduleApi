@@ -1,6 +1,5 @@
 package com.github.karixdev.webscraperservice.service;
 
-import com.github.karixdev.webscraperservice.service.HtmlElementService;
 import org.jsoup.nodes.Element;
 import org.junit.jupiter.api.Test;
 
@@ -9,7 +8,8 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class HtmlElementServiceTest {
+class HtmlElementServiceTest {
+
     HtmlElementService underTest = new HtmlElementService();
 
     @Test
@@ -59,7 +59,7 @@ public class HtmlElementServiceTest {
         int result = underTest.getSizeAttr(el, attrName);
 
         // Then
-        assertThat(result).isEqualTo(0);
+        assertThat(result).isZero();
     }
 
     @Test
@@ -86,7 +86,7 @@ public class HtmlElementServiceTest {
         int result = underTest.getCssSizeProperty(styles, propertyName);
 
         // Then
-        assertThat(result).isEqualTo(0);
+        assertThat(result).isZero();
     }
 
     @Test
@@ -103,4 +103,5 @@ public class HtmlElementServiceTest {
         // Then
         assertThat(result).isEqualTo(10);
     }
+
 }

@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 8088
 
 spring:
   application:
@@ -26,6 +26,14 @@ spring:
     host: localhost
     port: 5672
 
+  kafka:
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    bootstrap-servers: localhost:29092
+    security:
+      protocol: PLAINTEXT
+
   security:
     oauth2:
       resourceserver:
@@ -38,6 +46,17 @@ eureka:
       defaultZone: http://localhost:8761/eureka
   instance:
     hostname: localhost
+
+management:
+  tracing:
+    enabled: true
+    sampling:
+      probability: 1.0
+    propagation:
+      type: w3c
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
 
 schedule:
   job:
@@ -52,3 +71,12 @@ springdoc:
 keycloak:
   server-url: http://localhost:8000
   realm: polsl-course-api
+
+kafka:
+  observation:
+    producer:
+      enabled: true
+  topics:
+    schedule-event: schedule.event
+
+logging.pattern.level: "%5p [${spring.application.name},%X{traceId:-},%X{spanId:-}]"

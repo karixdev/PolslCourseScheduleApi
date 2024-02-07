@@ -1,6 +1,6 @@
 package com.github.karixdev.webhookservice.service;
 
-import com.github.karixdev.webhookservice.converter.RealmRoleConverter;
+import com.github.karixdev.commonservice.converter.RealmRoleConverter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -11,22 +11,25 @@ import java.util.Collection;
 @Service
 @RequiredArgsConstructor
 public class SecurityService {
-    private final RealmRoleConverter realmRoleConverter;
 
-    public boolean isAdmin(Jwt jwt) {
-        Collection<GrantedAuthority> roles =
-                realmRoleConverter.convert(jwt);
+	private final RealmRoleConverter converter;
 
-        if (roles == null) {
-            return false;
-        }
+	private static final String ADMIN_ROLE = "ROLE_admin";
 
-        return roles.stream()
-                .map(GrantedAuthority::getAuthority)
-                .anyMatch(authority -> authority.equals("ROLE_admin"));
-    }
+	public boolean isAdmin(Jwt jwt) {
+		Collection<GrantedAuthority> authorities = converter.convert(jwt);
 
-    public String getUserId(Jwt jwt) {
-        return jwt.getSubject();
-    }
+		if (authorities == null) {
+			return false;
+		}
+
+		return authorities.stream().anyMatch(
+				authority -> authority.getAuthority().equals(ADMIN_ROLE)
+		);
+	}
+
+	public String getUserId(Jwt jwt) {
+		return jwt.getSubject();
+	}
+
 }

@@ -2,25 +2,44 @@ package com.github.karixdev.webhookservice.document;
 
 import lombok.*;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.LinkedHashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
-@Data
+@Document(collection = "webhook")
+@Getter
+@Setter
 @Builder
-@Document
+@NoArgsConstructor
 @AllArgsConstructor
 public class Webhook {
-    @Id
-    @Setter(AccessLevel.NONE)
-    private String id;
 
-    private DiscordWebhook discordWebhook;
+	@Id
+	private String id;
 
-    private String addedBy;
+	private String addedBy;
 
-    @Builder.Default
-    private Set<UUID> schedules = new LinkedHashSet<>();
+	@Builder.Default
+	private Set<UUID> schedulesIds = new LinkedHashSet<>();
+
+	@Indexed(unique = true)
+	private String discordWebhookUrl;
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		Webhook webhook = (Webhook) o;
+		return id != null && Objects.equals(getId(), webhook.getId());
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(getId());
+	}
+
 }

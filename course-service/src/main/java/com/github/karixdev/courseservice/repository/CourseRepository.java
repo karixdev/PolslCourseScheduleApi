@@ -11,10 +11,12 @@ import java.util.UUID;
 
 @Repository
 public interface CourseRepository extends JpaRepository<Course, UUID> {
+
     @Query("""
             SELECT c
             FROM Course c
             WHERE c.scheduleId = :scheduleId
             """)
     List<Course> findByScheduleId(@Param("scheduleId") UUID scheduleId);
+
 }

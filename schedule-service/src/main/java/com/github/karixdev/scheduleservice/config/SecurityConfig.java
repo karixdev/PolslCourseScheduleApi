@@ -1,6 +1,6 @@
 package com.github.karixdev.scheduleservice.config;
 
-import com.github.karixdev.scheduleservice.converter.RealmRoleConverter;
+import com.github.karixdev.commonservice.converter.RealmRoleConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
@@ -63,4 +63,5 @@ public class SecurityConfig {
 
         return source;
     }
+
 }

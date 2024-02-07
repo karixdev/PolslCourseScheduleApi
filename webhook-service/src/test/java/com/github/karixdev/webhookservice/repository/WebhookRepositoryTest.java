@@ -1,195 +1,106 @@
 package com.github.karixdev.webhookservice.repository;
 
-import com.github.karixdev.webhookservice.ContainersEnvironment;
-import com.github.karixdev.webhookservice.document.DiscordWebhook;
 import com.github.karixdev.webhookservice.document.Webhook;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.MongoDBContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Testcontainers
 @DataMongoTest
-class WebhookRepositoryTest extends ContainersEnvironment {
-    @Autowired
-    WebhookRepository underTest;
+@ActiveProfiles("test")
+class WebhookRepositoryTest {
 
-    @BeforeEach
-    void setUp() {
-        underTest.deleteAll();
-    }
+	@Container
+	static final MongoDBContainer mongoDBContainer =
+			new MongoDBContainer(DockerImageName.parse("mongo:4.4.2"))
+					.withReuse(true);
 
-    @Test
-    void GivenNotExistingAddedBy_WhenFindByAddedBy_ThenReturnsEmptyPage() {
-        // Given
-        String addedBy = "userId";
-        PageRequest pageRequest = PageRequest.of(0, 10);
+	@DynamicPropertySource
+	static void overrideDBConnectionProperties(DynamicPropertyRegistry registry) {
+		registry.add("spring.data.mongodb.uri", mongoDBContainer::getReplicaSetUrl);
+	}
 
-        underTest.save(
-                Webhook.builder()
-                        .addedBy("111")
-                        .schedules(Set.of(UUID.randomUUID()))
-                        .build()
-        );
+	@Autowired
+	WebhookRepository underTest;
 
-        // When
-        Page<Webhook> result = underTest.findByAddedBy(
-                addedBy,
-                pageRequest);
+	@Test
+	void GivenDiscordWebhookUrlThatNoneWebhookHas_WhenFindByDiscordWebhookUrl_ThenReturnsEmptyOptional() {
+		// Given
+		String url = "url";
 
-        // Then
-        assertThat(result).isEmpty();
-    }
+		underTest.save(Webhook.builder().discordWebhookUrl("my-url").build());
 
-    @Test
-    void GivenExistingAddedByAndPageable_WhenFindByAddedBy_ThenReturnsCorrectPage() {
-        // Given
-        String addedBy = "userId";
-        PageRequest pageRequest1 = PageRequest.of(0, 2);
-        PageRequest pageRequest2 = PageRequest.of(1, 2);
+		// When
+		Optional<Webhook> result = underTest.findByDiscordWebhookUrl(url);
 
-        underTest.save(
-                Webhook.builder()
-                        .addedBy("111")
-                        .schedules(Set.of(UUID.randomUUID()))
-                        .build()
-        );
+		// Then
+		assertThat(result).isEmpty();
+	}
 
-        underTest.saveAll(
-                IntStream.range(1, 4)
-                        .mapToObj(i -> Webhook.builder()
-                                .addedBy(addedBy)
-                                .schedules(Set.of(UUID.randomUUID()))
-                                .build())
-                        .toList()
-        );
+	@Test
+	void GivenDiscordWebhookUrlFromOneWebhook_WhenFindByDiscordWebhookUrl_ThenReturnsOptionalWithCorrectWebhook() {
+		// Given
+		String url = "url";
 
-        // When
-        Page<Webhook> result1 = underTest.findByAddedBy(
-                addedBy,
-                pageRequest1);
+		Webhook webhook = Webhook.builder()
+				.discordWebhookUrl(url)
+				.build();
 
-        Page<Webhook> result2 = underTest.findByAddedBy(
-                addedBy,
-                pageRequest2);
+		underTest.saveAll(List.of(
+				webhook,
+				Webhook.builder().discordWebhookUrl("my-url").build()
+		));
 
-        // Then
-        assertThat(result1.getTotalPages()).isEqualTo(2);
-        assertThat(result2.getTotalPages()).isEqualTo(2);
+		// When
+		Optional<Webhook> result = underTest.findByDiscordWebhookUrl(url);
 
-        assertThat(result1).hasSize(2);
-        assertThat(result2).hasSize(1);
-    }
+		// Then
+		assertThat(result).contains(webhook);
+	}
 
-    @Test
-    void GivenDiscordWebhookIdAndToken_FindByDiscordWebhook_ThenReturnsOptionalWithCorrectDocument() {
-        // Given
-        String discordWebhookId = "id1";
-        String discordWebhookToken = "token1";
+	@Test
+	void GivenAddedByAndPageRequest_WhenFindByAddedBy_ThenReturnsWebhookCreatedByGivenUser() {
+		// Given
+		String userId = "userId";
+		PageRequest pageRequest = PageRequest.of(0, 5);
 
-        DiscordWebhook discordWebhook = new DiscordWebhook(discordWebhookId, discordWebhookToken);
+		Webhook webhook = Webhook.builder()
+				.addedBy(userId)
+				.build();
 
-        Webhook expected = underTest.save(
-                Webhook.builder()
-                        .addedBy("123")
-                        .discordWebhook(new DiscordWebhook(
-                                discordWebhookId,
-                                discordWebhookToken
-                        ))
-                        .build()
-        );
+		Webhook webhook2 = Webhook.builder()
+				.addedBy(userId)
+				.build();
 
-        underTest.save(
-                Webhook.builder()
-                        .addedBy("1234")
-                        .discordWebhook(new DiscordWebhook(
-                                "id2",
-                                "token2"
-                        ))
-                        .build()
-        );
+		Webhook webhook3 = Webhook.builder()
+				.addedBy("otherUserId")
+				.build();
 
-        underTest.save(
-                Webhook.builder()
-                        .addedBy("1234")
-                        .discordWebhook(new DiscordWebhook(
-                                "id2",
-                                "token2"
-                        ))
-                        .build()
-        );
+		underTest.saveAll(List.of(
+				webhook,
+				webhook2,
+				webhook3
+		));
 
-        underTest.save(
-                Webhook.builder()
-                        .addedBy("1234")
-                        .discordWebhook(new DiscordWebhook(
-                                "id2",
-                                "token2"
-                        ))
-                        .build()
-        );
+		// When
+		Page<Webhook> result = underTest.findByAddedBy(userId, pageRequest);
 
-        // When
-        Optional<Webhook> result = underTest.findByDiscordWebhook(discordWebhook);
+		// Then
+		assertThat(result).containsExactly(webhook, webhook2);
+	}
 
-        // Then
-        assertThat(result).isPresent();
-        assertThat(result.get()).isEqualTo(expected);
-    }
-
-    @Test
-    void GivenSchedule_WhenFindBySchedule_ThenReturnsCorrectList() {
-        // Given
-        UUID schedule1 = UUID.fromString("5c0db272-eb91-44d9-97bc-4a259a8a2703");
-        UUID schedule2 = UUID.fromString("a105e5f0-64ee-4e83-8c37-7db16240120e");
-        UUID schedule3 = UUID.fromString("fc8899d0-a1a2-4e58-9726-6e268c5d2740");
-
-        Webhook webhook1 = underTest.save(
-                Webhook.builder()
-                        .addedBy("1234")
-                        .discordWebhook(new DiscordWebhook(
-                                "id1",
-                                "token1"
-                        ))
-                        .schedules(Set.of(schedule1))
-                        .build()
-        );
-
-        Webhook webhook2 = underTest.save(
-                Webhook.builder()
-                        .addedBy("1234")
-                        .discordWebhook(new DiscordWebhook(
-                                "id2",
-                                "token2"
-                        ))
-                        .schedules(Set.of(schedule1, schedule2))
-                        .build()
-        );
-
-        underTest.save(
-                Webhook.builder()
-                        .addedBy("1234")
-                        .discordWebhook(new DiscordWebhook(
-                                "id3",
-                                "token3"
-                        ))
-                        .schedules(Set.of(schedule2, schedule3))
-                        .build()
-        );
-
-        // When
-        List<Webhook> result = underTest.findBySchedulesContaining(schedule1);
-
-        // Then
-        assertThat(result).containsExactly(webhook1, webhook2);
-    }
 }

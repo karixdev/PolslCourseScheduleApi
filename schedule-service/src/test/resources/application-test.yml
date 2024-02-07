@@ -2,3 +2,16 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create-drop
+
+eureka:
+  client:
+    enabled: false
+
+management:
+  tracing:
+    enabled: false
+
+kafka:
+  observation:
+    producer:
+      enabled: false

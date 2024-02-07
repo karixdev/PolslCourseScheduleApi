@@ -15,6 +15,7 @@ import java.nio.charset.Charset;
 @Service
 @RequiredArgsConstructor
 public class PlanPolslService {
+
     private final PlanPolslClient client;
     private final PlanPolslResponseMapper mapper;
 
@@ -36,4 +37,5 @@ public class PlanPolslService {
 
         return mapper.map(document);
     }
+
 }
