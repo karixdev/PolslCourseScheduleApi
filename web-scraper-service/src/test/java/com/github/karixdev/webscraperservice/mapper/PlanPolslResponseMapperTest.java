@@ -4,7 +4,6 @@ import com.github.karixdev.commonservice.model.course.raw.CourseCell;
 import com.github.karixdev.commonservice.model.course.raw.Link;
 import com.github.karixdev.commonservice.model.schedule.raw.TimeCell;
 import com.github.karixdev.webscraperservice.model.PlanPolslResponse;
-import com.github.karixdev.webscraperservice.service.HtmlElementService;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.junit.jupiter.api.Test;
@@ -28,7 +27,7 @@ class PlanPolslResponseMapperTest {
     PlanPolslResponseMapper underTest;
 
     @Mock
-    HtmlElementService htmlElementService;
+    DOMElementAttributesMapper attributesMapper;
 
     @Test
     void GivenDocumentWithTimeCellContainingTooShortText_WhenMap_ThenReturnsPlanPolslResponseWithEmptyTimeCellsSet() {
@@ -83,13 +82,13 @@ class PlanPolslResponseMapperTest {
                 </div>
                 """);
 
-        when(htmlElementService.getSizeAttr(any(), any()))
+        when(attributesMapper.getSizeAttr(any(), any()))
                 .thenReturn(10);
 
-        when(htmlElementService.getStylesAttr(any()))
+        when(attributesMapper.getStylesAttr(any()))
                 .thenReturn(Map.of());
 
-        when(htmlElementService.getCssSizeProperty(any(), any()))
+        when(attributesMapper.getCssSizeProperty(any(), any()))
                 .thenReturn(0);
 
         // When
@@ -108,16 +107,16 @@ class PlanPolslResponseMapperTest {
                 </div>
                 """);
 
-        when(htmlElementService.getSizeAttr(any(), any()))
+        when(attributesMapper.getSizeAttr(any(), any()))
                 .thenReturn(0);
 
-        when(htmlElementService.getStylesAttr(any()))
+        when(attributesMapper.getStylesAttr(any()))
                 .thenReturn(Map.of(
                         "left", "10",
                         "top", "10"
                 ));
 
-        when(htmlElementService.getSizeAttr(any(), any()))
+        when(attributesMapper.getSizeAttr(any(), any()))
                 .thenReturn(10);
 
         // When
@@ -136,23 +135,23 @@ class PlanPolslResponseMapperTest {
                 </div>
                 """);
 
-        when(htmlElementService.getSizeAttr(any(), eq("ch")))
+        when(attributesMapper.getSizeAttr(any(), eq("ch")))
                 .thenReturn(10);
 
-        when(htmlElementService.getSizeAttr(any(), eq("cw")))
+        when(attributesMapper.getSizeAttr(any(), eq("cw")))
                 .thenReturn(20);
 
-        when(htmlElementService.getStylesAttr(any()))
+        when(attributesMapper.getStylesAttr(any()))
                 .thenReturn(Map.of(
                         "left", "40",
                         "top", "30"
                 ));
 
-        when(htmlElementService.getCssSizeProperty(any(), eq("top")))
+        when(attributesMapper.getCssSizeProperty(any(), eq("top")))
                 .thenReturn(30);
 
 
-        when(htmlElementService.getCssSizeProperty(any(), eq("left")))
+        when(attributesMapper.getCssSizeProperty(any(), eq("left")))
                 .thenReturn(40);
 
         // When
@@ -173,23 +172,23 @@ class PlanPolslResponseMapperTest {
                 </div>
                 """);
 
-        when(htmlElementService.getSizeAttr(any(), eq("ch")))
+        when(attributesMapper.getSizeAttr(any(), eq("ch")))
                 .thenReturn(10);
 
-        when(htmlElementService.getSizeAttr(any(), eq("cw")))
+        when(attributesMapper.getSizeAttr(any(), eq("cw")))
                 .thenReturn(20);
 
-        when(htmlElementService.getStylesAttr(any()))
+        when(attributesMapper.getStylesAttr(any()))
                 .thenReturn(Map.of(
                         "left", "40",
                         "top", "30"
                 ));
 
-        when(htmlElementService.getCssSizeProperty(any(), eq("top")))
+        when(attributesMapper.getCssSizeProperty(any(), eq("top")))
                 .thenReturn(30);
 
 
-        when(htmlElementService.getCssSizeProperty(any(), eq("left")))
+        when(attributesMapper.getCssSizeProperty(any(), eq("left")))
                 .thenReturn(40);
 
         // When

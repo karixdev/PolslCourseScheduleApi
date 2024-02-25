@@ -5,13 +5,11 @@ import com.github.karixdev.commonservice.model.course.raw.Link;
 import com.github.karixdev.commonservice.model.schedule.raw.TimeCell;
 import com.github.karixdev.webscraperservice.model.PlanPolslResponse;
 import com.github.karixdev.webscraperservice.props.PlanPolslMapperProperties;
-import com.github.karixdev.webscraperservice.service.HtmlElementService;
 import lombok.RequiredArgsConstructor;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 import java.util.Map;
 import java.util.Set;
@@ -22,7 +20,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class PlanPolslResponseMapper {
 
-    private final HtmlElementService htmlElementService;
+    private final DOMElementAttributesMapper attributesMapper;
 
     public PlanPolslResponse map(Document document) {
         Set<TimeCell> timeCells = getTimeCells(document);
@@ -62,13 +60,13 @@ public class PlanPolslResponseMapper {
     }
 
     private CourseCell getCourseCell(Element element) {
-        Map<String, String> styles = htmlElementService.getStylesAttr(element);
+        Map<String, String> styles = attributesMapper.getStylesAttr(element);
 
-        int top = htmlElementService.getCssSizeProperty(styles, "top");
-        int left = htmlElementService.getCssSizeProperty(styles, "left");
+        int top = attributesMapper.getCssSizeProperty(styles, "top");
+        int left = attributesMapper.getCssSizeProperty(styles, "left");
 
-        int ch = htmlElementService.getSizeAttr(element, "ch");
-        int cw = htmlElementService.getSizeAttr(element, "cw");
+        int ch = attributesMapper.getSizeAttr(element, "ch");
+        int cw = attributesMapper.getSizeAttr(element, "cw");
 
         Set<Link> links = getLinks(element);
         String text = getText(element);
