@@ -1,6 +1,7 @@
-package com.github.karixdev.webscraperservice.event.producer;
+package com.github.karixdev.webscraperservice.infrastructure.kafka.producer;
 
 import com.github.karixdev.commonservice.event.schedule.ScheduleRaw;
+import com.github.karixdev.webscraperservice.event.producer.EventProducer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
