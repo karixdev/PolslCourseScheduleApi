@@ -1,7 +1,7 @@
 package com.github.karixdev.webscraperservice.consumer;
 
 import com.github.karixdev.commonservice.event.schedule.ScheduleEvent;
-import com.github.karixdev.webscraperservice.service.ScheduleService;
+import com.github.karixdev.webscraperservice.event.handler.EventHandler;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -11,11 +11,11 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ScheduleEventConsumer {
 
-    private final ScheduleService service;
+    private final EventHandler<ScheduleEvent> eventHandler;
 
     @KafkaListener(topics = "${kafka.topics.schedule-event}", groupId = "${spring.application.name}", containerFactory = "scheduleEventConcurrentKafkaListenerContainerFactory")
     public void consumeScheduleEvent(ConsumerRecord<String, ScheduleEvent> consumerRecord) {
-        service.handleScheduleEvent(consumerRecord);
+        eventHandler.handle(consumerRecord.value());
     }
 
 }

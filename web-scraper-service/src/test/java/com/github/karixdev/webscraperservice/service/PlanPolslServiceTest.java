@@ -3,6 +3,8 @@ package com.github.karixdev.webscraperservice.service;
 import com.github.karixdev.commonservice.model.course.raw.CourseCell;
 import com.github.karixdev.commonservice.model.schedule.raw.TimeCell;
 import com.github.karixdev.webscraperservice.client.PlanPolslClient;
+import com.github.karixdev.webscraperservice.exception.EmptyCourseCellsSetException;
+import com.github.karixdev.webscraperservice.exception.EmptyTimeCellSetException;
 import com.github.karixdev.webscraperservice.mapper.PlanPolslResponseMapper;
 import com.github.karixdev.webscraperservice.model.PlanPolslResponse;
 import com.github.karixdev.webscraperservice.props.PlanPolslClientProperties;
@@ -16,7 +18,9 @@ import org.springframework.core.io.ByteArrayResource;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -79,6 +83,56 @@ class PlanPolslServiceTest {
                         Set.of(timeCell),
                         Set.of(courseCell))
                 );
+    }
+
+    @Test
+    void GivenScheduleParamsSuchThatResultsWithEmptyCourseCellsSet_WhenGetSchedule_ThenThrowsEmptyCourseCellsSetException() {
+        // Given
+        int planPolslId = 1000;
+        int type = 0;
+        int wd = 0;
+
+        when(client.getSchedule(
+                planPolslId,
+                type,
+                wd,
+                PlanPolslClientProperties.WIN_W,
+                PlanPolslClientProperties.WIN_H))
+                .thenReturn(new ByteArrayResource("<html></html>".getBytes()));
+
+        when(mapper.map(any())).thenReturn(new PlanPolslResponse(Set.of(), Set.of()));
+
+        // When & Then
+        assertThatThrownBy(() -> underTest.getSchedule(planPolslId, type, wd))
+                .isInstanceOf(EmptyCourseCellsSetException.class);
+    }
+
+    @Test
+    void GivenScheduleParamSuchThatResultsWithEmptyTimeCellsSet_WhenGetSchedule_ThenThrowsEmptyTimeCellSetException() {
+        // Given
+        int planPolslId = 1000;
+        int type = 0;
+        int wd = 0;
+
+        when(client.getSchedule(
+                planPolslId,
+                type,
+                wd,
+                PlanPolslClientProperties.WIN_W,
+                PlanPolslClientProperties.WIN_H))
+                .thenReturn(new ByteArrayResource("<html></html>".getBytes()));
+
+        when(mapper.map(any()))
+                .thenReturn(
+                        new PlanPolslResponse(
+                                Set.of(),
+                                Set.of(CourseCell.builder().build())
+                        )
+                );
+
+        // When & Then
+        assertThatThrownBy(() -> underTest.getSchedule(planPolslId, type, wd))
+                .isInstanceOf(EmptyTimeCellSetException.class);
     }
 
 }

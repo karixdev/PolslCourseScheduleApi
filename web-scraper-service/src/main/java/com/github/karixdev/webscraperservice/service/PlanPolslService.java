@@ -1,6 +1,8 @@
 package com.github.karixdev.webscraperservice.service;
 
 import com.github.karixdev.webscraperservice.client.PlanPolslClient;
+import com.github.karixdev.webscraperservice.exception.EmptyCourseCellsSetException;
+import com.github.karixdev.webscraperservice.exception.EmptyTimeCellSetException;
 import com.github.karixdev.webscraperservice.mapper.PlanPolslResponseMapper;
 import com.github.karixdev.webscraperservice.model.PlanPolslResponse;
 import com.github.karixdev.webscraperservice.props.PlanPolslClientProperties;
@@ -35,7 +37,17 @@ public class PlanPolslService {
 
         Document document = Jsoup.parse(responseStr);
 
-        return mapper.map(document);
+        PlanPolslResponse planPolslResponse = mapper.map(document);
+
+        if (planPolslResponse.courseCells().isEmpty()) {
+            throw new EmptyCourseCellsSetException(planPolslId);
+        }
+
+        if (planPolslResponse.timeCells().isEmpty()) {
+            throw new EmptyTimeCellSetException(planPolslId);
+        }
+
+        return planPolslResponse;
     }
 
 }
