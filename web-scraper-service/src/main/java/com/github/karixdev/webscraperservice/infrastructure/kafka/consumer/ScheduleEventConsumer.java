@@ -1,7 +1,7 @@
 package com.github.karixdev.webscraperservice.infrastructure.kafka.consumer;
 
-import com.github.karixdev.commonservice.event.schedule.ScheduleEvent;
-import com.github.karixdev.webscraperservice.event.handler.EventHandler;
+import com.github.karixdev.webscraperservice.application.event.ScheduleEvent;
+import com.github.karixdev.webscraperservice.application.event.handler.EventHandler;
 import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.annotation.KafkaListener;

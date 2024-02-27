@@ -1,8 +1,8 @@
 package com.github.karixdev.webscraperservice.infrastructure.kafka;
 
-import com.github.karixdev.commonservice.event.schedule.ScheduleRaw;
-import com.github.karixdev.commonservice.event.schedule.ScheduleEvent;
-import com.github.karixdev.webscraperservice.exception.PlanPolslUnavailableException;
+import com.github.karixdev.webscraperservice.application.event.RawScheduleEvent;
+import com.github.karixdev.webscraperservice.application.event.ScheduleEvent;
+import com.github.karixdev.webscraperservice.infrastructure.client.exception.PlanPolslUnavailableException;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.TopicPartition;
@@ -99,11 +99,11 @@ public class KafkaConfig {
 	}
 
 	@Bean
-	ProducerFactory<String, ScheduleRaw> scheduleRawProducerFactory(
+	ProducerFactory<String, RawScheduleEvent> rawScheduleProducerFactory(
 			KafkaProperties kafkaProperties,
 			MeterRegistry meterRegistry
 	) {
-		DefaultKafkaProducerFactory<String, ScheduleRaw> factory =
+		DefaultKafkaProducerFactory<String, RawScheduleEvent> factory =
 				new DefaultKafkaProducerFactory<>(kafkaProperties.buildProducerProperties());
 		factory.addListener(new MicrometerProducerListener<>(meterRegistry));
 
@@ -111,11 +111,11 @@ public class KafkaConfig {
 	}
 
 	@Bean
-	KafkaTemplate<String, ScheduleRaw> scheduleRawKafkaTemplate(
-			ProducerFactory<String, ScheduleRaw> producerFactory,
+	KafkaTemplate<String, RawScheduleEvent> rawScheduleKafkaTemplate(
+			ProducerFactory<String, RawScheduleEvent> producerFactory,
 			@Value("${kafka.observation.producer.enabled}") Boolean isObservationEnabled
 	) {
-		KafkaTemplate<String, ScheduleRaw> template = new KafkaTemplate<>(producerFactory);
+		KafkaTemplate<String, RawScheduleEvent> template = new KafkaTemplate<>(producerFactory);
 		template.setObservationEnabled(isObservationEnabled);
 
 		return template;
