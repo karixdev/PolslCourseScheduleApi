@@ -10,6 +10,7 @@ public class ScheduleJpaMapper {
     public ScheduleEntity toJpaEntity(Schedule domainSchedule) {
         return ScheduleEntity.builder()
                 .id(domainSchedule.getId())
+                .name(domainSchedule.getName())
                 .semester(domainSchedule.getSemester())
                 .groupNumber(domainSchedule.getGroupNumber())
                 .type(domainSchedule.getType())
@@ -21,6 +22,7 @@ public class ScheduleJpaMapper {
     public Schedule toDomainEntity(ScheduleEntity jpaSchedule) {
         return Schedule.builder()
                 .id(jpaSchedule.getId())
+                .name(jpaSchedule.getName())
                 .semester(jpaSchedule.getSemester())
                 .groupNumber(jpaSchedule.getGroupNumber())
                 .type(jpaSchedule.getType())

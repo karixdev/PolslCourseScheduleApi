@@ -1,6 +1,8 @@
 package com.github.karixdev.scheduleservice.infrastructure.kafka;
 
-import com.github.karixdev.commonservice.event.schedule.ScheduleEvent;
+import com.github.karixdev.scheduleservice.application.event.ScheduleEvent;
+import com.github.karixdev.scheduleservice.application.event.producer.EventProducer;
+import com.github.karixdev.scheduleservice.infrastructure.kafka.producer.ScheduleEventProducer;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
@@ -34,6 +36,23 @@ public class KafkaConfig {
 		KafkaTemplate<String, ScheduleEvent> kafkaTemplate = new KafkaTemplate<>(producerFactory);
 		kafkaTemplate.setObservationEnabled(isObservationEnabled);
 		return kafkaTemplate;
+	}
+
+	@Bean
+	EventProducer<ScheduleEvent> kafkaScheduleEventProducer(
+			KafkaProperties properties,
+			MeterRegistry meterRegistry,
+			@Value("${kafka.observation.producer.enabled}") Boolean isObservationEnabled,
+			@Value("${kafka.topics.schedule-event}") String topic
+	) {
+		ProducerFactory<String, ScheduleEvent> factory =
+				new DefaultKafkaProducerFactory<>(properties.buildProducerProperties());
+		factory.addListener(new MicrometerProducerListener<>(meterRegistry));
+
+		KafkaTemplate<String, ScheduleEvent> kafkaTemplate = new KafkaTemplate<>(factory);
+		kafkaTemplate.setObservationEnabled(isObservationEnabled);
+
+		return new ScheduleEventProducer(kafkaTemplate, topic);
 	}
 
 }
