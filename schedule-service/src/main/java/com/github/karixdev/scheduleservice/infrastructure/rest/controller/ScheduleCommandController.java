@@ -1,14 +1,14 @@
 package com.github.karixdev.scheduleservice.infrastructure.rest.controller;
 
 import com.github.karixdev.scheduleservice.application.command.CreateScheduleCommand;
+import com.github.karixdev.scheduleservice.application.command.DeleteScheduleByIdCommand;
 import com.github.karixdev.scheduleservice.application.command.handler.CommandHandler;
 import com.github.karixdev.scheduleservice.infrastructure.rest.controller.payload.ScheduleRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/commands/schedules")
@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ScheduleCommandController {
 
     private final CommandHandler<CreateScheduleCommand> createScheduleCommandHandler;
+    private final CommandHandler<DeleteScheduleByIdCommand> deleteScheduleByIdCommandHandler;
 
     @PostMapping
     ResponseEntity<Void> createSchedule(@RequestBody ScheduleRequest payload) {
@@ -30,6 +31,17 @@ public class ScheduleCommandController {
                 .build();
 
         createScheduleCommandHandler.handle(command);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{id}")
+    ResponseEntity<Void> deleteScheduleById(@PathVariable UUID id) {
+        DeleteScheduleByIdCommand command = DeleteScheduleByIdCommand.builder()
+                .id(id)
+                .build();
+
+        deleteScheduleByIdCommandHandler.handle(command);
 
         return ResponseEntity.noContent().build();
     }

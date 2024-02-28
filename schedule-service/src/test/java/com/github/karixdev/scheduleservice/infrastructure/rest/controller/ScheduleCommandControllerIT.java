@@ -3,6 +3,7 @@ package com.github.karixdev.scheduleservice.infrastructure.rest.controller;
 import com.github.karixdev.scheduleservice.ContainersEnvironment;
 import com.github.karixdev.scheduleservice.application.event.EventType;
 import com.github.karixdev.scheduleservice.application.event.ScheduleEvent;
+import com.github.karixdev.scheduleservice.application.event.producer.EventProducer;
 import com.github.karixdev.scheduleservice.domain.entity.Schedule;
 import com.github.karixdev.scheduleservice.domain.repository.ScheduleRepository;
 import com.github.karixdev.scheduleservice.infrastructure.dal.JpaScheduleRepository;
@@ -178,6 +179,98 @@ class ScheduleCommandControllerIT extends ContainersEnvironment {
 
         assertThat(consumerRecord.key()).isEqualTo(schedule.getId().toString());
         assertThat(consumerRecord.value()).isEqualTo(expectedEvent);
+    }
+
+    @Test
+    void shouldNotAllowStandardUserToDeleteSchedule() {
+        String token = KeycloakUtils.getUserToken(keycloakContainer.getAuthServerUrl());
+
+        Schedule schedule = Schedule.builder()
+                .id(UUID.randomUUID())
+                .type(1)
+                .planPolslId(1999)
+                .semester(1)
+                .name("schedule-name")
+                .groupNumber(1)
+                .wd(0)
+                .build();
+
+        scheduleRepository.save(schedule);
+
+        webClient.delete().uri("/api/commands/schedules/%s".formatted(schedule.getId()))
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus().isForbidden();
+
+        assertThat(scheduleRepository.findAll()).hasSize(1);
+    }
+
+    @Test
+    void shouldNotDeleteNonExistingSchedule() {
+        String token = KeycloakUtils.getAdminToken(keycloakContainer.getAuthServerUrl());
+
+        Schedule schedule = Schedule.builder()
+                .id(UUID.randomUUID())
+                .type(1)
+                .planPolslId(1999)
+                .semester(1)
+                .name("schedule-name")
+                .groupNumber(1)
+                .wd(0)
+                .build();
+
+        scheduleRepository.save(schedule);
+
+        webClient.delete().uri("/api/commands/schedules/%s".formatted(UUID.randomUUID()))
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus().isNotFound();
+
+        assertThat(scheduleRepository.findAll()).hasSize(1);
+    }
+
+    @Test
+    void shouldDeleteScheduleAndProduceEvent() {
+        String token = KeycloakUtils.getAdminToken(keycloakContainer.getAuthServerUrl());
+
+        Schedule schedule = Schedule.builder()
+                .id(UUID.randomUUID())
+                .type(1)
+                .planPolslId(1999)
+                .semester(1)
+                .name("schedule-name")
+                .groupNumber(1)
+                .wd(0)
+                .build();
+
+        Schedule otherSchedule = Schedule.builder()
+                .id(UUID.randomUUID())
+                .type(1)
+                .planPolslId(2000)
+                .semester(1)
+                .name("schedule-name-2")
+                .groupNumber(1)
+                .wd(0)
+                .build();
+
+        scheduleRepository.save(schedule);
+        scheduleRepository.save(otherSchedule);
+
+        webClient.delete().uri("/api/commands/schedules/%s".formatted(schedule.getId()))
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus().isNoContent();
+
+        ConsumerRecord<String, ScheduleEvent> consumerRecord =
+                KafkaTestUtils.getSingleRecord(scheduleEventConsumer, SCHEDULE_EVENT_TOPIC, Duration.ofSeconds(20));
+        ScheduleEvent event = consumerRecord.value();
+
+        assertThat(scheduleRepository.findAll()).hasSize(1);
+
+        assertThat(consumerRecord.key()).isEqualTo(schedule.getId().toString());
+        assertThat(event.scheduleId()).isEqualTo(schedule.getId().toString());
+        assertThat(event.type()).isEqualTo(EventType.DELETE);
+        assertThat(event.entity()).isEqualTo(schedule);
     }
 
 }
