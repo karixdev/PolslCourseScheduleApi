@@ -7,7 +7,7 @@ import com.github.karixdev.commonservice.exception.ValidationException;
 import com.github.karixdev.scheduleservice.domain.entity.Schedule;
 import com.github.karixdev.scheduleservice.application.mapper.ScheduleMapper;
 import com.github.karixdev.scheduleservice.application.event.producer.ScheduleEventProducer;
-import com.github.karixdev.scheduleservice.infrastructure.dal.ScheduleRepository;
+import com.github.karixdev.scheduleservice.domain.repository.ScheduleRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

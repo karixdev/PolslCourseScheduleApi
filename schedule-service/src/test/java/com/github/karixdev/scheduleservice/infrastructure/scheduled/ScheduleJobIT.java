@@ -2,9 +2,9 @@ package com.github.karixdev.scheduleservice.infrastructure.scheduled;
 
 import com.github.karixdev.commonservice.event.schedule.ScheduleEvent;
 import com.github.karixdev.scheduleservice.ContainersEnvironment;
-import com.github.karixdev.scheduleservice.domain.entity.Schedule;
-import com.github.karixdev.scheduleservice.infrastructure.dal.ScheduleRepository;
 import com.github.karixdev.scheduleservice.application.service.ScheduleService;
+import com.github.karixdev.scheduleservice.infrastructure.dal.JpaScheduleRepository;
+import com.github.karixdev.scheduleservice.infrastructure.dal.entity.ScheduleEntity;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -31,13 +31,13 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-public class ScheduleJobIT extends ContainersEnvironment {
+class ScheduleJobIT extends ContainersEnvironment {
 
     @Autowired
     ScheduleService scheduleService;
 
     @Autowired
-    ScheduleRepository scheduleRepository;
+    JpaScheduleRepository scheduleRepository;
 
     Consumer<String, ScheduleEvent> scheduleEventConsumer;
 
@@ -72,7 +72,7 @@ public class ScheduleJobIT extends ContainersEnvironment {
     @Test
     void shouldRequestForThreeUpdates() {
         scheduleRepository.saveAll(List.of(
-                Schedule.builder()
+                ScheduleEntity.builder()
                         .type(1)
                         .planPolslId(1)
                         .semester(1)
@@ -80,7 +80,7 @@ public class ScheduleJobIT extends ContainersEnvironment {
                         .groupNumber(1)
                         .wd(0)
                         .build(),
-                Schedule.builder()
+                ScheduleEntity.builder()
                         .type(1)
                         .planPolslId(2)
                         .semester(1)
@@ -88,7 +88,7 @@ public class ScheduleJobIT extends ContainersEnvironment {
                         .groupNumber(1)
                         .wd(0)
                         .build(),
-                Schedule.builder()
+                ScheduleEntity.builder()
                         .type(1)
                         .planPolslId(3)
                         .semester(1)

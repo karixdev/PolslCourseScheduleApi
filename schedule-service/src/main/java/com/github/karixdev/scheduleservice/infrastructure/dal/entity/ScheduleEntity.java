@@ -1,0 +1,77 @@
+package com.github.karixdev.scheduleservice.infrastructure.dal.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.util.Objects;
+import java.util.UUID;
+
+@Entity(name = "Schedule")
+@Table(name = "schedule")
+@Getter
+@Setter
+@Builder
+@ToString
+@AllArgsConstructor
+@NoArgsConstructor
+public class ScheduleEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(
+            name = "id",
+            nullable = false,
+            updatable = false
+    )
+    @Setter(AccessLevel.NONE)
+    private UUID id;
+
+    @Column(
+            name = "type",
+            nullable = false
+    )
+    private Integer type;
+
+    @Column(
+            name = "plan_polsl_id",
+            nullable = false
+    )
+    private Integer planPolslId;
+
+    @Column(
+            name = "semester",
+            nullable = false
+    )
+    private Integer semester;
+
+    @Column(
+            name = "name",
+            nullable = false
+    )
+    private String name;
+
+    @Column(
+            name = "group_number",
+            nullable = false
+    )
+    private Integer groupNumber;
+
+    @Column(
+            name = "wd",
+            nullable = false
+    )
+    private Integer wd;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ScheduleEntity that = (ScheduleEntity) o;
+        return id != null && Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+}

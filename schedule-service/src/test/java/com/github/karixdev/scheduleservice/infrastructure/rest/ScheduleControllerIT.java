@@ -3,8 +3,8 @@ package com.github.karixdev.scheduleservice.infrastructure.rest;
 import com.github.karixdev.commonservice.event.EventType;
 import com.github.karixdev.commonservice.event.schedule.ScheduleEvent;
 import com.github.karixdev.scheduleservice.ContainersEnvironment;
-import com.github.karixdev.scheduleservice.domain.entity.Schedule;
-import com.github.karixdev.scheduleservice.infrastructure.dal.ScheduleRepository;
+import com.github.karixdev.scheduleservice.infrastructure.dal.JpaScheduleRepository;
+import com.github.karixdev.scheduleservice.infrastructure.dal.entity.ScheduleEntity;
 import com.github.karixdev.scheduleservice.utils.KeycloakUtils;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -40,7 +40,7 @@ class ScheduleControllerIT extends ContainersEnvironment {
     WebTestClient webClient;
 
     @Autowired
-    ScheduleRepository scheduleRepository;
+    JpaScheduleRepository scheduleRepository;
 
     Consumer<String, ScheduleEvent> scheduleEventConsumer;
 
@@ -94,7 +94,7 @@ class ScheduleControllerIT extends ContainersEnvironment {
     void shouldNotCreateSchedule() {
         String token = KeycloakUtils.getAdminToken(keycloakContainer.getAuthServerUrl());
 
-        scheduleRepository.save(Schedule.builder()
+        scheduleRepository.save(ScheduleEntity.builder()
                 .type(1)
                 .planPolslId(1999)
                 .semester(1)
@@ -152,14 +152,14 @@ class ScheduleControllerIT extends ContainersEnvironment {
                 .jsonPath("$.name").isEqualTo("available-name")
                 .jsonPath("$.groupNumber").isEqualTo(1);
 
-        List<Schedule> schedules = scheduleRepository.findAll();
+        List<ScheduleEntity> schedules = scheduleRepository.findAll();
         ConsumerRecord<String, ScheduleEvent> consumerRecord =
                 KafkaTestUtils.getSingleRecord(scheduleEventConsumer, SCHEDULE_EVENT_TOPIC, Duration.ofSeconds(20));
 
         assertThat(schedules)
                 .hasSize(1);
 
-        Schedule schedule = schedules.get(0);
+        ScheduleEntity schedule = schedules.get(0);
 
         assertThat(schedule.getType())
                 .isEqualTo(1);
@@ -187,7 +187,7 @@ class ScheduleControllerIT extends ContainersEnvironment {
     @Test
     void shouldGetAllCourses() {
         scheduleRepository.saveAll(List.of(
-                Schedule.builder()
+                ScheduleEntity.builder()
                         .type(1)
                         .planPolslId(2000)
                         .semester(1)
@@ -195,7 +195,7 @@ class ScheduleControllerIT extends ContainersEnvironment {
                         .groupNumber(2)
                         .wd(1)
                         .build(),
-                Schedule.builder()
+                ScheduleEntity.builder()
                         .type(1)
                         .planPolslId(1999)
                         .semester(1)
@@ -203,7 +203,7 @@ class ScheduleControllerIT extends ContainersEnvironment {
                         .groupNumber(1)
                         .wd(4)
                         .build(),
-                Schedule.builder()
+                ScheduleEntity.builder()
                         .type(1)
                         .planPolslId(1000)
                         .semester(2)
@@ -228,8 +228,8 @@ class ScheduleControllerIT extends ContainersEnvironment {
 
     @Test
     void shouldRetrieveAllSchedulesWithProvidedIdsInCorrectOrder() {
-        Schedule schedule1 = scheduleRepository.save(
-                Schedule.builder()
+        ScheduleEntity schedule1 = scheduleRepository.save(
+                ScheduleEntity.builder()
                         .type(1)
                         .planPolslId(2000)
                         .semester(1)
@@ -239,7 +239,7 @@ class ScheduleControllerIT extends ContainersEnvironment {
                         .build()
         );
 
-        scheduleRepository.save(Schedule.builder()
+        scheduleRepository.save(ScheduleEntity.builder()
                 .type(1)
                 .planPolslId(1999)
                 .semester(1)
@@ -248,8 +248,8 @@ class ScheduleControllerIT extends ContainersEnvironment {
                 .wd(4)
                 .build());
 
-        Schedule schedule3 = scheduleRepository.save(
-                Schedule.builder()
+        ScheduleEntity schedule3 = scheduleRepository.save(
+                ScheduleEntity.builder()
                         .type(1)
                         .planPolslId(1000)
                         .semester(2)
@@ -284,14 +284,14 @@ class ScheduleControllerIT extends ContainersEnvironment {
                 .expectBody()
                 .jsonPath("$.message").isEqualTo(
                         String.format(
-                                "Schedule with id %s not found",
+                                "ScheduleEntity with id %s not found",
                                 id
                         ));
     }
 
     @Test
     void shouldFindScheduleById() {
-        Schedule schedule = scheduleRepository.save(Schedule.builder()
+        ScheduleEntity schedule = scheduleRepository.save(ScheduleEntity.builder()
                 .type(1)
                 .planPolslId(2000)
                 .semester(1)
@@ -300,7 +300,7 @@ class ScheduleControllerIT extends ContainersEnvironment {
                 .wd(2)
                 .build());
 
-        scheduleRepository.save(Schedule.builder()
+        scheduleRepository.save(ScheduleEntity.builder()
                 .type(1)
                 .planPolslId(1999)
                 .semester(1)
@@ -371,7 +371,7 @@ class ScheduleControllerIT extends ContainersEnvironment {
     void shouldNotUpdateScheduleWhileTryingToAssignUnavailableName() {
         String token = KeycloakUtils.getAdminToken(keycloakContainer.getAuthServerUrl());
 
-        Schedule schedule = scheduleRepository.save(Schedule.builder()
+        ScheduleEntity schedule = scheduleRepository.save(ScheduleEntity.builder()
                 .type(1)
                 .planPolslId(2000)
                 .semester(1)
@@ -380,7 +380,7 @@ class ScheduleControllerIT extends ContainersEnvironment {
                 .wd(4)
                 .build());
 
-        scheduleRepository.save(Schedule.builder()
+        scheduleRepository.save(ScheduleEntity.builder()
                 .type(1)
                 .planPolslId(1999)
                 .semester(1)
@@ -411,7 +411,7 @@ class ScheduleControllerIT extends ContainersEnvironment {
     void shouldUpdateSchedule() {
         String token = KeycloakUtils.getAdminToken(keycloakContainer.getAuthServerUrl());
 
-        Schedule schedule = scheduleRepository.save(Schedule.builder()
+        ScheduleEntity schedule = scheduleRepository.save(ScheduleEntity.builder()
                 .type(1)
                 .planPolslId(2000)
                 .semester(1)
@@ -420,7 +420,7 @@ class ScheduleControllerIT extends ContainersEnvironment {
                 .wd(0)
                 .build());
 
-        scheduleRepository.save(Schedule.builder()
+        scheduleRepository.save(ScheduleEntity.builder()
                 .type(1)
                 .planPolslId(1999)
                 .semester(1)
@@ -452,7 +452,7 @@ class ScheduleControllerIT extends ContainersEnvironment {
                 .jsonPath("$.name").isEqualTo("schedule3")
                 .jsonPath("$.groupNumber").isEqualTo(7);
 
-        Optional<Schedule> optionalSchedule =
+        Optional<ScheduleEntity> optionalSchedule =
                 scheduleRepository.findById(schedule.getId());
         ConsumerRecord<String, ScheduleEvent> consumerRecord =
                 KafkaTestUtils.getSingleRecord(scheduleEventConsumer, SCHEDULE_EVENT_TOPIC, Duration.ofSeconds(20));
@@ -477,7 +477,7 @@ class ScheduleControllerIT extends ContainersEnvironment {
     void shouldNotDeleteScheduleForStandardUser() {
         String token = KeycloakUtils.getUserToken(keycloakContainer.getAuthServerUrl());
 
-        scheduleRepository.save(Schedule.builder()
+        scheduleRepository.save(ScheduleEntity.builder()
                 .type(1)
                 .planPolslId(1999)
                 .semester(1)
@@ -496,7 +496,7 @@ class ScheduleControllerIT extends ContainersEnvironment {
     void shouldNotDeleteNotExistingSchedule() {
         String token = KeycloakUtils.getAdminToken(keycloakContainer.getAuthServerUrl());
 
-        scheduleRepository.save(Schedule.builder()
+        scheduleRepository.save(ScheduleEntity.builder()
                 .type(1)
                 .planPolslId(1999)
                 .semester(1)
@@ -515,7 +515,7 @@ class ScheduleControllerIT extends ContainersEnvironment {
     void shouldDeleteSchedule() {
         String token = KeycloakUtils.getAdminToken(keycloakContainer.getAuthServerUrl());
 
-        Schedule schedule = scheduleRepository.save(Schedule.builder()
+        ScheduleEntity schedule = scheduleRepository.save(ScheduleEntity.builder()
                 .type(1)
                 .planPolslId(1999)
                 .semester(1)
@@ -547,7 +547,7 @@ class ScheduleControllerIT extends ContainersEnvironment {
     void shouldNotRequestScheduleCoursesUpdateForNotExistingSchedule() {
         String token = KeycloakUtils.getAdminToken(keycloakContainer.getAuthServerUrl());
 
-        scheduleRepository.save(Schedule.builder()
+        scheduleRepository.save(ScheduleEntity.builder()
                 .type(1)
                 .planPolslId(1999)
                 .semester(1)
@@ -566,7 +566,7 @@ class ScheduleControllerIT extends ContainersEnvironment {
     void shouldRequestScheduleCourses() {
         String token = KeycloakUtils.getAdminToken(keycloakContainer.getAuthServerUrl());
 
-        Schedule schedule = scheduleRepository.save(Schedule.builder()
+        ScheduleEntity schedule = scheduleRepository.save(ScheduleEntity.builder()
                 .type(1)
                 .planPolslId(1999)
                 .semester(1)

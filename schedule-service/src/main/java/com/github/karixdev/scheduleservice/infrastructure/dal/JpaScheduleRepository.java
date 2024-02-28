@@ -1,6 +1,6 @@
 package com.github.karixdev.scheduleservice.infrastructure.dal;
 
-import com.github.karixdev.scheduleservice.domain.entity.Schedule;
+import com.github.karixdev.scheduleservice.infrastructure.dal.entity.ScheduleEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -11,20 +11,20 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface ScheduleRepository extends JpaRepository<Schedule, UUID> {
+public interface JpaScheduleRepository extends JpaRepository<ScheduleEntity, UUID> {
 
     @Query("""
             SELECT schedule
             FROM Schedule schedule
             WHERE schedule.name = :name
             """)
-    Optional<Schedule> findByName(@Param("name") String name);
+    Optional<ScheduleEntity> findByName(@Param("name") String name);
 
     @Query("""
             SELECT schedule
             FROM Schedule schedule
             ORDER BY schedule.semester, schedule.groupNumber ASC
             """)
-    List<Schedule> findAllOrderBySemesterAndGroupNumberAsc();
+    List<ScheduleEntity> findAllOrderBySemesterAndGroupNumberAsc();
 
 }

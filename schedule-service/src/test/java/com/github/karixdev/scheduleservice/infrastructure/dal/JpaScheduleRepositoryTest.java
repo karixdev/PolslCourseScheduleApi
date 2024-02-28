@@ -1,8 +1,6 @@
 package com.github.karixdev.scheduleservice.infrastructure.dal;
 
-import com.github.karixdev.scheduleservice.ContainersEnvironment;
-import com.github.karixdev.scheduleservice.domain.entity.Schedule;
-import com.github.karixdev.scheduleservice.infrastructure.dal.ScheduleRepository;
+import com.github.karixdev.scheduleservice.infrastructure.dal.entity.ScheduleEntity;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -16,10 +14,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-class ScheduleRepositoryTest extends ContainersEnvironment {
+class JpaScheduleRepositoryTest extends PostgresContainerEnvironment {
 
     @Autowired
-    ScheduleRepository underTest;
+    JpaScheduleRepository underTest;
 
     @Autowired
     TestEntityManager em;
@@ -29,7 +27,7 @@ class ScheduleRepositoryTest extends ContainersEnvironment {
         // Given
         String name = "schedule-name";
 
-        Schedule schedule = Schedule.builder()
+        ScheduleEntity schedule = ScheduleEntity.builder()
                 .type(0)
                 .planPolslId(1111)
                 .semester(1)
@@ -41,7 +39,7 @@ class ScheduleRepositoryTest extends ContainersEnvironment {
         em.persistAndFlush(schedule);
 
         // When
-        Optional<Schedule> result = underTest.findByName(name);
+        Optional<ScheduleEntity> result = underTest.findByName(name);
 
         // Then
         assertThat(result).isEmpty();
@@ -52,7 +50,7 @@ class ScheduleRepositoryTest extends ContainersEnvironment {
         // Given
         String name = "schedule-name";
 
-        Schedule schedule = Schedule.builder()
+        ScheduleEntity schedule = ScheduleEntity.builder()
                 .type(0)
                 .planPolslId(1111)
                 .semester(1)
@@ -63,7 +61,7 @@ class ScheduleRepositoryTest extends ContainersEnvironment {
 
         em.persist(schedule);
 
-        Schedule otherSchedule = Schedule.builder()
+        ScheduleEntity otherSchedule = ScheduleEntity.builder()
                 .type(0)
                 .planPolslId(1999)
                 .semester(1)
@@ -75,7 +73,7 @@ class ScheduleRepositoryTest extends ContainersEnvironment {
         em.persistAndFlush(otherSchedule);
 
         // When
-        Optional<Schedule> result = underTest.findByName(name);
+        Optional<ScheduleEntity> result = underTest.findByName(name);
 
         // Then
         assertThat(result).contains(schedule);
@@ -83,7 +81,7 @@ class ScheduleRepositoryTest extends ContainersEnvironment {
 
     @Test
     void WhenFindAllOrderBySemesterAndGroupNumberAsc_ThenReturnsListWithCorrectOrder() {
-        Schedule schedule1 = Schedule.builder()
+        ScheduleEntity schedule1 = ScheduleEntity.builder()
                 .type(0)
                 .planPolslId(1111)
                 .semester(1)
@@ -94,7 +92,7 @@ class ScheduleRepositoryTest extends ContainersEnvironment {
 
         em.persist(schedule1);
 
-        Schedule schedule2 = Schedule.builder()
+        ScheduleEntity schedule2 = ScheduleEntity.builder()
                 .type(0)
                 .planPolslId(1999)
                 .semester(1)
@@ -105,7 +103,7 @@ class ScheduleRepositoryTest extends ContainersEnvironment {
 
         em.persist(schedule2);
 
-        Schedule schedule3 = Schedule.builder()
+        ScheduleEntity schedule3 = ScheduleEntity.builder()
                 .type(0)
                 .planPolslId(1222)
                 .semester(3)
@@ -117,7 +115,7 @@ class ScheduleRepositoryTest extends ContainersEnvironment {
         em.persistAndFlush(schedule3);
 
         // When
-        List<Schedule> result =
+        List<ScheduleEntity> result =
                 underTest.findAllOrderBySemesterAndGroupNumberAsc();
 
         // Then
