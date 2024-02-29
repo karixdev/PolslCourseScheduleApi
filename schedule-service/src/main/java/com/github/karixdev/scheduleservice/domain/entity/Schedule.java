@@ -19,10 +19,6 @@ public class Schedule {
     private String name;
     private Integer groupNumber;
 
-    private Integer type;
-    private Integer planPolslId;
-    private Integer wd;
-
     private PlanPolslData planPolslData;
 
     @Override
