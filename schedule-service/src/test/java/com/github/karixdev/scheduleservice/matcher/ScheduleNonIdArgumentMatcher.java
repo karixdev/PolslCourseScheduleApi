@@ -1,5 +1,6 @@
 package com.github.karixdev.scheduleservice.matcher;
 
+import com.github.karixdev.scheduleservice.domain.entity.PlanPolslData;
 import com.github.karixdev.scheduleservice.domain.entity.Schedule;
 import lombok.RequiredArgsConstructor;
 import org.mockito.ArgumentMatcher;
@@ -18,12 +19,17 @@ public class ScheduleNonIdArgumentMatcher implements ArgumentMatcher<Schedule> {
 
     @Override
     public boolean matches(Schedule other) {
+        PlanPolslData planPolslData = schedule.getPlanPolslData();
+        PlanPolslData otherPlanPolslData = other.getPlanPolslData();
+
+        boolean planPolslMatch = Objects.equals(planPolslData.getId(), otherPlanPolslData.getId())
+                && Objects.equals(planPolslData.getType(), otherPlanPolslData.getType())
+                && Objects.equals(planPolslData.getWeekDays(), otherPlanPolslData.getWeekDays());
+
         return Objects.equals(schedule.getSemester(), other.getSemester())
                 && Objects.equals(schedule.getName(), other.getName())
                 && Objects.equals(schedule.getGroupNumber(), other.getGroupNumber())
-                && Objects.equals(schedule.getType(), other.getType())
-                && Objects.equals(schedule.getPlanPolslId(), other.getPlanPolslId())
-                && Objects.equals(schedule.getWd(), other.getWd());
+                && planPolslMatch;
     }
 
 }

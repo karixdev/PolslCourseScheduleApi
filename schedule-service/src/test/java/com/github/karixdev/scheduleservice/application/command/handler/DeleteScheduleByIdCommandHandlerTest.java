@@ -7,6 +7,7 @@ import com.github.karixdev.scheduleservice.application.event.EventType;
 import com.github.karixdev.scheduleservice.application.event.ScheduleEvent;
 import com.github.karixdev.scheduleservice.application.event.producer.EventProducer;
 import com.github.karixdev.scheduleservice.application.exception.ScheduleWithIdNotFoundException;
+import com.github.karixdev.scheduleservice.domain.entity.PlanPolslData;
 import com.github.karixdev.scheduleservice.domain.entity.Schedule;
 import com.github.karixdev.scheduleservice.domain.repository.ScheduleRepository;
 import org.junit.jupiter.api.Test;
@@ -65,11 +66,16 @@ class DeleteScheduleByIdCommandHandlerTest {
 
         Schedule schedule = Schedule.builder()
                 .id(id)
-                .type(0)
-                .planPolslId(1)
                 .semester(2)
                 .groupNumber(3)
                 .name("schedule")
+                .planPolslData(
+                        PlanPolslData.builder()
+                                .id(0)
+                                .type(1)
+                                .weekDays(2)
+                                .build()
+                )
                 .build();
 
         when(repository.findById(id))

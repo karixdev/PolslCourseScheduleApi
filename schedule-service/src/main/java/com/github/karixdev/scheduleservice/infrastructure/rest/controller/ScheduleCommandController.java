@@ -2,6 +2,7 @@ package com.github.karixdev.scheduleservice.infrastructure.rest.controller;
 
 import com.github.karixdev.scheduleservice.application.command.CreateScheduleCommand;
 import com.github.karixdev.scheduleservice.application.command.DeleteScheduleByIdCommand;
+import com.github.karixdev.scheduleservice.application.command.UpdateScheduleByIdCommand;
 import com.github.karixdev.scheduleservice.application.command.handler.CommandHandler;
 import com.github.karixdev.scheduleservice.infrastructure.rest.controller.payload.ScheduleRequest;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ public class ScheduleCommandController {
 
     private final CommandHandler<CreateScheduleCommand> createScheduleCommandHandler;
     private final CommandHandler<DeleteScheduleByIdCommand> deleteScheduleByIdCommandHandler;
+    private final CommandHandler<UpdateScheduleByIdCommand> updateScheduleByIdCommandHandler;
 
     @PostMapping
     ResponseEntity<Void> createSchedule(@RequestBody ScheduleRequest payload) {
@@ -27,7 +29,7 @@ public class ScheduleCommandController {
                 .semester(payload.semester())
                 .name(payload.name())
                 .groupNumber(payload.groupNumber())
-                .wd(payload.wd())
+                .weekDays(payload.wd())
                 .build();
 
         createScheduleCommandHandler.handle(command);

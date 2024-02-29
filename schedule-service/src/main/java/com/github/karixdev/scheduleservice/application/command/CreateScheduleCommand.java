@@ -9,5 +9,5 @@ public record CreateScheduleCommand(
         Integer semester,
         String name,
         Integer groupNumber,
-        Integer wd
+        Integer weekDays
 ) {}

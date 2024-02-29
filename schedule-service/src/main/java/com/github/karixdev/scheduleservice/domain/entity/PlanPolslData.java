@@ -3,34 +3,24 @@ package com.github.karixdev.scheduleservice.domain.entity;
 import lombok.*;
 
 import java.util.Objects;
-import java.util.UUID;
-
 
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Schedule {
+public class PlanPolslData {
 
-    private UUID id;
-
-    private Integer semester;
-    private String name;
-    private Integer groupNumber;
-
+    private Integer id;
     private Integer type;
-    private Integer planPolslId;
-    private Integer wd;
-
-    private PlanPolslData planPolslData;
+    private Integer weekDays;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Schedule schedule = (Schedule) o;
-        return id != null && Objects.equals(id, schedule.id);
+        PlanPolslData that = (PlanPolslData) o;
+        return id != null && Objects.equals(id, that.id);
     }
 
     @Override

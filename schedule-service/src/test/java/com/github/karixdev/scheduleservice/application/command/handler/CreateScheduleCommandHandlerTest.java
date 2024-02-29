@@ -7,6 +7,7 @@ import com.github.karixdev.scheduleservice.application.event.EventType;
 import com.github.karixdev.scheduleservice.application.event.ScheduleEvent;
 import com.github.karixdev.scheduleservice.application.event.producer.EventProducer;
 import com.github.karixdev.scheduleservice.application.exception.UnavailableScheduleNameException;
+import com.github.karixdev.scheduleservice.domain.entity.PlanPolslData;
 import com.github.karixdev.scheduleservice.domain.entity.Schedule;
 import com.github.karixdev.scheduleservice.domain.repository.ScheduleRepository;
 import org.junit.jupiter.api.Test;
@@ -68,6 +69,7 @@ class CreateScheduleCommandHandlerTest {
                 .planPolslId(1)
                 .semester(2)
                 .groupNumber(3)
+                .weekDays(4)
                 .name("schedule")
                 .build();
 
@@ -75,11 +77,16 @@ class CreateScheduleCommandHandlerTest {
                 .thenReturn(Optional.empty());
 
         Schedule expectedSchedule = Schedule.builder()
-                .type(0)
-                .planPolslId(1)
                 .semester(2)
                 .groupNumber(3)
                 .name("schedule")
+                .planPolslData(
+                        PlanPolslData.builder()
+                                .id(1)
+                                .type(0)
+                                .weekDays(4)
+                                .build()
+                )
                 .build();
 
         // When

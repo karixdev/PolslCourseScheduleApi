@@ -1,5 +1,6 @@
 package com.github.karixdev.scheduleservice.infrastructure.dal.mapper;
 
+import com.github.karixdev.scheduleservice.domain.entity.PlanPolslData;
 import com.github.karixdev.scheduleservice.domain.entity.Schedule;
 import com.github.karixdev.scheduleservice.infrastructure.dal.entity.ScheduleEntity;
 import org.springframework.stereotype.Component;
@@ -13,9 +14,9 @@ public class ScheduleJpaMapper {
                 .name(domainSchedule.getName())
                 .semester(domainSchedule.getSemester())
                 .groupNumber(domainSchedule.getGroupNumber())
-                .type(domainSchedule.getType())
-                .planPolslId(domainSchedule.getPlanPolslId())
-                .wd(domainSchedule.getWd())
+                .type(domainSchedule.getPlanPolslData().getType())
+                .planPolslId(domainSchedule.getPlanPolslData().getId())
+                .wd(domainSchedule.getPlanPolslData().getWeekDays())
                 .build();
     }
 
@@ -25,9 +26,13 @@ public class ScheduleJpaMapper {
                 .name(jpaSchedule.getName())
                 .semester(jpaSchedule.getSemester())
                 .groupNumber(jpaSchedule.getGroupNumber())
-                .type(jpaSchedule.getType())
-                .planPolslId(jpaSchedule.getPlanPolslId())
-                .wd(jpaSchedule.getWd())
+                .planPolslData(
+                        PlanPolslData.builder()
+                                .id(jpaSchedule.getPlanPolslId())
+                                .type(jpaSchedule.getType())
+                                .weekDays(jpaSchedule.getWd())
+                                .build()
+                )
                 .build();
     }
 

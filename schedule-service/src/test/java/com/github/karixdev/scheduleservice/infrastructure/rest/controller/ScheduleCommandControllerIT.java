@@ -4,6 +4,7 @@ import com.github.karixdev.scheduleservice.ContainersEnvironment;
 import com.github.karixdev.scheduleservice.application.event.EventType;
 import com.github.karixdev.scheduleservice.application.event.ScheduleEvent;
 import com.github.karixdev.scheduleservice.application.event.producer.EventProducer;
+import com.github.karixdev.scheduleservice.domain.entity.PlanPolslData;
 import com.github.karixdev.scheduleservice.domain.entity.Schedule;
 import com.github.karixdev.scheduleservice.domain.repository.ScheduleRepository;
 import com.github.karixdev.scheduleservice.infrastructure.dal.JpaScheduleRepository;
@@ -99,12 +100,16 @@ class ScheduleCommandControllerIT extends ContainersEnvironment {
 
         scheduleRepository.save(Schedule.builder()
                 .id(UUID.randomUUID())
-                .type(1)
-                .planPolslId(1999)
                 .semester(1)
                 .name("schedule-name")
                 .groupNumber(1)
-                .wd(0)
+                .planPolslData(
+                        PlanPolslData.builder()
+                                .id(1999)
+                                .type(1)
+                                .weekDays(0)
+                                .build()
+                )
                 .build());
 
         String payload = """
@@ -159,17 +164,21 @@ class ScheduleCommandControllerIT extends ContainersEnvironment {
                 .hasSize(1);
 
         Schedule schedule = schedules.get(0);
+        PlanPolslData planPolslData = schedule.getPlanPolslData();
 
-        assertThat(schedule.getType())
-                .isEqualTo(1);
-        assertThat(schedule.getPlanPolslId())
-                .isEqualTo(1999);
         assertThat(schedule.getSemester())
                 .isEqualTo(2);
         assertThat(schedule.getName())
                 .isEqualTo("available-name");
         assertThat(schedule.getGroupNumber())
                 .isEqualTo(1);
+
+        assertThat(planPolslData.getType())
+                .isEqualTo(1);
+        assertThat(planPolslData.getId())
+                .isEqualTo(1999);
+        assertThat(planPolslData.getWeekDays())
+                .isZero();
 
         ScheduleEvent expectedEvent = ScheduleEvent.builder()
                 .type(EventType.CREATE)
@@ -187,12 +196,16 @@ class ScheduleCommandControllerIT extends ContainersEnvironment {
 
         Schedule schedule = Schedule.builder()
                 .id(UUID.randomUUID())
-                .type(1)
-                .planPolslId(1999)
                 .semester(1)
                 .name("schedule-name")
                 .groupNumber(1)
-                .wd(0)
+                .planPolslData(
+                        PlanPolslData.builder()
+                                .id(1999)
+                                .type(1)
+                                .weekDays(0)
+                                .build()
+                )
                 .build();
 
         scheduleRepository.save(schedule);
@@ -211,12 +224,16 @@ class ScheduleCommandControllerIT extends ContainersEnvironment {
 
         Schedule schedule = Schedule.builder()
                 .id(UUID.randomUUID())
-                .type(1)
-                .planPolslId(1999)
                 .semester(1)
                 .name("schedule-name")
                 .groupNumber(1)
-                .wd(0)
+                .planPolslData(
+                        PlanPolslData.builder()
+                                .id(1999)
+                                .type(1)
+                                .weekDays(0)
+                                .build()
+                )
                 .build();
 
         scheduleRepository.save(schedule);
@@ -235,22 +252,30 @@ class ScheduleCommandControllerIT extends ContainersEnvironment {
 
         Schedule schedule = Schedule.builder()
                 .id(UUID.randomUUID())
-                .type(1)
-                .planPolslId(1999)
                 .semester(1)
                 .name("schedule-name")
                 .groupNumber(1)
-                .wd(0)
+                .planPolslData(
+                        PlanPolslData.builder()
+                                .id(1999)
+                                .type(1)
+                                .weekDays(0)
+                                .build()
+                )
                 .build();
 
         Schedule otherSchedule = Schedule.builder()
                 .id(UUID.randomUUID())
-                .type(1)
-                .planPolslId(2000)
                 .semester(1)
                 .name("schedule-name-2")
                 .groupNumber(1)
-                .wd(0)
+                .planPolslData(
+                        PlanPolslData.builder()
+                                .id(2000)
+                                .type(1)
+                                .weekDays(0)
+                                .build()
+                )
                 .build();
 
         scheduleRepository.save(schedule);

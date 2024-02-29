@@ -6,6 +6,7 @@ import com.github.karixdev.scheduleservice.application.event.EventType;
 import com.github.karixdev.scheduleservice.application.event.ScheduleEvent;
 import com.github.karixdev.scheduleservice.application.event.producer.EventProducer;
 import com.github.karixdev.scheduleservice.application.exception.UnavailableScheduleNameException;
+import com.github.karixdev.scheduleservice.domain.entity.PlanPolslData;
 import com.github.karixdev.scheduleservice.domain.entity.Schedule;
 import com.github.karixdev.scheduleservice.domain.repository.ScheduleRepository;
 import lombok.RequiredArgsConstructor;
@@ -27,14 +28,18 @@ public class CreateScheduleCommandHandler implements CommandHandler<CreateSchedu
             throw new UnavailableScheduleNameException(command.name());
         }
 
+        PlanPolslData planPolslData = PlanPolslData.builder()
+                .id(command.planPolslId())
+                .type(command.type())
+                .weekDays(command.weekDays())
+                .build();
+
         Schedule schedule = Schedule.builder()
                 .id(UUID.randomUUID())
                 .semester(command.semester())
                 .name(command.name())
                 .groupNumber(command.groupNumber())
-                .type(command.type())
-                .planPolslId(command.planPolslId())
-                .wd(command.wd())
+                .planPolslData(planPolslData)
                 .build();
 
         transactionManager.execute(() -> repository.save(schedule));
