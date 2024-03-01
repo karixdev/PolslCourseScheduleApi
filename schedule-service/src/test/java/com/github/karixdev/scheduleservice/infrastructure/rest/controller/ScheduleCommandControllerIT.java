@@ -3,7 +3,6 @@ package com.github.karixdev.scheduleservice.infrastructure.rest.controller;
 import com.github.karixdev.scheduleservice.ContainersEnvironment;
 import com.github.karixdev.scheduleservice.application.event.EventType;
 import com.github.karixdev.scheduleservice.application.event.ScheduleEvent;
-import com.github.karixdev.scheduleservice.application.event.producer.EventProducer;
 import com.github.karixdev.scheduleservice.domain.entity.PlanPolslData;
 import com.github.karixdev.scheduleservice.domain.entity.Schedule;
 import com.github.karixdev.scheduleservice.domain.repository.ScheduleRepository;
@@ -29,6 +28,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -296,6 +296,233 @@ class ScheduleCommandControllerIT extends ContainersEnvironment {
         assertThat(event.scheduleId()).isEqualTo(schedule.getId().toString());
         assertThat(event.type()).isEqualTo(EventType.DELETE);
         assertThat(event.entity()).isEqualTo(schedule);
+    }
+
+    @Test
+    void shouldNotAllowStandardUserToUpdateSchedule() {
+        String token = KeycloakUtils.getUserToken(keycloakContainer.getAuthServerUrl());
+
+        Schedule schedule = Schedule.builder()
+                .id(UUID.randomUUID())
+                .semester(1)
+                .name("schedule-name")
+                .groupNumber(1)
+                .planPolslData(
+                        PlanPolslData.builder()
+                                .id(1999)
+                                .type(1)
+                                .weekDays(0)
+                                .build()
+                )
+                .build();
+
+        scheduleRepository.save(schedule);
+
+        String payload = """
+                {
+                    "type": 1,
+                    "planPolslId": 1999,
+                    "semester": 2,
+                    "name": "schedule-name",
+                    "groupNumber": 1,
+                    "wd": 0
+                }
+                """;
+
+        webClient.put().uri("/api/commands/schedules/%s".formatted(schedule.getId()))
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(payload)
+                .exchange()
+                .expectStatus().isForbidden();
+    }
+
+    @Test
+    void shouldNotNotExistingSchedule() {
+        String token = KeycloakUtils.getAdminToken(keycloakContainer.getAuthServerUrl());
+
+        Schedule schedule = Schedule.builder()
+                .id(UUID.randomUUID())
+                .semester(1)
+                .name("schedule-name")
+                .groupNumber(1)
+                .planPolslData(
+                        PlanPolslData.builder()
+                                .id(1999)
+                                .type(1)
+                                .weekDays(0)
+                                .build()
+                )
+                .build();
+
+        scheduleRepository.save(schedule);
+
+        String payload = """
+                {
+                    "type": 1,
+                    "planPolslId": 1999,
+                    "semester": 2,
+                    "name": "schedule-name",
+                    "groupNumber": 1,
+                    "wd": 0
+                }
+                """;
+
+        webClient.put().uri("/api/commands/schedules/%s".formatted(UUID.randomUUID()))
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(payload)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void shouldNotUpdateScheduleWithUnavailableName() {
+        String token = KeycloakUtils.getAdminToken(keycloakContainer.getAuthServerUrl());
+
+        Schedule schedule = Schedule.builder()
+                .id(UUID.randomUUID())
+                .semester(1)
+                .name("schedule-name")
+                .groupNumber(1)
+                .planPolslData(
+                        PlanPolslData.builder()
+                                .id(1999)
+                                .type(1)
+                                .weekDays(0)
+                                .build()
+                )
+                .build();
+
+        Schedule otherSchedule = Schedule.builder()
+                .id(UUID.randomUUID())
+                .semester(1)
+                .name("other-schedule-name")
+                .groupNumber(1)
+                .planPolslData(
+                        PlanPolslData.builder()
+                                .id(23232)
+                                .type(1)
+                                .weekDays(0)
+                                .build()
+                )
+                .build();
+
+        scheduleRepository.save(schedule);
+        scheduleRepository.save(otherSchedule);
+
+        String payload = """
+                {
+                    "type": 1,
+                    "planPolslId": 1999,
+                    "semester": 2,
+                    "name": "other-schedule-name",
+                    "groupNumber": 1,
+                    "wd": 0
+                }
+                """;
+
+        webClient.put().uri("/api/commands/schedules/%s".formatted(schedule.getId()))
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(payload)
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
+
+    @Test
+    void shouldUpdateScheduleAndProduceEvent() {
+        String token = KeycloakUtils.getAdminToken(keycloakContainer.getAuthServerUrl());
+
+        Schedule schedule = Schedule.builder()
+                .id(UUID.randomUUID())
+                .semester(1)
+                .name("schedule-name")
+                .groupNumber(1)
+                .planPolslData(
+                        PlanPolslData.builder()
+                                .id(1999)
+                                .type(1)
+                                .weekDays(0)
+                                .build()
+                )
+                .build();
+
+        Schedule otherSchedule = Schedule.builder()
+                .id(UUID.randomUUID())
+                .semester(1)
+                .name("other-schedule-name")
+                .groupNumber(1)
+                .planPolslData(
+                        PlanPolslData.builder()
+                                .id(31231)
+                                .type(1)
+                                .weekDays(0)
+                                .build()
+                )
+                .build();
+
+        scheduleRepository.save(schedule);
+        scheduleRepository.save(otherSchedule);
+
+        String payload = """
+                {
+                    "type": 53,
+                    "planPolslId": 1234,
+                    "semester": 12,
+                    "name": "new-name",
+                    "groupNumber": 22,
+                    "wd": 15
+                }
+                """;
+
+        webClient.put().uri("/api/commands/schedules/%s".formatted(schedule.getId()))
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(payload)
+                .exchange()
+                .expectStatus().isNoContent();
+
+        Optional<Schedule> optionalUpdatedSchedule = scheduleRepository.findById(schedule.getId());
+        Optional<Schedule> optionalOtherNotUpdatedSchedule = scheduleRepository.findById(otherSchedule.getId());
+
+        ConsumerRecord<String, ScheduleEvent> consumerRecord =
+                KafkaTestUtils.getSingleRecord(scheduleEventConsumer, SCHEDULE_EVENT_TOPIC, Duration.ofSeconds(20));
+        ScheduleEvent event = consumerRecord.value();
+
+        assertThat(optionalUpdatedSchedule).isPresent();
+        assertThat(optionalOtherNotUpdatedSchedule).isPresent();
+
+        Schedule updatedSchedule = optionalUpdatedSchedule.get();
+        Schedule otherNotUpdatedSchedule = optionalOtherNotUpdatedSchedule.get();
+
+        assertThat(otherNotUpdatedSchedule)
+                .usingRecursiveComparison()
+                .isEqualTo(otherSchedule);
+
+        Schedule expectedUpdate = Schedule.builder()
+                .id(schedule.getId())
+                .semester(12)
+                .name("new-name")
+                .groupNumber(22)
+                .planPolslData(
+                        PlanPolslData.builder()
+                                .id(1234)
+                                .type(53)
+                                .weekDays(15)
+                                .build()
+                )
+                .build();
+
+        assertThat(updatedSchedule)
+                .usingRecursiveComparison()
+                .isEqualTo(expectedUpdate);
+
+        assertThat(event.type()).isEqualTo(EventType.UPDATE);
+        assertThat(event.scheduleId()).isEqualTo(schedule.getId().toString());
+        assertThat(event.entity())
+                .usingRecursiveComparison()
+                .isEqualTo(updatedSchedule);
     }
 
 }

@@ -48,4 +48,24 @@ public class ScheduleCommandController {
         return ResponseEntity.noContent().build();
     }
 
+    @PutMapping("/{id}")
+    ResponseEntity<Void> updateScheduleById(
+            @PathVariable UUID id,
+            @RequestBody ScheduleRequest payload
+    ) {
+        UpdateScheduleByIdCommand command = UpdateScheduleByIdCommand.builder()
+                .id(id)
+                .type(payload.type())
+                .planPolslId(payload.planPolslId())
+                .semester(payload.semester())
+                .name(payload.name())
+                .groupNumber(payload.groupNumber())
+                .weekDays(payload.wd())
+                .build();
+
+        updateScheduleByIdCommandHandler.handle(command);
+
+        return ResponseEntity.noContent().build();
+    }
+
 }
