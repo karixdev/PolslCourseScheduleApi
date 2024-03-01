@@ -28,10 +28,9 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers(HttpMethod.POST).hasRole("admin")
-                        .requestMatchers(HttpMethod.PUT).hasRole("admin")
-                        .requestMatchers(HttpMethod.DELETE).hasRole("admin")
-                        .requestMatchers(HttpMethod.GET).permitAll()
+                        .requestMatchers("/api/commands/**").authenticated()
+                        .requestMatchers("/api/commands/**").hasRole("admin")
+                        .requestMatchers("/api/queries/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(config ->
