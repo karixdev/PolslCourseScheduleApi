@@ -6,7 +6,6 @@ import com.github.karixdev.scheduleservice.application.dal.TransactionManager;
 import com.github.karixdev.scheduleservice.application.event.EventType;
 import com.github.karixdev.scheduleservice.application.event.ScheduleEvent;
 import com.github.karixdev.scheduleservice.application.event.producer.EventProducer;
-import com.github.karixdev.scheduleservice.application.exception.UnavailableScheduleNameException;
 import com.github.karixdev.scheduleservice.domain.entity.PlanPolslData;
 import com.github.karixdev.scheduleservice.domain.entity.Schedule;
 import com.github.karixdev.scheduleservice.domain.repository.ScheduleRepository;
@@ -21,7 +20,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 
 import static com.github.karixdev.scheduleservice.matcher.ScheduleNonIdArgumentMatcher.scheduleNonIdEq;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -47,21 +45,6 @@ class CreateScheduleCommandHandlerTest {
     ArgumentCaptor<Schedule> scheduleCaptor;
 
     @Test
-    void GivenCommandWithUnavailableName_WhenHandle_ThenThrowsUnavailableScheduleNameException() {
-        // Given
-        CreateScheduleCommand command = CreateScheduleCommand.builder()
-                .name("name")
-                .build();
-
-        when(repository.findByName(command.name()))
-                .thenReturn(Optional.of(Schedule.builder().build()));
-
-        // When & Then
-        assertThatThrownBy(() -> underTest.handle(command))
-                .isInstanceOf(UnavailableScheduleNameException.class);
-    }
-
-    @Test
     void GivenValidCommand_WhenHandle_ThenSavesScheduleAndProducesEvent() {
         // Given
         CreateScheduleCommand command = CreateScheduleCommand.builder()
@@ -70,16 +53,13 @@ class CreateScheduleCommandHandlerTest {
                 .semester(2)
                 .groupNumber(3)
                 .weekDays(4)
-                .name("schedule")
+                .major("schedule")
                 .build();
-
-        when(repository.findByName(command.name()))
-                .thenReturn(Optional.empty());
 
         Schedule expectedSchedule = Schedule.builder()
                 .semester(2)
                 .groupNumber(3)
-                .name("schedule")
+                .major("schedule")
                 .planPolslData(
                         PlanPolslData.builder()
                                 .id(1)

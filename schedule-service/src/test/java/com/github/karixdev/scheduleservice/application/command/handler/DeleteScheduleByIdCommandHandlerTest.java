@@ -68,7 +68,7 @@ class DeleteScheduleByIdCommandHandlerTest {
                 .id(id)
                 .semester(2)
                 .groupNumber(3)
-                .name("schedule")
+                .major("schedule")
                 .planPolslData(
                         PlanPolslData.builder()
                                 .id(0)

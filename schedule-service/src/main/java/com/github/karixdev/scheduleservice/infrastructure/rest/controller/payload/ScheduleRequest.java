@@ -21,9 +21,9 @@ public record ScheduleRequest(
         @NotNull
         @Positive
         Integer semester,
-        @JsonProperty("name")
+        @JsonProperty("major")
         @NotBlank
-        String name,
+        String major,
         @JsonProperty("groupNumber")
         @NotNull
         @Positive

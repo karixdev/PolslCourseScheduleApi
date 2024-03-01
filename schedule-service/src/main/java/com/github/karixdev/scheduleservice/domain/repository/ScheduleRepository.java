@@ -11,10 +11,8 @@ public interface ScheduleRepository {
     void save(Schedule schedule);
     void delete(Schedule schedule);
 
-    Optional<Schedule> findByName(String name);
     Optional<Schedule> findById(UUID id);
 
-    List<Schedule> findAllOrderBySemesterAndGroupNumberAsc();
     List<Schedule> findAll();
 
 }

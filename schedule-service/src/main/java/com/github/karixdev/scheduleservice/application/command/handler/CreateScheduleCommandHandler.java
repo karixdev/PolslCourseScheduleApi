@@ -5,7 +5,6 @@ import com.github.karixdev.scheduleservice.application.dal.TransactionManager;
 import com.github.karixdev.scheduleservice.application.event.EventType;
 import com.github.karixdev.scheduleservice.application.event.ScheduleEvent;
 import com.github.karixdev.scheduleservice.application.event.producer.EventProducer;
-import com.github.karixdev.scheduleservice.application.exception.UnavailableScheduleNameException;
 import com.github.karixdev.scheduleservice.domain.entity.PlanPolslData;
 import com.github.karixdev.scheduleservice.domain.entity.Schedule;
 import com.github.karixdev.scheduleservice.domain.repository.ScheduleRepository;
@@ -24,10 +23,6 @@ public class CreateScheduleCommandHandler implements CommandHandler<CreateSchedu
 
     @Override
     public void handle(CreateScheduleCommand command) {
-        if (repository.findByName(command.name()).isPresent()) {
-            throw new UnavailableScheduleNameException(command.name());
-        }
-
         PlanPolslData planPolslData = PlanPolslData.builder()
                 .id(command.planPolslId())
                 .type(command.type())
@@ -37,7 +32,7 @@ public class CreateScheduleCommandHandler implements CommandHandler<CreateSchedu
         Schedule schedule = Schedule.builder()
                 .id(UUID.randomUUID())
                 .semester(command.semester())
-                .name(command.name())
+                .major(command.major())
                 .groupNumber(command.groupNumber())
                 .planPolslData(planPolslData)
                 .build();

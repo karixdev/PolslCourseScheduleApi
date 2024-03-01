@@ -38,10 +38,10 @@ public class ScheduleEntity {
     private Integer semester;
 
     @Column(
-            name = "name",
+            name = "major",
             nullable = false
     )
-    private String name;
+    private String major;
 
     @Column(
             name = "group_number",

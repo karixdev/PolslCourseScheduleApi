@@ -6,7 +6,6 @@ import com.github.karixdev.scheduleservice.application.event.EventType;
 import com.github.karixdev.scheduleservice.application.event.ScheduleEvent;
 import com.github.karixdev.scheduleservice.application.event.producer.EventProducer;
 import com.github.karixdev.scheduleservice.application.exception.ScheduleWithIdNotFoundException;
-import com.github.karixdev.scheduleservice.application.exception.UnavailableScheduleNameException;
 import com.github.karixdev.scheduleservice.domain.entity.PlanPolslData;
 import com.github.karixdev.scheduleservice.domain.entity.Schedule;
 import com.github.karixdev.scheduleservice.domain.repository.ScheduleRepository;
@@ -33,12 +32,8 @@ public class UpdateScheduleByIdCommandHandler implements CommandHandler<UpdateSc
 
         Schedule schedule = optionalSchedule.get();
 
-        if (!isNewNameAvailable(schedule.getName(), command.name())) {
-            throw new UnavailableScheduleNameException(command.name());
-        }
-
         schedule.setSemester(command.semester());
-        schedule.setName(command.name());
+        schedule.setMajor(command.major());
         schedule.setGroupNumber(command.groupNumber());
 
         PlanPolslData updatedPlanPolslData = PlanPolslData.builder()
@@ -62,10 +57,6 @@ public class UpdateScheduleByIdCommandHandler implements CommandHandler<UpdateSc
 
             producer.produce(event);
         }
-    }
-
-    private boolean isNewNameAvailable(String currentName, String newName) {
-        return Objects.equals(currentName, newName) || repository.findByName(newName).isEmpty();
     }
 
     private boolean shouldProduceEvent(PlanPolslData currentData, PlanPolslData newData) {

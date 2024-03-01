@@ -27,7 +27,7 @@ public class ScheduleNonIdArgumentMatcher implements ArgumentMatcher<Schedule> {
                 && Objects.equals(planPolslData.getWeekDays(), otherPlanPolslData.getWeekDays());
 
         return Objects.equals(schedule.getSemester(), other.getSemester())
-                && Objects.equals(schedule.getName(), other.getName())
+                && Objects.equals(schedule.getMajor(), other.getMajor())
                 && Objects.equals(schedule.getGroupNumber(), other.getGroupNumber())
                 && planPolslMatch;
     }

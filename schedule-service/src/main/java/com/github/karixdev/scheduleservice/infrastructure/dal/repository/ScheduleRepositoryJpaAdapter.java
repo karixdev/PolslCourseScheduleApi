@@ -28,21 +28,8 @@ public class ScheduleRepositoryJpaAdapter implements ScheduleRepository {
     }
 
     @Override
-    public Optional<Schedule> findByName(String name) {
-        return jpaRepository.findByName(name).map(entityMapper::toDomainEntity);
-    }
-
-    @Override
     public Optional<Schedule> findById(UUID id) {
         return jpaRepository.findById(id).map(entityMapper::toDomainEntity);
-    }
-
-    @Override
-    public List<Schedule> findAllOrderBySemesterAndGroupNumberAsc() {
-        return jpaRepository.findAllOrderBySemesterAndGroupNumberAsc()
-                .stream()
-                .map(entityMapper::toDomainEntity)
-                .toList();
     }
 
     @Override

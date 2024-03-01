@@ -15,8 +15,8 @@ public class Schedule {
 
     private UUID id;
 
+    private String major;
     private Integer semester;
-    private String name;
     private Integer groupNumber;
 
     private PlanPolslData planPolslData;

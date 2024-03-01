@@ -10,7 +10,7 @@ public record UpdateScheduleByIdCommand(
         Integer type,
         Integer planPolslId,
         Integer semester,
-        String name,
+        String major,
         Integer groupNumber,
         Integer weekDays
 ) {}

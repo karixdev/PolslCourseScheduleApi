@@ -7,7 +7,6 @@ import com.github.karixdev.scheduleservice.application.event.EventType;
 import com.github.karixdev.scheduleservice.application.event.ScheduleEvent;
 import com.github.karixdev.scheduleservice.application.event.producer.EventProducer;
 import com.github.karixdev.scheduleservice.application.exception.ScheduleWithIdNotFoundException;
-import com.github.karixdev.scheduleservice.application.exception.UnavailableScheduleNameException;
 import com.github.karixdev.scheduleservice.domain.entity.PlanPolslData;
 import com.github.karixdev.scheduleservice.domain.entity.Schedule;
 import com.github.karixdev.scheduleservice.domain.repository.ScheduleRepository;
@@ -64,33 +63,6 @@ class UpdateScheduleByIdCommandHandlerTest {
     }
 
     @Test
-    void GivenCommandWithUnavailableName_WhenHandle_ThenThrowsUnavailableScheduleNameException() {
-        // Given
-        UUID id = UUID.randomUUID();
-        String name = "unavailable-name";
-
-        UpdateScheduleByIdCommand command = UpdateScheduleByIdCommand.builder()
-                .id(id)
-                .name(name)
-                .build();
-
-        Schedule schedule = Schedule.builder()
-                .id(id)
-                .name("name")
-                .build();
-
-        when(repository.findById(id))
-                .thenReturn(Optional.of(schedule));
-
-        when(repository.findByName(command.name()))
-                .thenReturn(Optional.of(Schedule.builder().build()));
-
-        // When & Then
-        assertThatThrownBy(() -> underTest.handle(command))
-                .isInstanceOf(UnavailableScheduleNameException.class);
-    }
-
-    @Test
     void GivenValidCommand_WhenHandle_ThenSavesUpdated() {
         // Given
         UUID id = UUID.randomUUID();
@@ -98,7 +70,7 @@ class UpdateScheduleByIdCommandHandlerTest {
         UpdateScheduleByIdCommand command = UpdateScheduleByIdCommand.builder()
                 .id(id)
                 .semester(1)
-                .name("new-name")
+                .major("new-major")
                 .groupNumber(2)
                 .planPolslId(3)
                 .type(4)
@@ -109,7 +81,7 @@ class UpdateScheduleByIdCommandHandlerTest {
                 .id(id)
                 .semester(2)
                 .groupNumber(3)
-                .name("name")
+                .major("major")
                 .planPolslData(
                         PlanPolslData.builder()
                                 .id(3)
@@ -123,7 +95,7 @@ class UpdateScheduleByIdCommandHandlerTest {
                 .id(id)
                 .semester(command.semester())
                 .groupNumber(command.groupNumber())
-                .name(command.name())
+                .major(command.major())
                 .planPolslData(
                         PlanPolslData.builder()
                                 .id(command.planPolslId())
@@ -135,9 +107,6 @@ class UpdateScheduleByIdCommandHandlerTest {
 
         when(repository.findById(id))
                 .thenReturn(Optional.of(schedule));
-        when(repository.findByName(command.name()))
-                .thenReturn(Optional.empty());
-
         // When
         underTest.handle(command);
 
@@ -156,7 +125,7 @@ class UpdateScheduleByIdCommandHandlerTest {
         UpdateScheduleByIdCommand command = UpdateScheduleByIdCommand.builder()
                 .id(id)
                 .semester(1)
-                .name("name")
+                .major("major")
                 .groupNumber(2)
                 .planPolslId(3)
                 .type(4)
@@ -167,7 +136,7 @@ class UpdateScheduleByIdCommandHandlerTest {
                 .id(id)
                 .semester(2)
                 .groupNumber(3)
-                .name("name")
+                .major("major")
                 .planPolslData(
                         PlanPolslData.builder()
                                 .id(3)
@@ -181,7 +150,7 @@ class UpdateScheduleByIdCommandHandlerTest {
                 .id(id)
                 .semester(command.semester())
                 .groupNumber(command.groupNumber())
-                .name(command.name())
+                .major(command.major())
                 .planPolslData(
                         PlanPolslData.builder()
                                 .id(command.planPolslId())
@@ -221,7 +190,7 @@ class UpdateScheduleByIdCommandHandlerTest {
         UpdateScheduleByIdCommand command = UpdateScheduleByIdCommand.builder()
                 .id(id)
                 .semester(1)
-                .name("name")
+                .major("major")
                 .groupNumber(2)
                 .planPolslId(planPolslId)
                 .type(type)
@@ -232,7 +201,7 @@ class UpdateScheduleByIdCommandHandlerTest {
                 .id(id)
                 .semester(2)
                 .groupNumber(3)
-                .name("name")
+                .major("major")
                 .planPolslData(
                         PlanPolslData.builder()
                                 .id(1)
@@ -246,7 +215,7 @@ class UpdateScheduleByIdCommandHandlerTest {
                 .id(id)
                 .semester(command.semester())
                 .groupNumber(command.groupNumber())
-                .name(command.name())
+                .major(command.major())
                 .planPolslData(
                         PlanPolslData.builder()
                                 .id(command.planPolslId())

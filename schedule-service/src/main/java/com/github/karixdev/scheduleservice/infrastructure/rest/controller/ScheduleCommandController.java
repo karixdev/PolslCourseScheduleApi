@@ -27,7 +27,7 @@ public class ScheduleCommandController {
                 .planPolslId(payload.planPolslId())
                 .semester(payload.semester())
                 .semester(payload.semester())
-                .name(payload.name())
+                .major(payload.major())
                 .groupNumber(payload.groupNumber())
                 .weekDays(payload.wd())
                 .build();
@@ -58,7 +58,7 @@ public class ScheduleCommandController {
                 .type(payload.type())
                 .planPolslId(payload.planPolslId())
                 .semester(payload.semester())
-                .name(payload.name())
+                .major(payload.major())
                 .groupNumber(payload.groupNumber())
                 .weekDays(payload.wd())
                 .build();
