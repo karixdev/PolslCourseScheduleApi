@@ -1,4 +1,4 @@
-package com.github.karixdev.scheduleservice.infrastructure.dal;
+package com.github.karixdev.scheduleservice.infrastructure.dal.repository;
 
 import com.github.karixdev.scheduleservice.infrastructure.dal.entity.ScheduleEntity;
 import org.springframework.data.jpa.repository.JpaRepository;

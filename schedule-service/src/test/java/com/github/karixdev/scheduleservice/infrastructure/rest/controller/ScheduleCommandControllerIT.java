@@ -6,7 +6,7 @@ import com.github.karixdev.scheduleservice.application.event.ScheduleEvent;
 import com.github.karixdev.scheduleservice.domain.entity.PlanPolslData;
 import com.github.karixdev.scheduleservice.domain.entity.Schedule;
 import com.github.karixdev.scheduleservice.domain.repository.ScheduleRepository;
-import com.github.karixdev.scheduleservice.infrastructure.dal.JpaScheduleRepository;
+import com.github.karixdev.scheduleservice.infrastructure.dal.repository.JpaScheduleRepository;
 import com.github.karixdev.scheduleservice.utils.KeycloakUtils;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;

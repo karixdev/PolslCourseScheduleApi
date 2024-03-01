@@ -1,6 +1,8 @@
-package com.github.karixdev.scheduleservice.infrastructure.dal;
+package com.github.karixdev.scheduleservice.infrastructure.dal.repository;
 
+import com.github.karixdev.scheduleservice.infrastructure.dal.PostgresContainerEnvironment;
 import com.github.karixdev.scheduleservice.infrastructure.dal.entity.ScheduleEntity;
+import com.github.karixdev.scheduleservice.infrastructure.dal.repository.JpaScheduleRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;

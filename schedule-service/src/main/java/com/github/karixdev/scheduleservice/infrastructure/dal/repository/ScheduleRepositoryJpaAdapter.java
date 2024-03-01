@@ -1,4 +1,4 @@
-package com.github.karixdev.scheduleservice.infrastructure.dal;
+package com.github.karixdev.scheduleservice.infrastructure.dal.repository;
 
 import com.github.karixdev.scheduleservice.domain.entity.Schedule;
 import com.github.karixdev.scheduleservice.domain.repository.ScheduleRepository;
