@@ -6,6 +6,7 @@ import com.github.karixdev.scheduleservice.application.dal.TransactionManager;
 import com.github.karixdev.scheduleservice.application.event.EventType;
 import com.github.karixdev.scheduleservice.application.event.ScheduleEvent;
 import com.github.karixdev.scheduleservice.application.event.producer.EventProducer;
+import com.github.karixdev.scheduleservice.application.exception.UnavailablePlanPolslIdException;
 import com.github.karixdev.scheduleservice.domain.entity.PlanPolslData;
 import com.github.karixdev.scheduleservice.domain.entity.Schedule;
 import com.github.karixdev.scheduleservice.domain.repository.ScheduleRepository;
@@ -20,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 
 import static com.github.karixdev.scheduleservice.matcher.ScheduleNonIdArgumentMatcher.scheduleNonIdEq;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -43,6 +45,26 @@ class CreateScheduleCommandHandlerTest {
 
     @Captor
     ArgumentCaptor<Schedule> scheduleCaptor;
+
+    @Test
+    void GivenCommandWithUnavailablePlanPolslId_WhenHandle_ThenThrowsUnavailablePlanPolslIdException() {
+        // Given
+        CreateScheduleCommand command = CreateScheduleCommand.builder()
+                .type(0)
+                .planPolslId(1)
+                .semester(2)
+                .groupNumber(3)
+                .weekDays(4)
+                .major("schedule")
+                .build();
+
+        when(repository.findByPlanPolslId(command.planPolslId()))
+                .thenReturn(Optional.of(Schedule.builder().build()));
+
+        // When & Then
+        assertThatThrownBy(() -> underTest.handle(command))
+                .isInstanceOf(UnavailablePlanPolslIdException.class);
+    }
 
     @Test
     void GivenValidCommand_WhenHandle_ThenSavesScheduleAndProducesEvent() {

@@ -33,6 +33,11 @@ public class ScheduleRepositoryJpaAdapter implements ScheduleRepository {
     }
 
     @Override
+    public Optional<Schedule> findByPlanPolslId(Integer planPolslId) {
+        return jpaRepository.findByPlanPolslId(planPolslId).map(entityMapper::toDomainEntity);
+    }
+
+    @Override
     public List<Schedule> findAll() {
         return jpaRepository.findAll()
                 .stream()

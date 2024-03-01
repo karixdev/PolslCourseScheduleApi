@@ -6,6 +6,7 @@ import com.github.karixdev.scheduleservice.application.event.EventType;
 import com.github.karixdev.scheduleservice.application.event.ScheduleEvent;
 import com.github.karixdev.scheduleservice.application.event.producer.EventProducer;
 import com.github.karixdev.scheduleservice.application.exception.ScheduleWithIdNotFoundException;
+import com.github.karixdev.scheduleservice.application.exception.UnavailablePlanPolslIdException;
 import com.github.karixdev.scheduleservice.domain.entity.PlanPolslData;
 import com.github.karixdev.scheduleservice.domain.entity.Schedule;
 import com.github.karixdev.scheduleservice.domain.repository.ScheduleRepository;
@@ -32,9 +33,11 @@ public class UpdateScheduleByIdCommandHandler implements CommandHandler<UpdateSc
 
         Schedule schedule = optionalSchedule.get();
 
-        schedule.setSemester(command.semester());
-        schedule.setMajor(command.major());
-        schedule.setGroupNumber(command.groupNumber());
+        if (repository.findByPlanPolslId(command.planPolslId()).isPresent()) {
+            throw new UnavailablePlanPolslIdException(command.planPolslId());
+        }
+
+        PlanPolslData currentPlanPolslData = schedule.getPlanPolslData();
 
         PlanPolslData updatedPlanPolslData = PlanPolslData.builder()
                 .id(command.planPolslId())
@@ -42,9 +45,16 @@ public class UpdateScheduleByIdCommandHandler implements CommandHandler<UpdateSc
                 .weekDays(command.weekDays())
                 .build();
 
-        boolean shouldProduceEvent = shouldProduceEvent(schedule.getPlanPolslData(), updatedPlanPolslData);
+        boolean shouldProduceEvent = shouldProduceEvent(currentPlanPolslData, updatedPlanPolslData);
+
+        if (!isPlanPolslIdAvailable(currentPlanPolslData, updatedPlanPolslData)) {
+            throw new UnavailablePlanPolslIdException(command.planPolslId());
+        }
 
         schedule.setPlanPolslData(updatedPlanPolslData);
+        schedule.setSemester(command.semester());
+        schedule.setMajor(command.major());
+        schedule.setGroupNumber(command.groupNumber());
 
         transactionManager.execute(() -> repository.save(schedule));
 
@@ -63,6 +73,11 @@ public class UpdateScheduleByIdCommandHandler implements CommandHandler<UpdateSc
         return !Objects.equals(currentData.getType(), newData.getType())
                 || !Objects.equals(currentData.getId(), newData.getId())
                 || !Objects.equals(currentData.getWeekDays(), newData.getWeekDays());
+    }
+
+    private boolean isPlanPolslIdAvailable(PlanPolslData currentData, PlanPolslData newData) {
+        return Objects.equals(currentData.getId(), newData.getId())
+                || repository.findByPlanPolslId(newData.getId()).isEmpty();
     }
 
 }

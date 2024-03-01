@@ -95,6 +95,46 @@ class ScheduleCommandControllerIT extends ContainersEnvironment {
     }
 
     @Test
+    void shouldNotCreateScheduleWithUnavailableWithUnavailablePlanPolslId() {
+        String token = KeycloakUtils.getAdminToken(keycloakContainer.getAuthServerUrl());
+
+        scheduleRepository.save(Schedule.builder()
+                .id(UUID.randomUUID())
+                .semester(1)
+                .major("major")
+                .groupNumber(1)
+                .planPolslData(
+                        PlanPolslData.builder()
+                                .id(1999)
+                                .type(1)
+                                .weekDays(0)
+                                .build()
+                )
+                .build());
+
+        String payload = """
+                {
+                    "type": 1,
+                    "planPolslId": 1999,
+                    "semester": 2,
+                    "name": "schedule-name",
+                    "groupNumber": 1,
+                    "wd": 0
+                }
+                """;
+
+        webClient.post().uri("/api/commands/schedules")
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(payload)
+                .exchange()
+                .expectStatus().isBadRequest();
+
+        assertThat(scheduleRepository.findAll())
+                .hasSize(1);
+    }
+
+    @Test
     void shouldCreateSchedule() {
         String token = KeycloakUtils.getAdminToken(keycloakContainer.getAuthServerUrl());
 
@@ -295,6 +335,60 @@ class ScheduleCommandControllerIT extends ContainersEnvironment {
                 .bodyValue(payload)
                 .exchange()
                 .expectStatus().isForbidden();
+    }
+
+    @Test
+    void shouldNotUpdateScheduleWithUnavailablePlanPolslId() {
+        String token = KeycloakUtils.getAdminToken(keycloakContainer.getAuthServerUrl());
+
+        Schedule schedule = Schedule.builder()
+                .id(UUID.randomUUID())
+                .semester(1)
+                .major("schedule-name")
+                .groupNumber(1)
+                .planPolslData(
+                        PlanPolslData.builder()
+                                .id(1999)
+                                .type(1)
+                                .weekDays(0)
+                                .build()
+                )
+                .build();
+
+        Schedule otherSchedule = Schedule.builder()
+                .id(UUID.randomUUID())
+                .semester(1)
+                .major("other-schedule-name")
+                .groupNumber(1)
+                .planPolslData(
+                        PlanPolslData.builder()
+                                .id(23232)
+                                .type(1)
+                                .weekDays(0)
+                                .build()
+                )
+                .build();
+
+        scheduleRepository.save(schedule);
+        scheduleRepository.save(otherSchedule);
+
+        String payload = """
+                {
+                    "type": 1,
+                    "planPolslId": 23232,
+                    "semester": 2,
+                    "name": "other-schedule-name",
+                    "groupNumber": 1,
+                    "wd": 0
+                }
+                """;
+
+        webClient.put().uri("/api/commands/schedules/%s".formatted(schedule.getId()))
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(payload)
+                .exchange()
+                .expectStatus().isBadRequest();
     }
 
     @Test

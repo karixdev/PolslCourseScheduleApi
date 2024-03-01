@@ -1,5 +1,6 @@
 package com.github.karixdev.scheduleservice.application.command.handler;
 
+import com.github.karixdev.scheduleservice.application.command.CreateScheduleCommand;
 import com.github.karixdev.scheduleservice.application.command.UpdateScheduleByIdCommand;
 import com.github.karixdev.scheduleservice.application.dal.TransactionCallback;
 import com.github.karixdev.scheduleservice.application.dal.TransactionManager;
@@ -7,6 +8,7 @@ import com.github.karixdev.scheduleservice.application.event.EventType;
 import com.github.karixdev.scheduleservice.application.event.ScheduleEvent;
 import com.github.karixdev.scheduleservice.application.event.producer.EventProducer;
 import com.github.karixdev.scheduleservice.application.exception.ScheduleWithIdNotFoundException;
+import com.github.karixdev.scheduleservice.application.exception.UnavailablePlanPolslIdException;
 import com.github.karixdev.scheduleservice.domain.entity.PlanPolslData;
 import com.github.karixdev.scheduleservice.domain.entity.Schedule;
 import com.github.karixdev.scheduleservice.domain.repository.ScheduleRepository;
@@ -60,6 +62,46 @@ class UpdateScheduleByIdCommandHandlerTest {
         // When & Then
         assertThatThrownBy(() -> underTest.handle(command))
                 .isInstanceOf(ScheduleWithIdNotFoundException.class);
+    }
+
+    @Test
+    void GivenCommandWithUnavailablePlanPolslId_WhenHandle_ThenThrowsUnavailablePlanPolslIdException() {
+        // Given
+        UUID id = UUID.randomUUID();
+
+        UpdateScheduleByIdCommand command = UpdateScheduleByIdCommand.builder()
+                .id(id)
+                .semester(1)
+                .major("new-major")
+                .groupNumber(2)
+                .planPolslId(31)
+                .type(4)
+                .weekDays(5)
+                .build();
+
+        Schedule schedule = Schedule.builder()
+                .id(id)
+                .semester(2)
+                .groupNumber(3)
+                .major("major")
+                .planPolslData(
+                        PlanPolslData.builder()
+                                .id(3)
+                                .type(4)
+                                .weekDays(5)
+                                .build()
+                )
+                .build();
+
+        when(repository.findById(id))
+                .thenReturn(Optional.of(schedule));
+
+        when(repository.findByPlanPolslId(command.planPolslId()))
+                .thenReturn(Optional.of(Schedule.builder().build()));
+
+        // When & Then
+        assertThatThrownBy(() -> underTest.handle(command))
+                .isInstanceOf(UnavailablePlanPolslIdException.class);
     }
 
     @Test

@@ -12,6 +12,7 @@ public interface ScheduleRepository {
     void delete(Schedule schedule);
 
     Optional<Schedule> findById(UUID id);
+    Optional<Schedule> findByPlanPolslId(Integer planPolslId);
 
     List<Schedule> findAll();
 

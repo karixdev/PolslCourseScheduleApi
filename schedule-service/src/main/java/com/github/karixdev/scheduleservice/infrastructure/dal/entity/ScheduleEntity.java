@@ -7,7 +7,15 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Entity(name = "Schedule")
-@Table(name = "schedule")
+@Table(
+        name = "schedule",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "unique_plan_polsl_id",
+                        columnNames = "plan_polsl_id"
+                )
+        }
+)
 @Getter
 @Setter
 @Builder
@@ -27,7 +35,8 @@ public class ScheduleEntity {
 
     @Column(
             name = "plan_polsl_id",
-            nullable = false
+            nullable = false,
+            unique = true
     )
     private Integer planPolslId;
 
