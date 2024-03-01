@@ -45,4 +45,9 @@ public class ScheduleRepositoryJpaAdapter implements ScheduleRepository {
                 .toList();
     }
 
+    @Override
+    public List<String> findUniqueMajorsOrderedAlphabetically() {
+        return jpaRepository.findUniqueMajorsOrderedAlphabetically();
+    }
+
 }

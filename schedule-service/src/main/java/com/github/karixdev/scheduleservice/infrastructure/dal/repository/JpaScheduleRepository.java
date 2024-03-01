@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -18,5 +19,12 @@ public interface JpaScheduleRepository extends JpaRepository<ScheduleEntity, UUI
             WHERE schedule.planPolslId = :planPolslId
             """)
     Optional<ScheduleEntity> findByPlanPolslId(@Param("planPolslId") Integer planPolslId);
+
+    @Query("""
+            SELECT DISTINCT schedule.major
+            FROM Schedule schedule
+            ORDER BY schedule.major ASC
+            """)
+    List<String> findUniqueMajorsOrderedAlphabetically();
 
 }

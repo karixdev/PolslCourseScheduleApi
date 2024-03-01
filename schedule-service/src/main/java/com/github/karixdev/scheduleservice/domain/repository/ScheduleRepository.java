@@ -16,4 +16,6 @@ public interface ScheduleRepository {
 
     List<Schedule> findAll();
 
+    List<String> findUniqueMajorsOrderedAlphabetically();
+
 }

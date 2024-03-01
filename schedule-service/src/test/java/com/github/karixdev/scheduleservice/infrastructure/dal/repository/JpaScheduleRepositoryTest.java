@@ -8,6 +8,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -80,6 +81,49 @@ class JpaScheduleRepositoryTest extends PostgresContainerEnvironment {
 
         // Then
         assertThat(result).contains(schedule);
+    }
+
+    @Test
+    void WhenFindUniqueMajorsOrderedAlphabetically_ThenReturnsListOfCorrectlySortedStrings() {
+        ScheduleEntity schedule1 = ScheduleEntity.builder()
+                .id(UUID.randomUUID())
+                .type(0)
+                .planPolslId(12313)
+                .semester(1)
+                .major("b")
+                .groupNumber(1)
+                .wd(0)
+                .build();
+
+        ScheduleEntity schedule2 = ScheduleEntity.builder()
+                .id(UUID.randomUUID())
+                .type(20)
+                .planPolslId(1111)
+                .semester(13)
+                .major("c")
+                .groupNumber(132)
+                .wd(10)
+                .build();
+
+        ScheduleEntity schedule3 = ScheduleEntity.builder()
+                .id(UUID.randomUUID())
+                .type(20)
+                .planPolslId(34)
+                .semester(13)
+                .major("a")
+                .groupNumber(132)
+                .wd(10)
+                .build();
+
+        em.persistAndFlush(schedule1);
+        em.persistAndFlush(schedule2);
+        em.persistAndFlush(schedule3);
+
+        // When
+        List<String> result = underTest.findUniqueMajorsOrderedAlphabetically();
+
+        // Then
+        assertThat(result).containsSequence("a", "b", "c");
     }
 
 
