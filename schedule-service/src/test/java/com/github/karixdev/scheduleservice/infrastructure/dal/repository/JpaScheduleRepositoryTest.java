@@ -126,5 +126,62 @@ class JpaScheduleRepositoryTest extends PostgresContainerEnvironment {
         assertThat(result).containsSequence("a", "b", "c");
     }
 
+    @Test
+    void GivenMajor_WhenFindSemestersByMajorOrderAsc_ThenReturnsSemestersInCorrectOrder() {
+        // Given
+        String major = "major-a";
+
+        ScheduleEntity schedule1 = ScheduleEntity.builder()
+                .id(UUID.randomUUID())
+                .type(0)
+                .planPolslId(1143)
+                .semester(3)
+                .major(major)
+                .groupNumber(1)
+                .wd(0)
+                .build();
+
+        ScheduleEntity schedule2 = ScheduleEntity.builder()
+                .id(UUID.randomUUID())
+                .type(20)
+                .planPolslId(897876)
+                .semester(1)
+                .major(major)
+                .groupNumber(132)
+                .wd(10)
+                .build();
+
+        ScheduleEntity schedule3 = ScheduleEntity.builder()
+                .id(UUID.randomUUID())
+                .type(20)
+                .planPolslId(4353)
+                .semester(2)
+                .major(major)
+                .groupNumber(132)
+                .wd(10)
+                .build();
+
+        ScheduleEntity schedule4 = ScheduleEntity.builder()
+                .id(UUID.randomUUID())
+                .type(20)
+                .planPolslId(123123)
+                .semester(13)
+                .major("major-2")
+                .groupNumber(132)
+                .wd(10)
+                .build();
+
+        em.persistAndFlush(schedule1);
+        em.persistAndFlush(schedule2);
+        em.persistAndFlush(schedule3);
+        em.persistAndFlush(schedule4);
+
+        // When
+        List<Integer> result = underTest.findSemestersByMajorOrderAsc(major);
+
+        // Then
+        assertThat(result).containsSequence(1, 2, 3);
+    }
+
 
 }

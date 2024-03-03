@@ -27,4 +27,12 @@ public interface JpaScheduleRepository extends JpaRepository<ScheduleEntity, UUI
             """)
     List<String> findUniqueMajorsOrderedAlphabetically();
 
+    @Query("""
+            SELECT DISTINCT schedule.semester
+            FROM Schedule schedule
+            WHERE schedule.major = :major
+            ORDER BY schedule.semester ASC
+            """)
+    List<Integer> findSemestersByMajorOrderAsc(String major);
+
 }

@@ -50,4 +50,9 @@ public class ScheduleRepositoryJpaAdapter implements ScheduleRepository {
         return jpaRepository.findUniqueMajorsOrderedAlphabetically();
     }
 
+    @Override
+    public List<Integer> findSemestersByMajorOrderAsc(String major) {
+        return jpaRepository.findSemestersByMajorOrderAsc(major);
+    }
+
 }
