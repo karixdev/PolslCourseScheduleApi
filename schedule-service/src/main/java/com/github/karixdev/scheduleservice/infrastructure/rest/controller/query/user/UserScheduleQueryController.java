@@ -4,7 +4,7 @@ import com.github.karixdev.scheduleservice.application.dto.PublicScheduleDTO;
 import com.github.karixdev.scheduleservice.application.query.user.FindSchedulesBySemesterAndMajorQuery;
 import com.github.karixdev.scheduleservice.application.query.user.FindSemestersByMajorQuery;
 import com.github.karixdev.scheduleservice.application.query.user.FindUniqueMajorsQuery;
-import com.github.karixdev.scheduleservice.application.query.user.handler.QueryHandler;
+import com.github.karixdev.scheduleservice.application.query.QueryHandler;
 import com.github.karixdev.scheduleservice.infrastructure.rest.controller.payload.PublicScheduleResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

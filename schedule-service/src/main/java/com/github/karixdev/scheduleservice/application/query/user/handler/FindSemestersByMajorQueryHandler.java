@@ -1,5 +1,6 @@
 package com.github.karixdev.scheduleservice.application.query.user.handler;
 
+import com.github.karixdev.scheduleservice.application.query.QueryHandler;
 import com.github.karixdev.scheduleservice.application.query.user.FindSemestersByMajorQuery;
 import com.github.karixdev.scheduleservice.domain.repository.ScheduleRepository;
 import lombok.RequiredArgsConstructor;
