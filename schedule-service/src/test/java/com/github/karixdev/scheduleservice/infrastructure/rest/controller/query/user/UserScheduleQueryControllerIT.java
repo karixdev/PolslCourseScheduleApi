@@ -175,4 +175,65 @@ class UserScheduleQueryControllerIT extends ContainersEnvironment {
                 .jsonPath("$.[2]").isEqualTo(3);
     }
 
+    @Test
+    void shouldRetrieveCorrectSchedulesForGivenMajorAndSemester() {
+        String major = "major-a";
+        int semester = 1;
+
+        Schedule schedule1 = Schedule.builder()
+                .id(UUID.randomUUID())
+                .semester(semester)
+                .major(major)
+                .groupNumber(3)
+                .planPolslData(
+                        PlanPolslData.builder()
+                                .id(1231)
+                                .type(1)
+                                .weekDays(0)
+                                .build()
+                )
+                .build();
+
+        Schedule schedule2 = Schedule.builder()
+                .id(UUID.randomUUID())
+                .semester(2)
+                .major(major)
+                .groupNumber(1)
+                .planPolslData(
+                        PlanPolslData.builder()
+                                .id(4324)
+                                .type(1)
+                                .weekDays(0)
+                                .build()
+                )
+                .build();
+
+        Schedule schedule3 = Schedule.builder()
+                .id(UUID.randomUUID())
+                .semester(semester)
+                .major("major-b")
+                .groupNumber(1)
+                .planPolslData(
+                        PlanPolslData.builder()
+                                .id(64564)
+                                .type(1)
+                                .weekDays(0)
+                                .build()
+                )
+                .build();
+
+        scheduleRepository.save(schedule1);
+        scheduleRepository.save(schedule2);
+        scheduleRepository.save(schedule3);
+
+        webClient.get().uri("/api/queries/schedules/majors/%s/semesters/%d".formatted(major, semester))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.*").isArray()
+                .jsonPath("$.[1]").doesNotExist()
+                .jsonPath("$.[0].id").isEqualTo(schedule1.getId().toString())
+                .jsonPath("$.[0].group").isEqualTo(schedule1.getGroupNumber());
+    }
+
 }

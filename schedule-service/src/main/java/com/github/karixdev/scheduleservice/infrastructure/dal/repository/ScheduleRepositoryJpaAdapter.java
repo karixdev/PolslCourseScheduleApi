@@ -46,6 +46,14 @@ public class ScheduleRepositoryJpaAdapter implements ScheduleRepository {
     }
 
     @Override
+    public List<Schedule> findByMajorAndSemester(String major, Integer group) {
+        return jpaRepository.findByMajorAndSemester(major, group)
+                .stream()
+                .map(entityMapper::toDomainEntity)
+                .toList();
+    }
+
+    @Override
     public List<String> findUniqueMajorsOrderedAlphabetically() {
         return jpaRepository.findUniqueMajorsOrderedAlphabetically();
     }

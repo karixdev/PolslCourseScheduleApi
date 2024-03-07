@@ -1,5 +1,6 @@
 package com.github.karixdev.scheduleservice.infrastructure.dal.repository;
 
+import com.github.karixdev.scheduleservice.domain.entity.Schedule;
 import com.github.karixdev.scheduleservice.infrastructure.dal.PostgresContainerEnvironment;
 import com.github.karixdev.scheduleservice.infrastructure.dal.entity.ScheduleEntity;
 import org.junit.jupiter.api.Test;
@@ -181,6 +182,53 @@ class JpaScheduleRepositoryTest extends PostgresContainerEnvironment {
 
         // Then
         assertThat(result).containsSequence(1, 2, 3);
+    }
+
+    @Test
+    void GivenMajorAndGroup_WhenFindByMajorAndSemester_ThenReturnsListWithCorrectValues() {
+        // Given
+        String major = "major-a";
+        int semester = 1;
+
+        ScheduleEntity schedule1 = ScheduleEntity.builder()
+                .id(UUID.randomUUID())
+                .type(0)
+                .planPolslId(1143)
+                .semester(semester)
+                .major(major)
+                .groupNumber(1)
+                .wd(0)
+                .build();
+
+        ScheduleEntity schedule2 = ScheduleEntity.builder()
+                .id(UUID.randomUUID())
+                .type(20)
+                .planPolslId(897876)
+                .semester(2)
+                .major(major)
+                .groupNumber(2)
+                .wd(10)
+                .build();
+
+        ScheduleEntity schedule3 = ScheduleEntity.builder()
+                .id(UUID.randomUUID())
+                .type(20)
+                .planPolslId(4353)
+                .semester(semester)
+                .major("major-b")
+                .groupNumber(3)
+                .wd(10)
+                .build();
+
+        em.persist(schedule1);
+        em.persist(schedule2);
+        em.persistAndFlush(schedule3);
+
+        // When
+        List<ScheduleEntity> result = underTest.findByMajorAndSemester(major, semester);
+
+        // Then
+        assertThat(result).containsExactly(schedule1);
     }
 
 
