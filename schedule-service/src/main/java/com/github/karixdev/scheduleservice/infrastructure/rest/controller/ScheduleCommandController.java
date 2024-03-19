@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/commands/schedules")
+@RequestMapping("/api/admin/commands/schedules")
 @RequiredArgsConstructor
 public class ScheduleCommandController {
 

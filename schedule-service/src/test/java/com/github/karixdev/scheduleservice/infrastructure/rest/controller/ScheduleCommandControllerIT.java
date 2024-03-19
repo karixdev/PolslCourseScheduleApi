@@ -84,7 +84,7 @@ class ScheduleCommandControllerIT extends ContainersEnvironment {
                 }
                 """;
 
-        webClient.post().uri("/api/commands/schedules")
+        webClient.post().uri("/api/admin/commands/schedules")
                 .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(payload)
@@ -123,7 +123,7 @@ class ScheduleCommandControllerIT extends ContainersEnvironment {
                 }
                 """;
 
-        webClient.post().uri("/api/commands/schedules")
+        webClient.post().uri("/api/admin/commands/schedules")
                 .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(payload)
@@ -149,7 +149,7 @@ class ScheduleCommandControllerIT extends ContainersEnvironment {
                 }
                 """;
 
-        webClient.post().uri("/api/commands/schedules")
+        webClient.post().uri("/api/admin/commands/schedules")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + token)
                 .bodyValue(payload)
@@ -210,7 +210,7 @@ class ScheduleCommandControllerIT extends ContainersEnvironment {
 
         scheduleRepository.save(schedule);
 
-        webClient.delete().uri("/api/commands/schedules/%s".formatted(schedule.getId()))
+        webClient.delete().uri("/api/admin/commands/schedules/%s".formatted(schedule.getId()))
                 .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus().isForbidden();
@@ -238,7 +238,7 @@ class ScheduleCommandControllerIT extends ContainersEnvironment {
 
         scheduleRepository.save(schedule);
 
-        webClient.delete().uri("/api/commands/schedules/%s".formatted(UUID.randomUUID()))
+        webClient.delete().uri("/api/admin/commands/schedules/%s".formatted(UUID.randomUUID()))
                 .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus().isNotFound();
@@ -281,7 +281,7 @@ class ScheduleCommandControllerIT extends ContainersEnvironment {
         scheduleRepository.save(schedule);
         scheduleRepository.save(otherSchedule);
 
-        webClient.delete().uri("/api/commands/schedules/%s".formatted(schedule.getId()))
+        webClient.delete().uri("/api/admin/commands/schedules/%s".formatted(schedule.getId()))
                 .header("Authorization", "Bearer " + token)
                 .exchange()
                 .expectStatus().isNoContent();
@@ -329,7 +329,7 @@ class ScheduleCommandControllerIT extends ContainersEnvironment {
                 }
                 """;
 
-        webClient.put().uri("/api/commands/schedules/%s".formatted(schedule.getId()))
+        webClient.put().uri("/api/admin/commands/schedules/%s".formatted(schedule.getId()))
                 .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(payload)
@@ -383,7 +383,7 @@ class ScheduleCommandControllerIT extends ContainersEnvironment {
                 }
                 """;
 
-        webClient.put().uri("/api/commands/schedules/%s".formatted(schedule.getId()))
+        webClient.put().uri("/api/admin/commands/schedules/%s".formatted(schedule.getId()))
                 .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(payload)
@@ -422,7 +422,7 @@ class ScheduleCommandControllerIT extends ContainersEnvironment {
                 }
                 """;
 
-        webClient.put().uri("/api/commands/schedules/%s".formatted(UUID.randomUUID()))
+        webClient.put().uri("/api/admin/commands/schedules/%s".formatted(UUID.randomUUID()))
                 .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(payload)
@@ -476,7 +476,7 @@ class ScheduleCommandControllerIT extends ContainersEnvironment {
                 }
                 """;
 
-        webClient.put().uri("/api/commands/schedules/%s".formatted(schedule.getId()))
+        webClient.put().uri("/api/admin/commands/schedules/%s".formatted(schedule.getId()))
                 .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(payload)
