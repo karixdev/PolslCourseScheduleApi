@@ -4,7 +4,6 @@ import com.github.karixdev.commonservice.converter.RealmRoleConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -30,6 +29,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request -> request
                         .requestMatchers("/api/commands/**").authenticated()
                         .requestMatchers("/api/commands/**").hasRole("admin")
+                        .requestMatchers("/api/admin/**").hasRole("admin")
                         .requestMatchers("/api/queries/**").permitAll()
                         .anyRequest().authenticated()
                 )
