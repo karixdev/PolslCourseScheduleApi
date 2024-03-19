@@ -1,4 +1,4 @@
-package com.github.karixdev.scheduleservice.infrastructure.rest.controller.params;
+package com.github.karixdev.scheduleservice.infrastructure.rest.params;
 
 import org.springframework.web.bind.annotation.RequestParam;
 

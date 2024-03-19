@@ -4,7 +4,7 @@ import com.github.karixdev.scheduleservice.application.command.CreateScheduleCom
 import com.github.karixdev.scheduleservice.application.command.DeleteScheduleByIdCommand;
 import com.github.karixdev.scheduleservice.application.command.UpdateScheduleByIdCommand;
 import com.github.karixdev.scheduleservice.application.command.handler.CommandHandler;
-import com.github.karixdev.scheduleservice.infrastructure.rest.controller.payload.ScheduleRequest;
+import com.github.karixdev.scheduleservice.infrastructure.rest.payload.ScheduleRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

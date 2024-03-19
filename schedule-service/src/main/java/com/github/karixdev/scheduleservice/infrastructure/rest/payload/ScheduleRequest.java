@@ -1,4 +1,4 @@
-package com.github.karixdev.scheduleservice.infrastructure.rest.controller.payload;
+package com.github.karixdev.scheduleservice.infrastructure.rest.payload;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
