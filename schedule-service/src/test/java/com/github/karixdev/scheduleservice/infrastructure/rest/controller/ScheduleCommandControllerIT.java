@@ -6,11 +6,13 @@ import com.github.karixdev.scheduleservice.application.event.ScheduleEvent;
 import com.github.karixdev.scheduleservice.domain.entity.PlanPolslData;
 import com.github.karixdev.scheduleservice.domain.entity.Schedule;
 import com.github.karixdev.scheduleservice.domain.repository.ScheduleRepository;
+import com.github.karixdev.scheduleservice.infrastructure.dal.entity.ScheduleEntity;
 import com.github.karixdev.scheduleservice.infrastructure.dal.repository.JpaScheduleRepository;
 import com.github.karixdev.scheduleservice.utils.KeycloakUtils;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,12 +26,11 @@ import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.test.utils.KafkaTestUtils;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.testcontainers.shaded.org.awaitility.Awaitility;
 
 import java.time.Duration;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
@@ -523,6 +524,49 @@ class ScheduleCommandControllerIT extends ContainersEnvironment {
         assertThat(event.entity())
                 .usingRecursiveComparison()
                 .isEqualTo(updatedSchedule);
+    }
+
+    @Test
+    void shouldBlankUpdateSchedules() {
+        String token = KeycloakUtils.getAdminToken(keycloakContainer.getAuthServerUrl());
+
+        List<ScheduleEntity> schedules = IntStream.range(0, 15).mapToObj(i ->
+                ScheduleEntity.builder()
+                        .id(UUID.randomUUID())
+                        .type(i + 1)
+                        .planPolslId(i + 1)
+                        .semester(i + 1)
+                        .major("major-" + i)
+                        .groupNumber(i + 1)
+                        .wd(i + 1)
+                        .build()
+        ).toList();
+
+        jpaScheduleRepository.saveAll(schedules);
+
+        List<ScheduleEntity> selectedSchedules = schedules.subList(0, 10);
+
+        List<String> ids = selectedSchedules.stream()
+                .map(entity -> entity.getId().toString())
+                .toList();
+
+        String queryString = String.join("&id=", ids);
+
+        webClient.put().uri("/api/admin/commands/schedules/blank-update?id=" + queryString)
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNoContent();
+
+        ConsumerRecords<String, ScheduleEvent> events = KafkaTestUtils.getRecords(scheduleEventConsumer, Duration.ofSeconds(20));
+        Iterator<ConsumerRecord<String, ScheduleEvent>> iterator = events.iterator();
+
+        List<String> eventsSchedulesIds = new ArrayList<>();
+        while (iterator.hasNext()) {
+            eventsSchedulesIds.add(iterator.next().value().scheduleId());
+        }
+
+        assertThat(eventsSchedulesIds).isEqualTo(ids);
     }
 
 }

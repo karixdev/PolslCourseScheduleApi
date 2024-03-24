@@ -2,10 +2,10 @@ package com.github.karixdev.scheduleservice.infrastructure.dal.repository;
 
 import com.github.karixdev.scheduleservice.application.filter.ScheduleFilter;
 import com.github.karixdev.scheduleservice.application.pagination.Page;
-import com.github.karixdev.scheduleservice.application.pagination.PageInfo;
 import com.github.karixdev.scheduleservice.application.pagination.PageRequest;
 import com.github.karixdev.scheduleservice.domain.entity.Schedule;
 import com.github.karixdev.scheduleservice.domain.repository.ScheduleRepository;
+import com.github.karixdev.scheduleservice.infrastructure.dal.mapper.PaginationJpaMapper;
 import com.github.karixdev.scheduleservice.infrastructure.dal.mapper.ScheduleJpaMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -20,6 +20,7 @@ public class ScheduleRepositoryJpaAdapter implements ScheduleRepository {
 
     private final JpaScheduleRepository jpaRepository;
     private final ScheduleJpaMapper entityMapper;
+    private final PaginationJpaMapper paginationMapper;
 
     @Override
     public void save(Schedule schedule) {
@@ -42,6 +43,12 @@ public class ScheduleRepositoryJpaAdapter implements ScheduleRepository {
     }
 
     @Override
+    public Page<Schedule> findAllPaginated(PageRequest pageRequest) {
+        var jpaPageRequest = org.springframework.data.domain.PageRequest.of(pageRequest.page(), pageRequest.size());
+        return paginationMapper.mapToDomain(jpaRepository.findAll(jpaPageRequest));
+    }
+
+    @Override
     public List<Schedule> findAll() {
         return jpaRepository.findAll()
                 .stream()
@@ -52,25 +59,15 @@ public class ScheduleRepositoryJpaAdapter implements ScheduleRepository {
     @Override
     public Page<Schedule> findByFilterAndPaginate(ScheduleFilter filter, PageRequest pageRequest) {
         var entitiesPage = jpaRepository.findByFilterAndPaginate(filter, pageRequest);
+        return paginationMapper.mapToDomain(entitiesPage);
+    }
 
-        PageInfo pageInfo = PageInfo.builder()
-                .page(entitiesPage.getPageable().getPageNumber())
-                .size(entitiesPage.getPageable().getPageSize())
-                .numberOfElements(entitiesPage.getNumberOfElements())
-                .totalPages(entitiesPage.getTotalPages())
-                .totalElements(entitiesPage.getTotalElements())
-                .isLast(entitiesPage.isLast())
-                .build();
-
-        List<Schedule> schedules = entitiesPage.getContent()
+    @Override
+    public List<Schedule> findByIds(List<UUID> ids) {
+        return jpaRepository.findAllById(ids)
                 .stream()
                 .map(entityMapper::toDomainEntity)
                 .toList();
-
-        return Page.<Schedule>builder()
-                .content(schedules)
-                .pageInfo(pageInfo)
-                .build();
     }
 
     @Override

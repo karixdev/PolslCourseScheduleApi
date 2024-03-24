@@ -17,8 +17,11 @@ public interface ScheduleRepository {
     Optional<Schedule> findById(UUID id);
     Optional<Schedule> findByPlanPolslId(Integer planPolslId);
 
-    List<Schedule> findAll();
+    Page<Schedule> findAllPaginated(PageRequest pageRequest);
     Page<Schedule> findByFilterAndPaginate(ScheduleFilter filter, PageRequest pageRequest);
+
+    List<Schedule> findByIds(List<UUID> ids);
+    List<Schedule> findAll();
     List<Schedule> findByMajorAndSemester(String major, Integer group);
     List<String> findUniqueMajorsOrderedAlphabetically();
     List<Integer> findSemestersByMajorOrderAsc(String major);

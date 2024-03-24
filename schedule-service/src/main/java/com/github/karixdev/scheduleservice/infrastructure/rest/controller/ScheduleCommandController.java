@@ -1,5 +1,6 @@
 package com.github.karixdev.scheduleservice.infrastructure.rest.controller;
 
+import com.github.karixdev.scheduleservice.application.command.BlankSchedulesUpdateCommand;
 import com.github.karixdev.scheduleservice.application.command.CreateScheduleCommand;
 import com.github.karixdev.scheduleservice.application.command.DeleteScheduleByIdCommand;
 import com.github.karixdev.scheduleservice.application.command.UpdateScheduleByIdCommand;
@@ -9,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -19,6 +21,7 @@ public class ScheduleCommandController {
     private final CommandHandler<CreateScheduleCommand> createScheduleCommandHandler;
     private final CommandHandler<DeleteScheduleByIdCommand> deleteScheduleByIdCommandHandler;
     private final CommandHandler<UpdateScheduleByIdCommand> updateScheduleByIdCommandHandler;
+    private final CommandHandler<BlankSchedulesUpdateCommand> blankSchedulesUpdateCommandHandler;
 
     @PostMapping
     ResponseEntity<Void> createSchedule(@RequestBody ScheduleRequest payload) {
@@ -64,6 +67,16 @@ public class ScheduleCommandController {
                 .build();
 
         updateScheduleByIdCommandHandler.handle(command);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/blank-update")
+    ResponseEntity<Void> blankUpdateSchedulesByIds(
+            @RequestParam("id") List<UUID> ids
+    ) {
+        BlankSchedulesUpdateCommand command = new BlankSchedulesUpdateCommand(ids);
+        blankSchedulesUpdateCommandHandler.handle(command);
 
         return ResponseEntity.noContent().build();
     }
