@@ -8,6 +8,7 @@ import com.github.karixdev.webscraperservice.application.event.producer.EventPro
 import com.github.karixdev.webscraperservice.application.payload.PlanPolslResponse;
 import com.github.karixdev.webscraperservice.application.props.PlanPolslClientProperties;
 import com.github.karixdev.webscraperservice.application.scraper.PlanPolslResponseContentScraper;
+import com.github.karixdev.webscraperservice.domain.PlanPolslData;
 import com.github.karixdev.webscraperservice.domain.RawSchedule;
 import com.github.karixdev.webscraperservice.domain.Schedule;
 import lombok.RequiredArgsConstructor;
@@ -35,10 +36,12 @@ public class ScheduleEventHandler implements EventHandler<ScheduleEvent> {
         }
 
         Schedule schedule = event.entity();
+        PlanPolslData planPolslData = schedule.planPolslData();
+
         PlanPolslResponse planPolslResponse = planPolslClient.getSchedule(
-                schedule.planPolslId(),
-                schedule.type(),
-                schedule.wd(),
+                planPolslData.id(),
+                planPolslData.type(),
+                planPolslData.weekDays(),
                 PlanPolslClientProperties.WIN_W,
                 PlanPolslClientProperties.WIN_H
         );
