@@ -1,6 +1,5 @@
 package com.github.karixdev.scheduleservice.infrastructure.security;
 
-import com.github.karixdev.commonservice.converter.RealmRoleConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
