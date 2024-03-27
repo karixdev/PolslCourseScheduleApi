@@ -117,7 +117,7 @@ services:
     container_name: 'discovery-server'
     restart: always
     build:
-      context: discovery-service
+      context: infrastructure-services/discovery-service
       dockerfile: Dockerfile
     environment:
       SPRING_PROFILES_ACTIVE: docker
