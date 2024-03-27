@@ -1,12 +1,14 @@
 package com.github.karixdev.domainmodelmapperservice;
 
-import com.github.karixdev.commonservice.event.schedule.ScheduleDomain;
-import com.github.karixdev.commonservice.event.schedule.ScheduleRaw;
-import com.github.karixdev.commonservice.model.course.domain.CourseDomain;
-import com.github.karixdev.commonservice.model.course.domain.CourseType;
-import com.github.karixdev.commonservice.model.course.domain.WeekType;
-import com.github.karixdev.commonservice.model.course.raw.CourseCell;
-import com.github.karixdev.commonservice.model.schedule.raw.TimeCell;
+import com.github.karixdev.domainmodelmapperservice.application.event.ProcessedRawScheduleEvent;
+import com.github.karixdev.domainmodelmapperservice.application.event.RawScheduleEvent;
+import com.github.karixdev.domainmodelmapperservice.domain.processed.CourseType;
+import com.github.karixdev.domainmodelmapperservice.domain.processed.ProcessedRawCourse;
+import com.github.karixdev.domainmodelmapperservice.domain.processed.ProcessedRawSchedule;
+import com.github.karixdev.domainmodelmapperservice.domain.processed.WeekType;
+import com.github.karixdev.domainmodelmapperservice.domain.raw.RawCourse;
+import com.github.karixdev.domainmodelmapperservice.domain.raw.RawSchedule;
+import com.github.karixdev.domainmodelmapperservice.domain.raw.RawTimeInterval;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -55,13 +57,13 @@ class DomainModelMapperServiceApplicationIntegrationTest {
         registry.add("spring.kafka.bootstrap-servers", kafkaContainer::getBootstrapServers);
     }
 
-    private static final String SCHEDULE_RAW_TOPIC = "schedule.raw";
-    private static final String SCHEDULE_DOMAIN_TOPIC = "schedule.domain";
+    private static final String RAW_SCHEDULE_TOPIC = "schedule.raw";
+    private static final String PROCESSED_RAW_SCHEDULE_TOPIC = "schedule.raw-processed";
     private static final String DLT_TOPIC = "domain-model-mapper-service.schedule.raw.dlt";
 
-    KafkaTemplate<String, ScheduleRaw> scheduleRawProducer;
-    Consumer<String, ScheduleDomain> scheduleDomainConsumer;
-    Consumer<String, ScheduleRaw> dltConsumer;
+    KafkaTemplate<String, RawScheduleEvent> rawScheduleEventProducer;
+    Consumer<String, ProcessedRawScheduleEvent> processedRawScheduleEventConsumer;
+    Consumer<String, RawScheduleEvent> dltConsumer;
 
     @BeforeEach
     void setUp() {
@@ -69,91 +71,103 @@ class DomainModelMapperServiceApplicationIntegrationTest {
         producerProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         producerProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
 
-        ProducerFactory<String, ScheduleRaw> producerFactory = new DefaultKafkaProducerFactory<>(producerProps);
-        scheduleRawProducer = new KafkaTemplate<>(producerFactory);
+        ProducerFactory<String, RawScheduleEvent> producerFactory = new DefaultKafkaProducerFactory<>(producerProps);
+        rawScheduleEventProducer = new KafkaTemplate<>(producerFactory);
 
-        Map<String, Object> scheduleDomainConsumerProps = KafkaTestUtils.consumerProps(kafkaContainer.getBootstrapServers(), "schedule-domain-test-group", "false");
-        addCommonConsumerProps(scheduleDomainConsumerProps);
+        Map<String, Object> processedRawScheduleEventProps = KafkaTestUtils.consumerProps(kafkaContainer.getBootstrapServers(), "schedule-domain-test-group", "false");
+        addCommonConsumerProps(processedRawScheduleEventProps);
 
-        ConsumerFactory<String, ScheduleDomain> scheduleDomainConsumerFactory = new DefaultKafkaConsumerFactory<>(scheduleDomainConsumerProps);
-        scheduleDomainConsumer = scheduleDomainConsumerFactory.createConsumer();
-        scheduleDomainConsumer.subscribe(List.of(SCHEDULE_DOMAIN_TOPIC));
+        ConsumerFactory<String, ProcessedRawScheduleEvent> processedRawScheduleEventConsumerFactory = new DefaultKafkaConsumerFactory<>(processedRawScheduleEventProps);
+        processedRawScheduleEventConsumer = processedRawScheduleEventConsumerFactory.createConsumer();
+        processedRawScheduleEventConsumer.subscribe(List.of(PROCESSED_RAW_SCHEDULE_TOPIC));
 
         Map<String, Object> dltConsumerProps = KafkaTestUtils.consumerProps(kafkaContainer.getBootstrapServers(), "dlt-test-group", "false");
         addCommonConsumerProps(dltConsumerProps);
 
-        ConsumerFactory<String, ScheduleRaw> rawCourseConsumerFactory = new DefaultKafkaConsumerFactory<>(dltConsumerProps);
-        dltConsumer = rawCourseConsumerFactory.createConsumer();
+        ConsumerFactory<String, RawScheduleEvent> rawScheduleEventConsumerFactory = new DefaultKafkaConsumerFactory<>(dltConsumerProps);
+        dltConsumer = rawScheduleEventConsumerFactory.createConsumer();
         dltConsumer.subscribe(List.of(DLT_TOPIC));
     }
 
     @AfterEach
     void tearDown() {
-        scheduleDomainConsumer.close();
+        processedRawScheduleEventConsumer.close();
         dltConsumer.close();
     }
 
     @Test
     void shouldConsumeScheduleRawAndProduceMappedScheduleDomainToDomainTopic() {
         // Given
-        CourseCell courseCell = CourseCell.builder()
+
+        RawTimeInterval rawTimeInterval = new RawTimeInterval("08:30", "10:00");
+        RawCourse rawCourse = RawCourse.builder()
                 .top(259)
                 .left(254)
-                .ch(135)
-                .cw(154)
+                .height(135)
+                .width(154)
                 .text("course 1")
                 .build();
-        TimeCell timeCell = new TimeCell("08:30-10:00");
 
         String scheduleId = UUID.randomUUID().toString();
-        ScheduleRaw scheduleRaw = ScheduleRaw.builder()
-                .scheduleId(scheduleId)
-                .timeCells(Set.of(timeCell))
-                .courseCells(Set.of(courseCell))
+        RawSchedule rawSchedule = RawSchedule.builder()
+                .courses(Set.of(rawCourse))
+                .timeIntervals(Set.of(rawTimeInterval))
                 .build();
 
-        CourseDomain courseDomain = CourseDomain.builder()
+        RawScheduleEvent rawScheduleEvent = RawScheduleEvent.builder()
+                .scheduleId(scheduleId)
+                .entity(rawSchedule)
+                .build();
+
+        ProcessedRawCourse course = ProcessedRawCourse.builder()
                 .startsAt(LocalTime.of(8, 30))
                 .endsAt(LocalTime.of(11, 45))
                 .name("course 1")
                 .courseType(CourseType.INFO)
                 .teachers("")
                 .dayOfWeek(DayOfWeek.TUESDAY)
-                .weeks(WeekType.EVERY)
-                .classrooms("")
+                .weekType(WeekType.EVERY)
+                .classroom("")
                 .build();
-        ScheduleDomain scheduleDomain = ScheduleDomain.builder()
+
+        ProcessedRawSchedule processedRawSchedule = ProcessedRawSchedule.builder()
+                .courses(Set.of(course))
+                .build();
+
+        ProcessedRawScheduleEvent expectedEvent = ProcessedRawScheduleEvent.builder()
                 .scheduleId(scheduleId)
-                .courses(Set.of(courseDomain))
+                .entity(processedRawSchedule)
                 .build();
 
         // When
-        scheduleRawProducer.send(SCHEDULE_RAW_TOPIC, scheduleId, scheduleRaw);
-        ConsumerRecord<String, ScheduleDomain> result = KafkaTestUtils.getSingleRecord(scheduleDomainConsumer, SCHEDULE_DOMAIN_TOPIC, Duration.ofSeconds(20));
+        rawScheduleEventProducer.send(RAW_SCHEDULE_TOPIC, scheduleId, rawScheduleEvent);
+        ConsumerRecord<String, ProcessedRawScheduleEvent> result = KafkaTestUtils.getSingleRecord(processedRawScheduleEventConsumer, PROCESSED_RAW_SCHEDULE_TOPIC, Duration.ofSeconds(20));
 
         // Then
         assertThat(result.key()).isEqualTo(scheduleId);
-        assertThat(result.value()).isEqualTo(scheduleDomain);
+        assertThat(result.value()).isEqualTo(expectedEvent);
     }
 
     @Test
     void shouldProduceProblematicEventOnDLT() {
         // Given
         String scheduleId = UUID.randomUUID().toString();
-        ScheduleRaw scheduleRaw = ScheduleRaw.builder()
+        RawSchedule rawSchedule = RawSchedule.builder()
+                .courses(Set.of())
+                .timeIntervals(Set.of())
+                .build();
+        RawScheduleEvent rawScheduleEvent = RawScheduleEvent.builder()
                 .scheduleId(scheduleId)
-                .timeCells(Set.of())
-                .courseCells(Set.of())
+                .entity(rawSchedule)
                 .build();
 
-
         // When
-        scheduleRawProducer.send(SCHEDULE_RAW_TOPIC, scheduleId, scheduleRaw);
-        ConsumerRecord<String, ScheduleRaw> result = KafkaTestUtils.getSingleRecord(dltConsumer, DLT_TOPIC, Duration.ofSeconds(20));
+        rawScheduleEventProducer.send(RAW_SCHEDULE_TOPIC, scheduleId, rawScheduleEvent);
+        ConsumerRecord<String, RawScheduleEvent> result = KafkaTestUtils.getSingleRecord(dltConsumer, DLT_TOPIC, Duration.ofSeconds(20));
 
         // Then
         assertThat(result.key()).isEqualTo(scheduleId);
-        assertThat(result.value()).isEqualTo(scheduleRaw);
+        assertThat(result.value()).isEqualTo(rawScheduleEvent);
     }
 
     private void addCommonConsumerProps(Map<String, Object> consumerProps) {

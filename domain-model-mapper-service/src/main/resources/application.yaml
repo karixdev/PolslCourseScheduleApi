@@ -39,6 +39,7 @@ kafka:
     schedule-raw: schedule.raw
     schedule-domain: schedule.domain
     dlt: domain-model-mapper-service.schedule.raw.dlt
+    processed-raw-schedule: schedule.raw-processed
   config:
     back-off:
       interval: 0
