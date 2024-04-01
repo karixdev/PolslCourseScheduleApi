@@ -2,7 +2,6 @@ package com.github.karixdev.courseservice.application.command.handler;
 
 
 import com.github.karixdev.courseservice.application.client.ScheduleServiceClient;
-import com.github.karixdev.courseservice.application.command.CreateCourseCommand;
 import com.github.karixdev.courseservice.application.command.UpdateCourseByIdCommand;
 import com.github.karixdev.courseservice.application.dal.TransactionCallback;
 import com.github.karixdev.courseservice.application.dal.TransactionManager;
@@ -12,11 +11,12 @@ import com.github.karixdev.courseservice.domain.entity.Course;
 import com.github.karixdev.courseservice.domain.entity.CourseType;
 import com.github.karixdev.courseservice.domain.entity.WeekType;
 import com.github.karixdev.courseservice.domain.repository.CourseRepository;
-import matcher.CourseWholeEntityArgumentMatcher;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.DayOfWeek;
