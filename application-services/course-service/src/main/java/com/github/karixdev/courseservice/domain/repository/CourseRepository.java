@@ -7,6 +7,7 @@ import java.util.UUID;
 
 public interface CourseRepository {
     void save(Course course);
+    void delete(Course course);
 
     Optional<Course> findById(UUID id);
 }
