@@ -44,9 +44,6 @@ class CreateCourseCommandHandlerTest {
     @Captor
     ArgumentCaptor<TransactionCallback> transactionCallbackCaptor;
 
-    @Captor
-    ArgumentCaptor<Course> courseCaptor;
-
     @Test
     void GivenCommandWithNotExistingScheduleId_WhenHandle_ThenThrowsScheduleWithIdNotFoundException() {
         // Given
