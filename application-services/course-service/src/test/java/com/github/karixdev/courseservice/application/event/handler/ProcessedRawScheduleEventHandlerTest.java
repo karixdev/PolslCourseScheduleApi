@@ -34,13 +34,13 @@ class ProcessedRawScheduleEventHandlerTest {
     private ProcessedRawScheduleEventHandler underTest;
 
     @Mock
-    private ModelMapper<ProcessedRawCourse, Course> toEntityMapper;
+    ModelMapper<ProcessedRawCourse, Course> toEntityMapper;
 
     @Mock
-    private CourseRepository repository;
+    CourseRepository repository;
 
     @Mock
-    private ScheduleCoursesUpdater updater;
+    ScheduleCoursesUpdater updater;
 
     @Test
     void GivenProcessedRawScheduleEvent_WhenHandle_ThenUpdateScheduleCourses() {
