@@ -13,6 +13,7 @@ public interface CourseRepository {
 
     void delete(Course course);
     void deleteAll(Collection<Course> courses);
+    void deleteByScheduleId(UUID scheduleId);
 
     Optional<Course> findById(UUID id);
 
