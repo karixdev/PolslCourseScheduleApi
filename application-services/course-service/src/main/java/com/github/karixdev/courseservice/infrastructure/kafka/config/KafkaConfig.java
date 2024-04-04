@@ -1,17 +1,17 @@
 package com.github.karixdev.courseservice.infrastructure.kafka.config;
 
-import com.github.karixdev.commonservice.event.course.ScheduleCoursesEvent;
-import com.github.karixdev.commonservice.event.schedule.ScheduleDomain;
-import com.github.karixdev.commonservice.event.schedule.ScheduleEvent;
+import com.github.karixdev.courseservice.application.event.ProcessedRawScheduleEvent;
+import com.github.karixdev.courseservice.application.event.ScheduleEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.TopicPartition;
-import org.hibernate.exception.JDBCConnectionException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
-import org.springframework.kafka.core.*;
+import org.springframework.kafka.core.ConsumerFactory;
+import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
 import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.util.backoff.FixedBackOff;
@@ -19,58 +19,6 @@ import org.springframework.util.backoff.FixedBackOff;
 @Slf4j
 @Configuration
 public class KafkaConfig {
-
-    @Bean
-    ProducerFactory<String, ScheduleDomain> scheduleDomainProducerFactory(
-            KafkaProperties properties
-    ) {
-        return new DefaultKafkaProducerFactory<>(properties.buildProducerProperties());
-    }
-
-    @Bean
-    KafkaTemplate<String, ScheduleDomain> scheduleDomainKafkaTemplate(
-            ProducerFactory<String, ScheduleDomain> factory,
-            @Value("${kafka.observation.producer.enabled}") Boolean isObservationEnabled
-    ) {
-        KafkaTemplate<String, ScheduleDomain> kafkaTemplate = new KafkaTemplate<>(factory);
-        kafkaTemplate.setObservationEnabled(isObservationEnabled);
-
-        return kafkaTemplate;
-    }
-
-    @Bean
-    ConsumerFactory<String, ScheduleDomain> scheduleDomainConsumerFactory(
-            KafkaProperties properties
-    ) {
-        return new DefaultKafkaConsumerFactory<>(properties.buildConsumerProperties());
-    }
-
-    @Bean
-    ConcurrentKafkaListenerContainerFactory<String, ScheduleDomain> scheduleDomainConcurrentKafkaListenerContainerFactory(
-            ConsumerFactory<String, ScheduleDomain> consumerFactory,
-            KafkaTemplate<String, ScheduleDomain> kafkaTemplate,
-            @Value("${kafka.topics.schedule-domain-dlt}") String dlt,
-            @Value("${kafka.config.back-off.interval}") Long interval,
-            @Value("${kafka.config.back-off.max-attempts}") Long maxAttempts,
-            @Value("${kafka.config.back-off.db-interval}") Long dbInterval,
-            @Value("${kafka.observation.consumer.enabled}") Boolean isObservationEnabled
-    ) {
-        ConcurrentKafkaListenerContainerFactory<String, ScheduleDomain> factory =
-                new ConcurrentKafkaListenerContainerFactory<>();
-
-        factory.setConsumerFactory(consumerFactory);
-        factory.setCommonErrorHandler(defaultErrorHandler(
-                kafkaTemplate,
-                dlt,
-                interval,
-                maxAttempts,
-                dbInterval
-        ));
-
-        factory.getContainerProperties().setObservationEnabled(isObservationEnabled);
-
-        return factory;
-    }
 
     @Bean
     ConsumerFactory<String, ScheduleEvent> scheduleEventConsumerFactory(
@@ -83,10 +31,9 @@ public class KafkaConfig {
     ConcurrentKafkaListenerContainerFactory<String, ScheduleEvent> scheduleEventConcurrentKafkaListenerContainerFactory(
             ConsumerFactory<String, ScheduleEvent> consumerFactory,
             KafkaTemplate<String, ScheduleEvent> kafkaTemplate,
-            @Value("${kafka.topics.schedule-event-dlt}") String dlt,
+            @Value("${kafka.topics.schedule-domain-dlt}") String dlt,
             @Value("${kafka.config.back-off.interval}") Long interval,
             @Value("${kafka.config.back-off.max-attempts}") Long maxAttempts,
-            @Value("${kafka.config.back-off.db-interval}") Long dbInterval,
             @Value("${kafka.observation.consumer.enabled}") Boolean isObservationEnabled
     ) {
         ConcurrentKafkaListenerContainerFactory<String, ScheduleEvent> factory =
@@ -97,8 +44,7 @@ public class KafkaConfig {
                 kafkaTemplate,
                 dlt,
                 interval,
-                maxAttempts,
-                dbInterval
+                maxAttempts
         ));
 
         factory.getContainerProperties().setObservationEnabled(isObservationEnabled);
@@ -107,47 +53,42 @@ public class KafkaConfig {
     }
 
     @Bean
-    ProducerFactory<String, ScheduleEvent> scheduleEventProducerFactory(
+    ConsumerFactory<String, ProcessedRawScheduleEvent> processedRawScheduleEventConsumerFactory(
             KafkaProperties properties
     ) {
-        return new DefaultKafkaProducerFactory<>(properties.buildProducerProperties());
+        return new DefaultKafkaConsumerFactory<>(properties.buildConsumerProperties());
     }
 
     @Bean
-    KafkaTemplate<String, ScheduleEvent> scheduleEventKafkaTemplate(
-            ProducerFactory<String, ScheduleEvent> factory,
-            @Value("${kafka.observation.producer.enabled}") Boolean isObservationEnabled
+    ConcurrentKafkaListenerContainerFactory<String, ProcessedRawScheduleEvent> processedRawScheduleEventConcurrentKafkaListenerContainerFactory(
+            ConsumerFactory<String, ProcessedRawScheduleEvent> consumerFactory,
+            KafkaTemplate<String, ProcessedRawScheduleEvent> kafkaTemplate,
+            @Value("${kafka.topics.schedule-domain-dlt}") String dlt,
+            @Value("${kafka.config.back-off.interval}") Long interval,
+            @Value("${kafka.config.back-off.max-attempts}") Long maxAttempts,
+            @Value("${kafka.observation.consumer.enabled}") Boolean isObservationEnabled
     ) {
-        KafkaTemplate<String, ScheduleEvent> kafkaTemplate = new KafkaTemplate<>(factory);
-        kafkaTemplate.setObservationEnabled(isObservationEnabled);
+        ConcurrentKafkaListenerContainerFactory<String, ProcessedRawScheduleEvent> factory =
+                new ConcurrentKafkaListenerContainerFactory<>();
 
-        return kafkaTemplate;
-    }
+        factory.setConsumerFactory(consumerFactory);
+        factory.setCommonErrorHandler(defaultErrorHandler(
+                kafkaTemplate,
+                dlt,
+                interval,
+                maxAttempts
+        ));
 
-    @Bean
-    ProducerFactory<String, ScheduleCoursesEvent> stringScheduleCoursesEventProducerFactory(
-            KafkaProperties properties
-    ) {
-        return new DefaultKafkaProducerFactory<>(properties.buildProducerProperties());
-    }
+        factory.getContainerProperties().setObservationEnabled(isObservationEnabled);
 
-    @Bean
-    KafkaTemplate<String, ScheduleCoursesEvent> scheduleCoursesEventKafkaTemplate(
-            ProducerFactory<String, ScheduleCoursesEvent> factory,
-            @Value("${kafka.observation.producer.enabled}") Boolean isObservationEnabled
-    ) {
-        KafkaTemplate<String, ScheduleCoursesEvent> kafkaTemplate = new KafkaTemplate<>(factory);
-        kafkaTemplate.setObservationEnabled(isObservationEnabled);
-
-        return kafkaTemplate;
+        return factory;
     }
 
     <K, V> DefaultErrorHandler defaultErrorHandler(
             KafkaTemplate<K, V> kafkaTemplate,
             String dlt,
             Long backOffInterval,
-            Long backOfMaxAttempts,
-            Long dbConnectionExceptionBackOffInterval
+            Long backOfMaxAttempts
     ) {
         DeadLetterPublishingRecoverer recoverer =
                 new DeadLetterPublishingRecoverer(kafkaTemplate, (cr, e) -> new TopicPartition(dlt, cr.partition()));
@@ -156,15 +97,9 @@ public class KafkaConfig {
         DefaultErrorHandler handler = new DefaultErrorHandler(recoverer, bo);
 
         handler.setRetryListeners((cr, e, v) -> log.info("Consuming attempt {} after exception: {}", v, e.getClass().getName()));
-        handler.setBackOffFunction((cr, ex) -> {
-            if (ex instanceof JDBCConnectionException) {
-                return new FixedBackOff(dbConnectionExceptionBackOffInterval, FixedBackOff.UNLIMITED_ATTEMPTS);
-            }
-
-            return bo;
-        });
 
         return handler;
     }
+
 
 }
