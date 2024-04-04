@@ -1,4 +1,4 @@
-package com.github.karixdev.courseservice.exception.handler;
+package com.github.karixdev.courseservice.infrastructure.rest.exception.handler;
 
 import com.github.karixdev.commonservice.exception.handler.CustomExceptionHandlerBase;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
