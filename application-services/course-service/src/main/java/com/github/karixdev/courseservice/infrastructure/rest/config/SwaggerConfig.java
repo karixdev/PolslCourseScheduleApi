@@ -1,4 +1,4 @@
-package com.github.karixdev.courseservice.config;
+package com.github.karixdev.courseservice.infrastructure.rest.config;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;

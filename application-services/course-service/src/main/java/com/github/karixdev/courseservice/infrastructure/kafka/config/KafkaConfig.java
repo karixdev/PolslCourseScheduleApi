@@ -1,4 +1,4 @@
-package com.github.karixdev.courseservice.config;
+package com.github.karixdev.courseservice.infrastructure.kafka.config;
 
 import com.github.karixdev.commonservice.event.course.ScheduleCoursesEvent;
 import com.github.karixdev.commonservice.event.schedule.ScheduleDomain;

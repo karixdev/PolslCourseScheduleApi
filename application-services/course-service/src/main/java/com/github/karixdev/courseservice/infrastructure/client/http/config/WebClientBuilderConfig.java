@@ -1,4 +1,4 @@
-package com.github.karixdev.courseservice.config;
+package com.github.karixdev.courseservice.infrastructure.client.http.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.cloud.client.loadbalancer.reactive.LoadBalancedExchangeFilterFunction;

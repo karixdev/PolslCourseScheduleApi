@@ -1,4 +1,4 @@
-package com.github.karixdev.courseservice.config;
+package com.github.karixdev.courseservice.infrastructure.rest.config;
 
 import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.boot.web.servlet.error.DefaultErrorAttributes;
