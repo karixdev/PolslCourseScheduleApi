@@ -24,7 +24,7 @@ import java.time.LocalTime;
 import java.util.Optional;
 import java.util.UUID;
 
-import static matcher.CourseWholeEntityArgumentMatcher.courseWholeEntityEq;
+import static com.github.karixdev.courseservice.matcher.CourseWholeEntityArgumentMatcher.courseWholeEntityEq;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;

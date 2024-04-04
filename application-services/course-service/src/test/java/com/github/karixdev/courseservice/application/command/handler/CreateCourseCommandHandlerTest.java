@@ -21,7 +21,7 @@ import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.util.UUID;
 
-import static matcher.CourseNonIdArgumentMatcher.courseNonIdEq;
+import static com.github.karixdev.courseservice.matcher.CourseNonIdArgumentMatcher.courseNonIdEq;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;

@@ -1,4 +1,4 @@
-package matcher;
+package com.github.karixdev.courseservice.matcher;
 
 import com.github.karixdev.courseservice.domain.entity.Course;
 import lombok.RequiredArgsConstructor;
