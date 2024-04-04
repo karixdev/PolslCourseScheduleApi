@@ -14,7 +14,7 @@ public interface CourseRepository extends JpaRepository<Course, UUID> {
 
     @Query("""
             SELECT c
-            FROM Course c
+            FROM CourseEntity c
             WHERE c.scheduleId = :scheduleId
             """)
     List<Course> findByScheduleId(@Param("scheduleId") UUID scheduleId);
