@@ -2,8 +2,11 @@ package com.github.karixdev.courseservice.infrastructure.kafka.config;
 
 import com.github.karixdev.courseservice.application.event.ProcessedRawScheduleEvent;
 import com.github.karixdev.courseservice.application.event.ScheduleEvent;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.observation.ObservationRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.TopicPartition;
+import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.context.annotation.Bean;
@@ -12,8 +15,10 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.core.MicrometerConsumerListener;
 import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
 import org.springframework.kafka.listener.DefaultErrorHandler;
+import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.util.backoff.FixedBackOff;
 
 @Slf4j
@@ -22,16 +27,24 @@ public class KafkaConfig {
 
     @Bean
     ConsumerFactory<String, ScheduleEvent> scheduleEventConsumerFactory(
-            KafkaProperties properties
+            KafkaProperties properties,
+            MeterRegistry meterRegistry
     ) {
-        return new DefaultKafkaConsumerFactory<>(properties.buildConsumerProperties());
+        ConsumerFactory<String, ScheduleEvent> factory = new DefaultKafkaConsumerFactory<>(
+                properties.buildConsumerProperties(),
+                new StringDeserializer(),
+                new JsonDeserializer<>(ScheduleEvent.class, false)
+        );
+        factory.addListener(new MicrometerConsumerListener<>(meterRegistry));
+
+        return factory;
     }
 
     @Bean
     ConcurrentKafkaListenerContainerFactory<String, ScheduleEvent> scheduleEventConcurrentKafkaListenerContainerFactory(
             ConsumerFactory<String, ScheduleEvent> consumerFactory,
             KafkaTemplate<String, ScheduleEvent> kafkaTemplate,
-            @Value("${kafka.topics.schedule-domain-dlt}") String dlt,
+            @Value("${kafka.topics.schedule-event-dlt}") String dlt,
             @Value("${kafka.config.back-off.interval}") Long interval,
             @Value("${kafka.config.back-off.max-attempts}") Long maxAttempts,
             @Value("${kafka.observation.consumer.enabled}") Boolean isObservationEnabled
@@ -54,16 +67,24 @@ public class KafkaConfig {
 
     @Bean
     ConsumerFactory<String, ProcessedRawScheduleEvent> processedRawScheduleEventConsumerFactory(
-            KafkaProperties properties
+            KafkaProperties properties,
+            MeterRegistry meterRegistry
     ) {
-        return new DefaultKafkaConsumerFactory<>(properties.buildConsumerProperties());
+        ConsumerFactory<String, ProcessedRawScheduleEvent> factory = new DefaultKafkaConsumerFactory<>(
+                properties.buildConsumerProperties(),
+                new StringDeserializer(),
+                new JsonDeserializer<>(ProcessedRawScheduleEvent.class, false)
+        );
+        factory.addListener(new MicrometerConsumerListener<>(meterRegistry));
+
+        return factory;
     }
 
     @Bean
     ConcurrentKafkaListenerContainerFactory<String, ProcessedRawScheduleEvent> processedRawScheduleEventConcurrentKafkaListenerContainerFactory(
             ConsumerFactory<String, ProcessedRawScheduleEvent> consumerFactory,
             KafkaTemplate<String, ProcessedRawScheduleEvent> kafkaTemplate,
-            @Value("${kafka.topics.schedule-domain-dlt}") String dlt,
+            @Value("${kafka.topics.processed-raw-schedule-dlt}") String dlt,
             @Value("${kafka.config.back-off.interval}") Long interval,
             @Value("${kafka.config.back-off.max-attempts}") Long maxAttempts,
             @Value("${kafka.observation.consumer.enabled}") Boolean isObservationEnabled
