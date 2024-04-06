@@ -5,6 +5,7 @@ import com.github.karixdev.courseservice.application.event.ScheduleEvent;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.observation.ObservationRegistry;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,10 +13,7 @@ import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
-import org.springframework.kafka.core.ConsumerFactory;
-import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.core.MicrometerConsumerListener;
+import org.springframework.kafka.core.*;
 import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
 import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
@@ -43,7 +41,8 @@ public class KafkaConfig {
     @Bean
     ConcurrentKafkaListenerContainerFactory<String, ScheduleEvent> scheduleEventConcurrentKafkaListenerContainerFactory(
             ConsumerFactory<String, ScheduleEvent> consumerFactory,
-            KafkaTemplate<String, ScheduleEvent> kafkaTemplate,
+            KafkaProperties properties,
+            MeterRegistry meterRegistry,
             @Value("${kafka.topics.schedule-event-dlt}") String dlt,
             @Value("${kafka.config.back-off.interval}") Long interval,
             @Value("${kafka.config.back-off.max-attempts}") Long maxAttempts,
@@ -54,7 +53,8 @@ public class KafkaConfig {
 
         factory.setConsumerFactory(consumerFactory);
         factory.setCommonErrorHandler(defaultErrorHandler(
-                kafkaTemplate,
+                properties,
+                meterRegistry,
                 dlt,
                 interval,
                 maxAttempts
@@ -83,7 +83,8 @@ public class KafkaConfig {
     @Bean
     ConcurrentKafkaListenerContainerFactory<String, ProcessedRawScheduleEvent> processedRawScheduleEventConcurrentKafkaListenerContainerFactory(
             ConsumerFactory<String, ProcessedRawScheduleEvent> consumerFactory,
-            KafkaTemplate<String, ProcessedRawScheduleEvent> kafkaTemplate,
+            KafkaProperties properties,
+            MeterRegistry meterRegistry,
             @Value("${kafka.topics.processed-raw-schedule-dlt}") String dlt,
             @Value("${kafka.config.back-off.interval}") Long interval,
             @Value("${kafka.config.back-off.max-attempts}") Long maxAttempts,
@@ -94,7 +95,8 @@ public class KafkaConfig {
 
         factory.setConsumerFactory(consumerFactory);
         factory.setCommonErrorHandler(defaultErrorHandler(
-                kafkaTemplate,
+                properties,
+                meterRegistry,
                 dlt,
                 interval,
                 maxAttempts
@@ -105,12 +107,29 @@ public class KafkaConfig {
         return factory;
     }
 
+    <K, V> KafkaTemplate<K, V> createKafkaTemplate(
+            KafkaProperties properties,
+            MeterRegistry meterRegistry
+    ) {
+        ProducerFactory<K, V> factory =
+                new DefaultKafkaProducerFactory<>(properties.buildProducerProperties());
+        factory.addListener(new MicrometerProducerListener<>(meterRegistry));
+
+        KafkaTemplate<K, V> kafkaTemplate = new KafkaTemplate<>(factory);
+        kafkaTemplate.setObservationEnabled(true);
+
+        return kafkaTemplate;
+    }
+
     <K, V> DefaultErrorHandler defaultErrorHandler(
-            KafkaTemplate<K, V> kafkaTemplate,
+            KafkaProperties properties,
+            MeterRegistry meterRegistry,
             String dlt,
             Long backOffInterval,
             Long backOfMaxAttempts
     ) {
+        KafkaTemplate<K, V> kafkaTemplate = createKafkaTemplate(properties, meterRegistry);
+
         DeadLetterPublishingRecoverer recoverer =
                 new DeadLetterPublishingRecoverer(kafkaTemplate, (cr, e) -> new TopicPartition(dlt, cr.partition()));
 
