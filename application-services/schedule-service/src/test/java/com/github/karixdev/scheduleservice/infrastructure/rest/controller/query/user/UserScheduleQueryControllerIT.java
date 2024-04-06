@@ -236,4 +236,67 @@ class UserScheduleQueryControllerIT extends ContainersEnvironment {
                 .jsonPath("$.[0].group").isEqualTo(schedule1.getGroupNumber());
     }
 
+    @Test
+    void shouldRespondWithNotFoundWhenLookingForNotExistingScheduleById() {
+        Schedule schedule1 = Schedule.builder()
+                .id(UUID.randomUUID())
+                .semester(1)
+                .major("a-major")
+                .groupNumber(1)
+                .planPolslData(
+                        PlanPolslData.builder()
+                                .id(1231)
+                                .type(1)
+                                .weekDays(0)
+                                .build()
+                )
+                .build();
+
+        scheduleRepository.save(schedule1);
+
+        webClient.get().uri("/api/queries/schedules/%s".formatted(UUID.randomUUID()))
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void shouldRetrieveScheduleById() {
+        Schedule schedule1 = Schedule.builder()
+                .id(UUID.randomUUID())
+                .semester(1)
+                .major("a-major")
+                .groupNumber(1)
+                .planPolslData(
+                        PlanPolslData.builder()
+                                .id(1231)
+                                .type(1)
+                                .weekDays(0)
+                                .build()
+                )
+                .build();
+
+        Schedule schedule2 = Schedule.builder()
+                .id(UUID.randomUUID())
+                .semester(1)
+                .major("c-major")
+                .groupNumber(1)
+                .planPolslData(
+                        PlanPolslData.builder()
+                                .id(4324)
+                                .type(1)
+                                .weekDays(0)
+                                .build()
+                )
+                .build();
+
+        scheduleRepository.save(schedule1);
+        scheduleRepository.save(schedule2);
+
+        webClient.get().uri("/api/queries/schedules/%s".formatted(schedule1.getId()))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.id").isEqualTo(schedule1.getId().toString());
+    }
+
 }

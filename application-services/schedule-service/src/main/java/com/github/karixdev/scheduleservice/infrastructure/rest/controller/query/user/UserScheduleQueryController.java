@@ -1,6 +1,7 @@
 package com.github.karixdev.scheduleservice.infrastructure.rest.controller.query.user;
 
 import com.github.karixdev.scheduleservice.application.dto.PublicScheduleDTO;
+import com.github.karixdev.scheduleservice.application.query.user.FindScheduleByIdQuery;
 import com.github.karixdev.scheduleservice.application.query.user.FindSchedulesBySemesterAndMajorQuery;
 import com.github.karixdev.scheduleservice.application.query.user.FindSemestersByMajorQuery;
 import com.github.karixdev.scheduleservice.application.query.user.FindUniqueMajorsQuery;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/queries/schedules")
@@ -23,6 +25,7 @@ public class UserScheduleQueryController {
     private final QueryHandler<FindUniqueMajorsQuery, List<String>> findUniqueMajorsQueryHandler;
     private final QueryHandler<FindSemestersByMajorQuery, List<Integer>> findSemestersByMajorQueryHandler;
     private final QueryHandler<FindSchedulesBySemesterAndMajorQuery, List<PublicScheduleDTO>> findSchedulesBySemesterAndMajorQueryHandler;
+    private final QueryHandler<FindScheduleByIdQuery, PublicScheduleDTO> findScheduleByIdQueryQueryHandler;
 
     @GetMapping("/majors")
     ResponseEntity<List<String>> majors() {
@@ -56,6 +59,14 @@ public class UserScheduleQueryController {
                                 .build()
                 )
                 .toList();
+
+        return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/{id}")
+    ResponseEntity<PublicScheduleDTO> findScheduleById(@PathVariable UUID id) {
+        FindScheduleByIdQuery query = new FindScheduleByIdQuery(id);
+        PublicScheduleDTO result = findScheduleByIdQueryQueryHandler.handle(query);
 
         return ResponseEntity.ok(result);
     }
