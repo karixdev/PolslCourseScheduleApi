@@ -3,6 +3,7 @@ package com.github.karixdev.courseservice.application.event.handler;
 import com.github.karixdev.courseservice.application.event.ProcessedRawScheduleEvent;
 import com.github.karixdev.courseservice.application.mapper.ModelMapper;
 import com.github.karixdev.courseservice.application.updater.ScheduleCoursesUpdater;
+import com.github.karixdev.courseservice.application.validator.Validator;
 import com.github.karixdev.courseservice.domain.entity.Course;
 import com.github.karixdev.courseservice.domain.entity.CourseType;
 import com.github.karixdev.courseservice.domain.entity.WeekType;
@@ -42,12 +43,15 @@ class ProcessedRawScheduleEventHandlerTest {
     @Mock
     ScheduleCoursesUpdater updater;
 
+    @Mock
+    Validator<ProcessedRawCourse> processedRawCourseValidator;
+
     @Test
     void GivenProcessedRawScheduleEvent_WhenHandle_ThenUpdateScheduleCourses() {
         // Given
         UUID scheduleId = UUID.randomUUID();
 
-        ProcessedRawCourse processedRawCourse = ProcessedRawCourse.builder()
+        ProcessedRawCourse processedRawCourse1 = ProcessedRawCourse.builder()
                 .courseType(ProcessedRawCourseType.INFO)
                 .weekType(ProcessedRawCourseWeekType.EVERY)
                 .name("Calculus I")
@@ -59,8 +63,20 @@ class ProcessedRawScheduleEventHandlerTest {
                 .endsAt(LocalTime.of(10, 15))
                 .build();
 
+        ProcessedRawCourse processedRawCourse2 = ProcessedRawCourse.builder()
+                .courseType(ProcessedRawCourseType.LAB)
+                .weekType(ProcessedRawCourseWeekType.EVEN)
+                .name("Physics")
+                .scheduleId(scheduleId)
+                .teachers("dr. Smith")
+                .classrooms("410")
+                .dayOfWeek(DayOfWeek.MONDAY)
+                .startsAt(LocalTime.of(9, 21))
+                .endsAt(LocalTime.of(12, 32))
+                .build();
+
         ProcessedRawSchedule processedRawSchedule = ProcessedRawSchedule.builder()
-                .courses(Set.of(processedRawCourse))
+                .courses(Set.of(processedRawCourse1, processedRawCourse2))
                 .build();
 
         ProcessedRawScheduleEvent event = ProcessedRawScheduleEvent.builder()
@@ -94,7 +110,13 @@ class ProcessedRawScheduleEventHandlerTest {
                 .endsAt(LocalTime.of(12, 15))
                 .build();
 
-        when(toEntityMapper.map(processedRawCourse))
+        when(processedRawCourseValidator.isValid(processedRawCourse2))
+                .thenReturn(false);
+
+        when(processedRawCourseValidator.isValid(processedRawCourse1))
+                .thenReturn(true);
+
+        when(toEntityMapper.map(processedRawCourse1))
                 .thenReturn(course1);
 
         when(repository.findByScheduleId(scheduleId))

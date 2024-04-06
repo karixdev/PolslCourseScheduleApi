@@ -3,6 +3,7 @@ package com.github.karixdev.courseservice.application.event.handler;
 import com.github.karixdev.courseservice.application.event.ProcessedRawScheduleEvent;
 import com.github.karixdev.courseservice.application.mapper.ModelMapper;
 import com.github.karixdev.courseservice.application.updater.ScheduleCoursesUpdater;
+import com.github.karixdev.courseservice.application.validator.Validator;
 import com.github.karixdev.courseservice.domain.entity.Course;
 import com.github.karixdev.courseservice.domain.entity.processed.ProcessedRawCourse;
 import com.github.karixdev.courseservice.domain.repository.CourseRepository;
@@ -21,12 +22,14 @@ public class ProcessedRawScheduleEventHandler implements EventHandler<ProcessedR
     private final ModelMapper<ProcessedRawCourse, Course> toEntityMapper;
     private final CourseRepository repository;
     private final ScheduleCoursesUpdater updater;
+    private final Validator<ProcessedRawCourse> processedRawCourseValidator;
 
     @Override
     public void handle(ProcessedRawScheduleEvent event) {
         Set<Course> receivedCourses = event.entity()
                 .courses()
                 .stream()
+                .filter(processedRawCourseValidator::isValid)
                 .map(toEntityMapper::map)
                 .collect(Collectors.toSet());
 
