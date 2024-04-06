@@ -7,12 +7,14 @@ import com.github.karixdev.courseservice.domain.entity.Course;
 import com.github.karixdev.courseservice.domain.entity.processed.ProcessedRawCourse;
 import com.github.karixdev.courseservice.domain.repository.CourseRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Component
 @RequiredArgsConstructor
 public class ProcessedRawScheduleEventHandler implements EventHandler<ProcessedRawScheduleEvent> {
 

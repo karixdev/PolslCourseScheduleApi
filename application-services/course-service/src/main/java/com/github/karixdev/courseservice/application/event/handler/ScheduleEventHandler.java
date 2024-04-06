@@ -5,9 +5,11 @@ import com.github.karixdev.courseservice.application.strategy.event.handler.sche
 import com.github.karixdev.courseservice.application.strategy.event.handler.scheduleevent.ScheduleEventConcreteTypeHandlerStrategy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@Component
 @Slf4j
 @RequiredArgsConstructor
 public class ScheduleEventHandler implements EventHandler<ScheduleEvent> {

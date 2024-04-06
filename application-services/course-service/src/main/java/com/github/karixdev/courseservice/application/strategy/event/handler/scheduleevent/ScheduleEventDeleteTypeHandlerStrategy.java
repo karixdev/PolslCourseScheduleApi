@@ -5,9 +5,11 @@ import com.github.karixdev.courseservice.application.event.EventType;
 import com.github.karixdev.courseservice.application.event.ScheduleEvent;
 import com.github.karixdev.courseservice.domain.repository.CourseRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
+@Component
 @RequiredArgsConstructor
 public class ScheduleEventDeleteTypeHandlerStrategy implements ScheduleEventConcreteTypeHandlerStrategy {
 

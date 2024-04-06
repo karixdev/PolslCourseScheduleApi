@@ -8,11 +8,13 @@ import com.github.karixdev.courseservice.application.exception.ScheduleWithIdNot
 import com.github.karixdev.courseservice.domain.entity.Course;
 import com.github.karixdev.courseservice.domain.repository.CourseRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
 import static com.github.karixdev.courseservice.application.utils.BooleanUtils.isFalse;
 
+@Component
 @RequiredArgsConstructor
 public class UpdateCourseByIdCommandHandler implements CommandHandler<UpdateCourseByIdCommand> {
 

@@ -6,7 +6,9 @@ import com.github.karixdev.courseservice.application.exception.CourseWithIdNotFo
 import com.github.karixdev.courseservice.domain.entity.Course;
 import com.github.karixdev.courseservice.domain.repository.CourseRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
+@Component
 @RequiredArgsConstructor
 public class DeleteCourseByIdCommandHandler implements CommandHandler<DeleteCourseByIdCommand> {
 

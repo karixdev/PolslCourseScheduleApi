@@ -3,7 +3,9 @@ package com.github.karixdev.courseservice.application.strategy.event.handler.sch
 import com.github.karixdev.courseservice.application.event.EventType;
 import com.github.karixdev.courseservice.application.event.ScheduleEvent;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
+@Component
 @Slf4j
 public class IgnoredScheduleEventTypeHandlerStrategy implements ScheduleEventConcreteTypeHandlerStrategy {
     @Override

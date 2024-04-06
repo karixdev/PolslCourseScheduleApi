@@ -4,12 +4,14 @@ import com.github.karixdev.courseservice.application.dal.TransactionManager;
 import com.github.karixdev.courseservice.domain.entity.Course;
 import com.github.karixdev.courseservice.domain.repository.CourseRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 
+@Component
 @RequiredArgsConstructor
 public class ScheduleCoursesUpdater {
 

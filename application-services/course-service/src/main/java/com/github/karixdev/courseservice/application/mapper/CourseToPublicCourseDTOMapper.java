@@ -6,7 +6,9 @@ import com.github.karixdev.courseservice.application.dto.user.PublicCourseWeekTy
 import com.github.karixdev.courseservice.domain.entity.Course;
 import com.github.karixdev.courseservice.domain.entity.CourseType;
 import com.github.karixdev.courseservice.domain.entity.WeekType;
+import org.springframework.stereotype.Component;
 
+@Component
 public class CourseToPublicCourseDTOMapper implements ModelMapper<Course, PublicCourseDTO> {
 
     @Override

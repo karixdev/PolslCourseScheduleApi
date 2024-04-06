@@ -8,9 +8,11 @@ import com.github.karixdev.courseservice.application.query.user.FindScheduleCour
 import com.github.karixdev.courseservice.domain.entity.Course;
 import com.github.karixdev.courseservice.domain.repository.CourseRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@Component
 @RequiredArgsConstructor
 public class FindScheduleCoursesInChronologicalOrderQueryHandler implements QueryHandler<FindScheduleCoursesInChronologicalOrderQuery, List<PublicCourseDTO>> {
 

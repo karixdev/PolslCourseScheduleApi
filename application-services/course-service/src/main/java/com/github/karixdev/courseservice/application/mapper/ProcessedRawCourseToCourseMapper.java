@@ -6,7 +6,9 @@ import com.github.karixdev.courseservice.domain.entity.WeekType;
 import com.github.karixdev.courseservice.domain.entity.processed.ProcessedRawCourse;
 import com.github.karixdev.courseservice.domain.entity.processed.ProcessedRawCourseType;
 import com.github.karixdev.courseservice.domain.entity.processed.ProcessedRawCourseWeekType;
+import org.springframework.stereotype.Component;
 
+@Component
 public class ProcessedRawCourseToCourseMapper implements ModelMapper<ProcessedRawCourse, Course> {
 
     @Override

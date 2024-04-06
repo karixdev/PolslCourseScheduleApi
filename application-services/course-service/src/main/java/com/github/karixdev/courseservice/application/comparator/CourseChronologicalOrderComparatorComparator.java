@@ -2,11 +2,13 @@ package com.github.karixdev.courseservice.application.comparator;
 
 
 import com.github.karixdev.courseservice.domain.entity.Course;
+import org.springframework.stereotype.Component;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.util.Comparator;
 
+@Component
 public class CourseChronologicalOrderComparatorComparator implements Comparator<Course> {
 
     @Override
