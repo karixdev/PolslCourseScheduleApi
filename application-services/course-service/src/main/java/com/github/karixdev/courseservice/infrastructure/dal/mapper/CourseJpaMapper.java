@@ -13,6 +13,7 @@ public class CourseJpaMapper {
 
     public CourseEntity toJpa(Course input) {
         return CourseEntity.builder()
+                .id(input.getId())
                 .scheduleId(input.getScheduleId())
                 .name(input.getName())
                 .courseType(mapToJpaCourseType(input.getCourseType()))
@@ -46,6 +47,7 @@ public class CourseJpaMapper {
 
     public Course toDomain(CourseEntity input) {
         return Course.builder()
+                .id(input.getId())
                 .scheduleId(input.getScheduleId())
                 .name(input.getName())
                 .courseType(mapToDomainCourseType(input.getCourseType()))

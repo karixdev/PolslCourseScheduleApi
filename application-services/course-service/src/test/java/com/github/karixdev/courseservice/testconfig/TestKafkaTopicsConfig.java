@@ -10,12 +10,12 @@ import org.springframework.kafka.config.TopicBuilder;
 public class TestKafkaTopicsConfig {
 
     @Bean
-    NewTopic scheduleDomainTopic(@Value("${kafka.topics.schedule-domain}") String topic) {
+    NewTopic processedRawScheduleTopic(@Value("${kafka.topics.processed-raw-schedule}") String topic) {
         return TopicBuilder.name(topic).build();
     }
 
     @Bean
-    NewTopic scheduleCoursesEvent(@Value("${kafka.topics.schedule-courses-event}") String topic) {
+    NewTopic scheduleEventTopic(@Value("${kafka.topics.schedule-event}") String topic) {
         return TopicBuilder.name(topic).build();
     }
 

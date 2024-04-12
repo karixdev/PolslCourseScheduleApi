@@ -88,16 +88,13 @@ kafka:
     consumer:
       enabled: true
   topics:
-    schedule-domain: schedule.domain
-    schedule-domain-dlt: course-service.schedule.domain.dlt
     schedule-event: schedule.event
     schedule-event-dlt: course-service.schedule.event.dlt
-    schedule-courses-event: schedule.courses.event
+    processed-raw-schedule: schedule.raw-processed
     processed-raw-schedule-dlt: course-service.schedule.raw-processed.dlt
   config:
     back-off:
       interval: 0
       max-attempts: 0
-      db-interval: 1000
 
 logging.pattern.level: "%5p [${spring.application.name},%X{traceId:-},%X{spanId:-}]"
