@@ -6,6 +6,8 @@ spring:
     hibernate:
       ddl-auto: create-drop
 
+    show-sql: true
+
 schedule-service:
   base-url: http://localhost:9999
 
@@ -27,3 +29,4 @@ kafka:
       enabled: false
     consumer:
       enabled: false
+

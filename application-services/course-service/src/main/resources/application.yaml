@@ -93,6 +93,7 @@ kafka:
     schedule-event: schedule.event
     schedule-event-dlt: course-service.schedule.event.dlt
     schedule-courses-event: schedule.courses.event
+    processed-raw-schedule-dlt: course-service.schedule.raw-processed.dlt
   config:
     back-off:
       interval: 0
