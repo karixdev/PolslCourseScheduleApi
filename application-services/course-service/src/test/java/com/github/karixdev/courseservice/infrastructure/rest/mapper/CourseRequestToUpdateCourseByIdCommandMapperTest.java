@@ -1,6 +1,6 @@
 package com.github.karixdev.courseservice.infrastructure.rest.mapper;
 
-import com.github.karixdev.courseservice.application.command.CreateCourseCommand;
+import com.github.karixdev.courseservice.application.command.UpdateCourseByIdCommand;
 import com.github.karixdev.courseservice.application.mapper.ModelMapper;
 import com.github.karixdev.courseservice.domain.entity.CourseType;
 import com.github.karixdev.courseservice.domain.entity.WeekType;
@@ -12,19 +12,20 @@ import org.junit.jupiter.api.Test;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
-class CourseRequestToCreateCourseCommandMapperTest {
+class CourseRequestToUpdateCourseByIdCommandMapperTest {
 
-    CourseRequestToCreateCourseCommandMapper underTest;
+    CourseRequestToUpdateCourseByIdCommandMapper underTest;
 
     @BeforeEach
     @SuppressWarnings("unchecked")
     void setUp() {
-        underTest = new CourseRequestToCreateCourseCommandMapper(
+        underTest = new CourseRequestToUpdateCourseByIdCommandMapper(
                 (ModelMapper<CourseRequestCourseType, CourseType>) mock(ModelMapper.class),
                 (ModelMapper<CourseRequestWeekType, WeekType>) mock(ModelMapper.class)
         );
@@ -45,11 +46,15 @@ class CourseRequestToCreateCourseCommandMapperTest {
                 .additionalInfo("Only on 8.03")
                 .build();
 
+        UUID id = UUID.randomUUID();
+        Map<String, Object> attrs = Map.of("id", id);
+
         // When
-        CreateCourseCommand result = underTest.map(course);
+        UpdateCourseByIdCommand result = underTest.map(course, attrs);
 
         // Then
-        CreateCourseCommand expected = CreateCourseCommand.builder()
+        UpdateCourseByIdCommand expected = UpdateCourseByIdCommand.builder()
+                .id(id)
                 .scheduleId(scheduleId)
                 .startsAt(LocalTime.of(8, 30))
                 .endsAt(LocalTime.of(10, 15))

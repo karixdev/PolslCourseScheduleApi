@@ -1,16 +1,18 @@
 package com.github.karixdev.courseservice.infrastructure.rest.controller.admin;
 
 import com.github.karixdev.courseservice.application.command.CreateCourseCommand;
+import com.github.karixdev.courseservice.application.command.UpdateCourseByIdCommand;
 import com.github.karixdev.courseservice.application.command.handler.CommandHandler;
 import com.github.karixdev.courseservice.application.mapper.ModelMapper;
+import com.github.karixdev.courseservice.application.mapper.ModelMapperWithAttrs;
 import com.github.karixdev.courseservice.infrastructure.rest.payload.request.CourseRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/admin/courses")
@@ -18,8 +20,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class CourseAdminController {
 
     private final CommandHandler<CreateCourseCommand> createCourseCommandHandler;
+    private final CommandHandler<UpdateCourseByIdCommand> updateCourseByIdCommandHandler;
 
     private final ModelMapper<CourseRequest, CreateCourseCommand> createCourseCommandMapper;
+    private final ModelMapperWithAttrs<CourseRequest, UpdateCourseByIdCommand> updateCourseByIdCommandMapper;
 
     @PostMapping
     ResponseEntity<Void> createCourse(@RequestBody CourseRequest request) {
@@ -28,5 +32,14 @@ public class CourseAdminController {
 
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+    @PutMapping("/{id}")
+    ResponseEntity<Void> updateCourseById(@RequestBody CourseRequest request, @PathVariable UUID id) {
+        UpdateCourseByIdCommand command = updateCourseByIdCommandMapper.map(request, Map.of("id", id));
+        updateCourseByIdCommandHandler.handle(command);
+
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
 
 }

@@ -1,7 +1,7 @@
 package com.github.karixdev.courseservice.infrastructure.rest.controller.admin;
 
 import com.github.karixdev.courseservice.ContainersEnvironment;
-import com.github.karixdev.courseservice.domain.entity.Course;
+import com.github.karixdev.courseservice.RestControllerITContainersEnvironment;
 import com.github.karixdev.courseservice.infrastructure.dal.entity.CourseEntity;
 import com.github.karixdev.courseservice.infrastructure.dal.entity.CourseEntityCourseType;
 import com.github.karixdev.courseservice.infrastructure.dal.entity.CourseEntityWeekType;
@@ -10,6 +10,7 @@ import com.github.karixdev.courseservice.testconfig.TestKafkaTopicsConfig;
 import com.github.karixdev.courseservice.testconfig.WebClientTestConfig;
 import com.github.karixdev.courseservice.utils.KeycloakUtils;
 import com.github.tomakehurst.wiremock.WireMockServer;
+import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,7 +35,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @ContextConfiguration(classes = {WebClientTestConfig.class, TestKafkaTopicsConfig.class})
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-class CourseAdminControllerIT extends ContainersEnvironment {
+class CourseAdminControllerIT extends RestControllerITContainersEnvironment {
 
 
     @Autowired
@@ -191,6 +192,245 @@ class CourseAdminControllerIT extends ContainersEnvironment {
         assertThat(allCourses.get(0))
                 .usingRecursiveComparison()
                 .ignoringFields("id")
+                .isEqualTo(expected);
+    }
+
+    @Test
+    void shouldNotAllowUserToUpdateSchedule() {
+        String token = KeycloakUtils.getUserToken(keycloakContainer.getAuthServerUrl());
+
+        CourseEntity course = CourseEntity.builder()
+                .id(UUID.randomUUID())
+                .name("course-name")
+                .scheduleId(UUID.randomUUID())
+                .startsAt(LocalTime.of(8, 30))
+                .endsAt(LocalTime.of(10, 15))
+                .courseType(CourseEntityCourseType.LAB)
+                .teachers("dr Adam")
+                .dayOfWeek(DayOfWeek.FRIDAY)
+                .weekType(CourseEntityWeekType.EVEN)
+                .classrooms("LAB 1")
+                .additionalInfo("Only on 3.08")
+                .build();
+
+        String payload = """
+                {
+                    "scheduleId": "11111111-1111-1111-1111-111111111111",
+                    "startsAt": "08:30",
+                    "endsAt": "10:15",
+                    "name": "course-name",
+                    "courseType": "LAB",
+                    "teachers": "dr Adam",
+                    "dayOfWeek": "FRIDAY",
+                    "weekType": "EVEN",
+                    "classrooms": "LAB 1",
+                    "additionalInfo": "Only on 3.08"
+                }
+                """;
+
+        courseRepository.save(course);
+
+        webClient.put().uri("/api/admin/courses/%s".formatted(course.getId()))
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(payload)
+                .exchange()
+                .expectStatus().isForbidden();
+
+        List<CourseEntity> allCourses = courseRepository.findAll();
+
+        assertThat(allCourses).hasSize(1);
+        AssertionsForClassTypes.assertThat(allCourses.get(0))
+                .usingRecursiveComparison()
+                .isEqualTo(course);
+    }
+
+    @Test
+    void shouldNotUpdateNotExistingSchedule() {
+        String token = KeycloakUtils.getAdminToken(keycloakContainer.getAuthServerUrl());
+
+        CourseEntity course = CourseEntity.builder()
+                .id(UUID.randomUUID())
+                .name("course-name")
+                .scheduleId(UUID.randomUUID())
+                .startsAt(LocalTime.of(8, 30))
+                .endsAt(LocalTime.of(10, 15))
+                .courseType(CourseEntityCourseType.LAB)
+                .teachers("dr Adam")
+                .dayOfWeek(DayOfWeek.FRIDAY)
+                .weekType(CourseEntityWeekType.EVEN)
+                .classrooms("LAB 1")
+                .additionalInfo("Only on 3.08")
+                .build();
+
+        String payload = """
+                {
+                    "scheduleId": "11111111-1111-1111-1111-111111111111",
+                    "startsAt": "08:30",
+                    "endsAt": "10:15",
+                    "name": "course-name",
+                    "courseType": "LAB",
+                    "teachers": "dr Adam",
+                    "dayOfWeek": "FRIDAY",
+                    "weekType": "EVEN",
+                    "classrooms": "LAB 1",
+                    "additionalInfo": "Only on 3.08"
+                }
+                """;
+
+        courseRepository.save(course);
+
+        webClient.put().uri("/api/admin/courses/%s".formatted(UUID.randomUUID()))
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(payload)
+                .exchange()
+                .expectStatus().isNotFound();
+
+        List<CourseEntity> allCourses = courseRepository.findAll();
+
+        assertThat(allCourses).hasSize(1);
+        AssertionsForClassTypes.assertThat(allCourses.get(0))
+                .usingRecursiveComparison()
+                .isEqualTo(course);
+    }
+
+    @Test
+    void shouldNotUpdateCourseWithIdOfNotExistingSchedule() {
+        String token = KeycloakUtils.getAdminToken(keycloakContainer.getAuthServerUrl());
+
+        UUID newScheduleId = UUID.randomUUID();
+
+        CourseEntity course = CourseEntity.builder()
+                .id(UUID.randomUUID())
+                .name("course-name")
+                .scheduleId(UUID.randomUUID())
+                .startsAt(LocalTime.of(8, 30))
+                .endsAt(LocalTime.of(10, 15))
+                .courseType(CourseEntityCourseType.LAB)
+                .teachers("dr Adam")
+                .dayOfWeek(DayOfWeek.FRIDAY)
+                .weekType(CourseEntityWeekType.EVEN)
+                .classrooms("LAB 1")
+                .additionalInfo("Only on 3.08")
+                .build();
+
+        String payload = """
+                {
+                    "scheduleId": "%s",
+                    "startsAt": "08:30",
+                    "endsAt": "10:15",
+                    "name": "course-name",
+                    "courseType": "LAB",
+                    "teachers": "dr Adam",
+                    "dayOfWeek": "FRIDAY",
+                    "weekType": "EVEN",
+                    "classrooms": "LAB 1",
+                    "additionalInfo": "Only on 3.08"
+                }
+                """.formatted(newScheduleId);
+
+        courseRepository.save(course);
+
+        wm.stubFor(
+                get(urlPathEqualTo("/api/queries/schedules/%s".formatted(newScheduleId)))
+                        .willReturn(aResponse().withStatus(404))
+        );
+
+        webClient.put().uri("/api/admin/courses/%s".formatted(course.getId()))
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(payload)
+                .exchange()
+                .expectStatus().isBadRequest();
+
+        List<CourseEntity> allCourses = courseRepository.findAll();
+
+        assertThat(allCourses).hasSize(1);
+        AssertionsForClassTypes.assertThat(allCourses.get(0))
+                .usingRecursiveComparison()
+                .isEqualTo(course);
+    }
+
+    @Test
+    void shouldUpdateCourse() {
+        String token = KeycloakUtils.getAdminToken(keycloakContainer.getAuthServerUrl());
+
+        UUID newScheduleId = UUID.randomUUID();
+
+        CourseEntity course = CourseEntity.builder()
+                .id(UUID.randomUUID())
+                .scheduleId(UUID.randomUUID())
+                .startsAt(LocalTime.of(8, 30))
+                .endsAt(LocalTime.of(10, 15))
+                .name("course-name")
+                .courseType(CourseEntityCourseType.LAB)
+                .teachers("dr Adam")
+                .dayOfWeek(DayOfWeek.FRIDAY)
+                .weekType(CourseEntityWeekType.EVEN)
+                .classrooms("LAB 1")
+                .additionalInfo("Only on 3.08")
+                .build();
+
+        String payload = """
+                {
+                    "scheduleId": "%s",
+                    "startsAt": "09:45",
+                    "endsAt": "12:20",
+                    "name": "new-course-name",
+                    "courseType": "LECTURE",
+                    "teachers": "dr Marcin",
+                    "dayOfWeek": "MONDAY",
+                    "weekType": "EVERY",
+                    "classrooms": "3a",
+                    "additionalInfo": "Bring notes"
+                }
+                """.formatted(newScheduleId);
+
+        courseRepository.save(course);
+
+        wm.stubFor(
+                get(urlPathEqualTo("/api/queries/schedules/%s".formatted(newScheduleId)))
+                        .willReturn(ok()
+                                .withHeader(
+                                        "Content-Type",
+                                        "application/json"
+                                )
+                                .withBody("""
+                                        {
+                                            "id": "%s"
+                                        }
+                                        """.formatted(newScheduleId)
+                                )
+                        )
+        );
+
+        webClient.put().uri("/api/admin/courses/%s".formatted(course.getId()))
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(payload)
+                .exchange()
+                .expectStatus().isNoContent();
+
+        List<CourseEntity> allCourses = courseRepository.findAll();
+
+        CourseEntity expected = CourseEntity.builder()
+                .id(course.getId())
+                .scheduleId(newScheduleId)
+                .startsAt(LocalTime.of(9, 45))
+                .endsAt(LocalTime.of(12, 20))
+                .name("new-course-name")
+                .courseType(CourseEntityCourseType.LECTURE)
+                .teachers("dr Marcin")
+                .dayOfWeek(DayOfWeek.MONDAY)
+                .weekType(CourseEntityWeekType.EVERY)
+                .classrooms("3a")
+                .additionalInfo("Bring notes")
+                .build();
+
+        assertThat(allCourses).hasSize(1);
+        AssertionsForClassTypes.assertThat(allCourses.get(0))
+                .usingRecursiveComparison()
                 .isEqualTo(expected);
     }
 
