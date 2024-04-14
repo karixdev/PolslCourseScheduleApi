@@ -22,7 +22,9 @@ class CourseToPublicCourseDTOMapperTest {
     void GivenCourse_WhenMap_ThenReturnsCorrectDTO() {
         // Given
         UUID scheduleId = UUID.randomUUID();
+        UUID id = UUID.randomUUID();
         Course course = Course.builder()
+                .id(id)
                 .scheduleId(scheduleId)
                 .startsAt(LocalTime.of(8, 30))
                 .endsAt(LocalTime.of(10, 15))
@@ -40,6 +42,7 @@ class CourseToPublicCourseDTOMapperTest {
 
         // Then
         PublicCourseDTO expected = PublicCourseDTO.builder()
+                .id(id)
                 .scheduleId(scheduleId)
                 .startsAt(LocalTime.of(8, 30))
                 .endsAt(LocalTime.of(10, 15))

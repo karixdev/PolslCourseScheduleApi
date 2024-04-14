@@ -14,6 +14,7 @@ public class CourseToPublicCourseDTOMapper implements ModelMapper<Course, Public
     @Override
     public PublicCourseDTO map(Course input) {
         return PublicCourseDTO.builder()
+                .id(input.getId())
                 .scheduleId(input.getScheduleId())
                 .name(input.getName())
                 .courseType(mapCourseType(input.getCourseType()))
