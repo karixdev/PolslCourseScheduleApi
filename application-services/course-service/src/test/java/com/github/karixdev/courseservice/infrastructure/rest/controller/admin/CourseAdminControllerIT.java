@@ -239,7 +239,7 @@ class CourseAdminControllerIT extends RestControllerITContainersEnvironment {
         List<CourseEntity> allCourses = courseRepository.findAll();
 
         assertThat(allCourses).hasSize(1);
-        AssertionsForClassTypes.assertThat(allCourses.get(0))
+        assertThat(allCourses.get(0))
                 .usingRecursiveComparison()
                 .isEqualTo(course);
     }
@@ -289,7 +289,7 @@ class CourseAdminControllerIT extends RestControllerITContainersEnvironment {
         List<CourseEntity> allCourses = courseRepository.findAll();
 
         assertThat(allCourses).hasSize(1);
-        AssertionsForClassTypes.assertThat(allCourses.get(0))
+        assertThat(allCourses.get(0))
                 .usingRecursiveComparison()
                 .isEqualTo(course);
     }
@@ -346,7 +346,7 @@ class CourseAdminControllerIT extends RestControllerITContainersEnvironment {
         List<CourseEntity> allCourses = courseRepository.findAll();
 
         assertThat(allCourses).hasSize(1);
-        AssertionsForClassTypes.assertThat(allCourses.get(0))
+        assertThat(allCourses.get(0))
                 .usingRecursiveComparison()
                 .isEqualTo(course);
     }
@@ -428,7 +428,7 @@ class CourseAdminControllerIT extends RestControllerITContainersEnvironment {
                 .build();
 
         assertThat(allCourses).hasSize(1);
-        AssertionsForClassTypes.assertThat(allCourses.get(0))
+        assertThat(allCourses.get(0))
                 .usingRecursiveComparison()
                 .isEqualTo(expected);
     }
