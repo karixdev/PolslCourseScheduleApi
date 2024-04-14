@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 
@@ -23,6 +24,8 @@ public class ScheduleCoursesUpdater {
                 .filter(retrievedCourse -> current.stream()
                         .noneMatch(currentCourse -> areNonIdParamsEqualPredicate().test(retrievedCourse, currentCourse)))
                 .collect(Collectors.toSet());
+
+        coursesToSave.forEach(course -> course.setId(UUID.randomUUID()));
 
         Set<Course> coursesToDelete = current.stream()
                 .filter(currentCourse -> received.stream()
