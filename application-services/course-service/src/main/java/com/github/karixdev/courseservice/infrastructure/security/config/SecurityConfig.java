@@ -1,6 +1,6 @@
 package com.github.karixdev.courseservice.infrastructure.security.config;
 
-import com.github.karixdev.commonservice.converter.RealmRoleConverter;
+import com.github.karixdev.courseservice.infrastructure.security.converter.RealmRoleConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
