@@ -50,6 +50,7 @@ class CourseEntityRepositoryTest {
         // Given
         UUID scheduleId = UUID.randomUUID();
         em.persist(CourseEntity.builder()
+                .id(UUID.randomUUID())
                 .scheduleId(scheduleId)
                 .name("course-name")
                 .courseType(CourseEntityCourseType.INFO)
@@ -60,6 +61,7 @@ class CourseEntityRepositoryTest {
                 .build());
 
         em.persist(CourseEntity.builder()
+                .id(UUID.randomUUID())
                 .scheduleId(scheduleId)
                 .name("course-name-2")
                 .courseType(CourseEntityCourseType.INFO)
@@ -70,6 +72,7 @@ class CourseEntityRepositoryTest {
                 .build());
 
         CourseEntity course1 = em.persist(CourseEntity.builder()
+                .id(UUID.randomUUID())
                 .scheduleId(UUID.randomUUID())
                 .name("course-name-3")
                 .courseType(CourseEntityCourseType.INFO)
@@ -93,6 +96,7 @@ class CourseEntityRepositoryTest {
         // Given
         UUID scheduleId = UUID.randomUUID();
         CourseEntity course1 = em.persist(CourseEntity.builder()
+                .id(UUID.randomUUID())
                 .scheduleId(scheduleId)
                 .name("course-name")
                 .courseType(CourseEntityCourseType.INFO)
@@ -103,6 +107,7 @@ class CourseEntityRepositoryTest {
                 .build());
 
         CourseEntity course2 = em.persist(CourseEntity.builder()
+                .id(UUID.randomUUID())
                 .scheduleId(scheduleId)
                 .name("course-name-2")
                 .courseType(CourseEntityCourseType.INFO)
@@ -113,6 +118,7 @@ class CourseEntityRepositoryTest {
                 .build());
 
         em.persist(CourseEntity.builder()
+                .id(UUID.randomUUID())
                 .scheduleId(UUID.randomUUID())
                 .name("course-name-3")
                 .courseType(CourseEntityCourseType.INFO)
