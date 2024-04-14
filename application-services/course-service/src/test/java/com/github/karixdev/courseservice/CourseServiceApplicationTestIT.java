@@ -77,6 +77,7 @@ class CourseServiceApplicationTestIT extends ContainersEnvironment {
         UUID scheduleId = UUID.randomUUID();
         List<CourseEntity> courses = IntStream.range(0, 5)
                 .mapToObj(i -> CourseEntity.builder()
+                        .id(UUID.randomUUID())
                         .scheduleId(scheduleId)
                         .name("course-" + i)
                         .courseType(CourseEntityCourseType.LAB)
@@ -92,6 +93,7 @@ class CourseServiceApplicationTestIT extends ContainersEnvironment {
 
         List<CourseEntity> otherCourses = IntStream.range(0, 5)
                 .mapToObj(i -> CourseEntity.builder()
+                        .id(UUID.randomUUID())
                         .scheduleId(UUID.randomUUID())
                         .name("course-2-" + i)
                         .teachers("teacher-2-" + i)
@@ -129,6 +131,7 @@ class CourseServiceApplicationTestIT extends ContainersEnvironment {
         UUID scheduleId = UUID.randomUUID();
 
         CourseEntity course1 = CourseEntity.builder()
+                .id(UUID.randomUUID())
                 .scheduleId(scheduleId)
                 .name("course")
                 .courseType(CourseEntityCourseType.LAB)
@@ -142,6 +145,7 @@ class CourseServiceApplicationTestIT extends ContainersEnvironment {
                 .build();
 
         CourseEntity course2 = CourseEntity.builder()
+                .id(UUID.randomUUID())
                 .scheduleId(scheduleId)
                 .name("course-2")
                 .teachers("teacher-2")
