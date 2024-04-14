@@ -1,6 +1,5 @@
 package com.github.karixdev.courseservice.infrastructure.rest.controller.admin;
 
-import com.github.karixdev.courseservice.ContainersEnvironment;
 import com.github.karixdev.courseservice.RestControllerITContainersEnvironment;
 import com.github.karixdev.courseservice.infrastructure.dal.entity.CourseEntity;
 import com.github.karixdev.courseservice.infrastructure.dal.entity.CourseEntityCourseType;
@@ -432,6 +431,107 @@ class CourseAdminControllerIT extends RestControllerITContainersEnvironment {
         AssertionsForClassTypes.assertThat(allCourses.get(0))
                 .usingRecursiveComparison()
                 .isEqualTo(expected);
+    }
+
+    @Test
+    void shouldNotAllowUserToDeleteSchedule() {
+        String token = KeycloakUtils.getUserToken(keycloakContainer.getAuthServerUrl());
+
+        CourseEntity course = CourseEntity.builder()
+                .id(UUID.randomUUID())
+                .scheduleId(UUID.randomUUID())
+                .startsAt(LocalTime.of(8, 30))
+                .endsAt(LocalTime.of(10, 15))
+                .name("course-name")
+                .courseType(CourseEntityCourseType.LAB)
+                .teachers("dr Adam")
+                .dayOfWeek(DayOfWeek.FRIDAY)
+                .weekType(CourseEntityWeekType.EVEN)
+                .classrooms("LAB 1")
+                .additionalInfo("Only on 3.08")
+                .build();
+
+        courseRepository.save(course);
+
+        webClient.delete().uri("/api/admin/courses/%s".formatted(course.getId()))
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus().isForbidden();
+
+        assertThat(courseRepository.findAll()).hasSize(1);
+    }
+
+    @Test
+    void shouldNotDeleteNotExistingSchedule() {
+        String token = KeycloakUtils.getAdminToken(keycloakContainer.getAuthServerUrl());
+
+        CourseEntity course = CourseEntity.builder()
+                .id(UUID.randomUUID())
+                .scheduleId(UUID.randomUUID())
+                .startsAt(LocalTime.of(8, 30))
+                .endsAt(LocalTime.of(10, 15))
+                .name("course-name")
+                .courseType(CourseEntityCourseType.LAB)
+                .teachers("dr Adam")
+                .dayOfWeek(DayOfWeek.FRIDAY)
+                .weekType(CourseEntityWeekType.EVEN)
+                .classrooms("LAB 1")
+                .additionalInfo("Only on 3.08")
+                .build();
+
+        courseRepository.save(course);
+
+        webClient.delete().uri("/api/admin/courses/%s".formatted(UUID.randomUUID()))
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus().isNotFound();
+
+        assertThat(courseRepository.findAll()).hasSize(1);
+    }
+
+    @Test
+    void shouldDeleteSchedule() {
+        String token = KeycloakUtils.getAdminToken(keycloakContainer.getAuthServerUrl());
+
+        CourseEntity course1 = CourseEntity.builder()
+                .id(UUID.randomUUID())
+                .scheduleId(UUID.randomUUID())
+                .startsAt(LocalTime.of(8, 30))
+                .endsAt(LocalTime.of(10, 15))
+                .name("course-name")
+                .courseType(CourseEntityCourseType.LAB)
+                .teachers("dr Adam")
+                .dayOfWeek(DayOfWeek.FRIDAY)
+                .weekType(CourseEntityWeekType.EVEN)
+                .classrooms("LAB 1")
+                .additionalInfo("Only on 3.08")
+                .build();
+
+        CourseEntity course2 = CourseEntity.builder()
+                .id(UUID.randomUUID())
+                .scheduleId(UUID.randomUUID())
+                .startsAt(LocalTime.of(9, 31))
+                .endsAt(LocalTime.of(15, 25))
+                .name("course-name-2")
+                .courseType(CourseEntityCourseType.LECTURE)
+                .teachers("dr Phil")
+                .dayOfWeek(DayOfWeek.MONDAY)
+                .weekType(CourseEntityWeekType.ODD)
+                .classrooms("LAB 2")
+                .additionalInfo("Only on 4.08")
+                .build();
+
+        courseRepository.saveAll(List.of(course1, course2));
+
+        webClient.delete().uri("/api/admin/courses/%s".formatted(course1.getId()))
+                .header("Authorization", "Bearer " + token)
+                .exchange()
+                .expectStatus().isNoContent();
+
+        List<CourseEntity> allCourses = courseRepository.findAll();
+
+        assertThat(allCourses).hasSize(1);
+        assertThat(allCourses.get(0)).isEqualTo(course2);
     }
 
 }

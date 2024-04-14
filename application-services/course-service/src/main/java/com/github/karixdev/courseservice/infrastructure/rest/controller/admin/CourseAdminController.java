@@ -1,6 +1,7 @@
 package com.github.karixdev.courseservice.infrastructure.rest.controller.admin;
 
 import com.github.karixdev.courseservice.application.command.CreateCourseCommand;
+import com.github.karixdev.courseservice.application.command.DeleteCourseByIdCommand;
 import com.github.karixdev.courseservice.application.command.UpdateCourseByIdCommand;
 import com.github.karixdev.courseservice.application.command.handler.CommandHandler;
 import com.github.karixdev.courseservice.application.mapper.ModelMapper;
@@ -21,6 +22,7 @@ public class CourseAdminController {
 
     private final CommandHandler<CreateCourseCommand> createCourseCommandHandler;
     private final CommandHandler<UpdateCourseByIdCommand> updateCourseByIdCommandHandler;
+    private final CommandHandler<DeleteCourseByIdCommand> deleteCourseByIdCommandHandler;
 
     private final ModelMapper<CourseRequest, CreateCourseCommand> createCourseCommandMapper;
     private final ModelMapperWithAttrs<CourseRequest, UpdateCourseByIdCommand> updateCourseByIdCommandMapper;
@@ -41,5 +43,12 @@ public class CourseAdminController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+    @DeleteMapping("/{id}")
+    ResponseEntity<Void> deleteCourseById(@PathVariable UUID id) {
+        DeleteCourseByIdCommand course = new DeleteCourseByIdCommand(id);
+        deleteCourseByIdCommandHandler.handle(course);
+
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 
 }
