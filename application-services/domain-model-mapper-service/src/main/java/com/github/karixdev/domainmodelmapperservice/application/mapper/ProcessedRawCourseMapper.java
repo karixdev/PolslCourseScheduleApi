@@ -52,7 +52,7 @@ public class ProcessedRawCourseMapper {
                 .teachers(teachers)
                 .dayOfWeek(dayOfWeek)
                 .weekType(weeks)
-                .classroom(rooms)
+                .classrooms(rooms)
                 .additionalInfo(additionalInfo)
                 .build();
     }

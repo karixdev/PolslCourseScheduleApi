@@ -128,7 +128,7 @@ class DomainModelMapperServiceApplicationIntegrationTest {
                 .teachers("")
                 .dayOfWeek(DayOfWeek.TUESDAY)
                 .weekType(WeekType.EVERY)
-                .classroom("")
+                .classrooms("")
                 .build();
 
         ProcessedRawSchedule processedRawSchedule = ProcessedRawSchedule.builder()

@@ -93,7 +93,7 @@ class ProcessedRawCourseMapperTest {
         // Then
         assertThat(result.teachers())
                 .isIn("teacher 1, teacher 2", "teacher 2, teacher 1");
-        assertThat(result.classroom())
+        assertThat(result.classrooms())
                 .isIn("room 1, room 2", "teacher 2, teacher 1");
     }
 

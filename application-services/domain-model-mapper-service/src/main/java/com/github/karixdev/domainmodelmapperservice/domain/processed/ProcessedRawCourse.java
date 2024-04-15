@@ -12,7 +12,7 @@ public record ProcessedRawCourse(
     String name,
     CourseType courseType,
     String teachers,
-    String classroom,
+    String classrooms,
     String additionalInfo,
     DayOfWeek dayOfWeek,
     WeekType weekType,
