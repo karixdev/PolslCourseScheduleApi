@@ -121,6 +121,7 @@ services:
       SPRING_PROFILES_ACTIVE: docker
     ports:
       - '8761:8761'
+    profiles: [infrastructure-services]
 
   # api-gateway
   api-gateway:
@@ -134,6 +135,7 @@ services:
     depends_on:
       - discovery-server
       - keycloak
+    profiles: [infrastructure-services]
 
   # web-scraper-service
   web-scraper-service:
@@ -150,6 +152,7 @@ services:
       - discovery-server
       - api-gateway
       - broker
+    profiles: [application-services]
 
   # domain-model-mapper-service
   domain-model-mapper-service:
@@ -162,6 +165,7 @@ services:
       ZIPKIN_BASE_URL: http://jaeger:9411
     depends_on:
       - broker
+    profiles: [application-services]
 
   # schedule-service
   schedule-service-postgres:
@@ -196,6 +200,7 @@ services:
       - api-gateway
       - broker
       - keycloak
+    profiles: [application-services]
 
   # course-service
   course-service-postgres:
@@ -231,3 +236,4 @@ services:
       - broker
       - keycloak
       - schedule-service
+    profiles: [application-services]
