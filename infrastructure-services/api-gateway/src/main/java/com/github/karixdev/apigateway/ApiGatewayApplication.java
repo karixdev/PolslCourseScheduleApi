@@ -13,17 +13,20 @@ public class ApiGatewayApplication {
 		SpringApplication.run(ApiGatewayApplication.class, args);
 	}
 
+	private static final String SCHEDULE_SERVICE = "lb://schedule-service";
+	private static final String COURSE_SERVICE = "lb://course-service";
+
 	@Bean
 	RouteLocator routeLocator(RouteLocatorBuilder builder) {
 		return builder.routes()
-				.route(r -> r.path("/api/schedules/**").uri("lb://schedule-service"))
-				.route(r -> r.path("/api/webhooks/**").uri("lb://webhook-service"))
-				.route(r -> r.path("/api/courses/**").uri("lb://course-service"))
-				.route(r -> r.path("/api/notifications/**").uri("lb://notification-service"))
+				.route(r -> r.path("/api/admin/schedules/**").uri(SCHEDULE_SERVICE))
+				.route(r -> r.path("/api/schedules/**").uri(SCHEDULE_SERVICE))
+				.route(r -> r.path("/schedule-service/v3/api-docs").uri(SCHEDULE_SERVICE))
 
-				.route(r -> r.path("/course-service/v3/api-docs").uri("lb://course-service"))
-				.route(r -> r.path("/schedule-service/v3/api-docs").uri("lb://schedule-service"))
-				.route(r -> r.path("/webhook-service/v3/api-docs").uri("lb://webhook-service"))
+				.route(r -> r.path("/api/courses/**").uri(COURSE_SERVICE))
+				.route(r -> r.path("/api/admin/courses/**").uri(COURSE_SERVICE))
+				.route(r -> r.path("/course-service/v3/api-docs").uri(COURSE_SERVICE))
+
 				.build();
 	}
 
