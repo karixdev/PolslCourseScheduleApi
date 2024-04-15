@@ -7,7 +7,7 @@ import java.util.UUID;
 
 public interface HttpInterfacesScheduleServiceClient {
 
-    @GetExchange("/api/queries/schedules/{id}")
+    @GetExchange("/api/schedules/{id}")
     void findScheduleById(@PathVariable("id") UUID id);
 
 }
