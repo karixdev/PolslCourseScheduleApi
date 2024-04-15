@@ -1,10 +1,9 @@
-package com.github.karixdev.scheduleservice.infrastructure.rest.controller.query.user;
+package com.github.karixdev.scheduleservice.infrastructure.rest.controller.user;
 
 import com.github.karixdev.scheduleservice.ContainersEnvironment;
 import com.github.karixdev.scheduleservice.domain.entity.PlanPolslData;
 import com.github.karixdev.scheduleservice.domain.entity.Schedule;
 import com.github.karixdev.scheduleservice.domain.repository.ScheduleRepository;
-import com.github.karixdev.scheduleservice.infrastructure.dal.entity.ScheduleEntity;
 import com.github.karixdev.scheduleservice.infrastructure.dal.repository.JpaScheduleRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +17,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-class UserScheduleQueryControllerIT extends ContainersEnvironment {
+class ScheduleControllerIT extends ContainersEnvironment {
 
     @Autowired
     WebTestClient webClient;
@@ -92,7 +91,7 @@ class UserScheduleQueryControllerIT extends ContainersEnvironment {
         scheduleRepository.save(schedule3);
         scheduleRepository.save(schedule4);
 
-        webClient.get().uri("/api/queries/schedules/majors")
+        webClient.get().uri("/api/schedules/majors")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -166,7 +165,7 @@ class UserScheduleQueryControllerIT extends ContainersEnvironment {
         scheduleRepository.save(schedule3);
         scheduleRepository.save(schedule4);
 
-        webClient.get().uri("/api/queries/schedules/majors/%s/semesters".formatted(major))
+        webClient.get().uri("/api/schedules/majors/%s/semesters".formatted(major))
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -226,7 +225,7 @@ class UserScheduleQueryControllerIT extends ContainersEnvironment {
         scheduleRepository.save(schedule2);
         scheduleRepository.save(schedule3);
 
-        webClient.get().uri("/api/queries/schedules/majors/%s/semesters/%d".formatted(major, semester))
+        webClient.get().uri("/api/schedules/majors/%s/semesters/%d".formatted(major, semester))
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -254,7 +253,7 @@ class UserScheduleQueryControllerIT extends ContainersEnvironment {
 
         scheduleRepository.save(schedule1);
 
-        webClient.get().uri("/api/queries/schedules/%s".formatted(UUID.randomUUID()))
+        webClient.get().uri("/api/schedules/%s".formatted(UUID.randomUUID()))
                 .exchange()
                 .expectStatus().isNotFound();
     }
@@ -292,7 +291,7 @@ class UserScheduleQueryControllerIT extends ContainersEnvironment {
         scheduleRepository.save(schedule1);
         scheduleRepository.save(schedule2);
 
-        webClient.get().uri("/api/queries/schedules/%s".formatted(schedule1.getId()))
+        webClient.get().uri("/api/schedules/%s".formatted(schedule1.getId()))
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()

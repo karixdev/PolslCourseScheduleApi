@@ -58,7 +58,11 @@ class BlankScheduleUpdateJobIT extends ContainersEnvironment {
         consumerProps.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, true);
         consumerProps.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
 
-        ConsumerFactory<String, ScheduleEvent> consumerFactory = new DefaultKafkaConsumerFactory<>(consumerProps);
+        ConsumerFactory<String, ScheduleEvent> consumerFactory = new DefaultKafkaConsumerFactory<>(
+                consumerProps,
+                new StringDeserializer(),
+                new JsonDeserializer<>(ScheduleEvent.class, false)
+        );
         scheduleEventConsumer = consumerFactory.createConsumer();
         scheduleEventConsumer.subscribe(List.of(SCHEDULE_EVENT_TOPIC));
     }

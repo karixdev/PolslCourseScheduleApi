@@ -1,11 +1,11 @@
-package com.github.karixdev.scheduleservice.infrastructure.rest.controller.query.user;
+package com.github.karixdev.scheduleservice.infrastructure.rest.controller.user;
 
 import com.github.karixdev.scheduleservice.application.dto.PublicScheduleDTO;
+import com.github.karixdev.scheduleservice.application.query.QueryHandler;
 import com.github.karixdev.scheduleservice.application.query.user.FindScheduleByIdQuery;
 import com.github.karixdev.scheduleservice.application.query.user.FindSchedulesBySemesterAndMajorQuery;
 import com.github.karixdev.scheduleservice.application.query.user.FindSemestersByMajorQuery;
 import com.github.karixdev.scheduleservice.application.query.user.FindUniqueMajorsQuery;
-import com.github.karixdev.scheduleservice.application.query.QueryHandler;
 import com.github.karixdev.scheduleservice.infrastructure.rest.payload.PublicScheduleResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,9 +18,9 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/queries/schedules")
+@RequestMapping("/api/schedules")
 @RequiredArgsConstructor
-public class UserScheduleQueryController {
+public class ScheduleController {
 
     private final QueryHandler<FindUniqueMajorsQuery, List<String>> findUniqueMajorsQueryHandler;
     private final QueryHandler<FindSemestersByMajorQuery, List<Integer>> findSemestersByMajorQueryHandler;
