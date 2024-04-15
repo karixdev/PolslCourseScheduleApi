@@ -6,6 +6,7 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.servers.Server;
 import org.springdoc.core.utils.SpringDocUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -13,6 +14,7 @@ import org.springframework.context.annotation.Configuration;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @Configuration
 public class SwaggerConfig {
@@ -28,15 +30,19 @@ public class SwaggerConfig {
 
     @Bean
     OpenAPI openAPI(
-            @Value("${keycloak.server-url}") String serverUrl,
-            @Value("${keycloak.realm}") String realm
+            @Value("${keycloak.server-url}") String keycloakServerUrl,
+            @Value("${keycloak.realm}") String realm,
+            @Value("${swagger.server-url}") String serverUrl
     ) {
+        Server server = new Server().url(serverUrl);
+
         return new OpenAPI()
                 .info(new Info().title("course-service"))
+                .servers(List.of(server))
                 .components(new Components()
                         .addSecuritySchemes(
                                 OPEN_ID_SCHEME_NAME,
-                                createOpenIdScheme(serverUrl, realm)
+                                createOpenIdScheme(keycloakServerUrl, realm)
                         )
                 )
                 .addSecurityItem(new SecurityRequirement().addList(OPEN_ID_SCHEME_NAME));

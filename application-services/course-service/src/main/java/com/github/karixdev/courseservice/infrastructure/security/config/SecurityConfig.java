@@ -32,6 +32,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request -> request
                         .requestMatchers("/api/admin/**").hasRole(ADMIN_ROLE)
                         .requestMatchers("/api/courses/**").permitAll()
+                        .requestMatchers("/course-service/v3/swagger-ui.html").permitAll()
+                        .requestMatchers("/course-service/v3/api-docs").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(config ->

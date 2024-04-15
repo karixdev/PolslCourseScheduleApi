@@ -77,6 +77,9 @@ springdoc:
   api-docs:
     path: /course-service/v3/api-docs
 
+swagger:
+  server-url: http://localhost:8081
+
 keycloak:
   server-url: http://localhost:8000
   realm: polsl-course-api

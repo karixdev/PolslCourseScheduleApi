@@ -28,6 +28,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request -> request
                         .requestMatchers("/api/admin/**").hasRole("admin")
                         .requestMatchers("/api/schedules/**").permitAll()
+                        .requestMatchers("/schedule-service/v3/swagger-ui.html").permitAll()
+                        .requestMatchers("/schedule-service/v3/api-docs").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(config ->
