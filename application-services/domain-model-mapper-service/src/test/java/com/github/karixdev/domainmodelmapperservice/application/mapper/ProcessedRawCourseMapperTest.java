@@ -14,6 +14,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,9 +25,12 @@ class ProcessedRawCourseMapperTest {
 
     LocalTime startTime;
 
+    UUID scheduleId;
+
     @BeforeEach
     void setUp() {
         startTime = LocalTime.of(8, 0);
+        scheduleId = UUID.randomUUID();
     }
 
     @Test
@@ -41,7 +45,7 @@ class ProcessedRawCourseMapperTest {
                 .build();
 
         // When
-        ProcessedRawCourse result = underTest.map(courseCell, startTime);
+        ProcessedRawCourse result = underTest.map(courseCell, scheduleId, startTime);
 
         // Then
         assertThat(result.startsAt())
@@ -84,7 +88,7 @@ class ProcessedRawCourseMapperTest {
                 .build();
 
         // When
-        ProcessedRawCourse result = underTest.map(courseCell, startTime);
+        ProcessedRawCourse result = underTest.map(courseCell, scheduleId, startTime);
 
         // Then
         assertThat(result.teachers())
@@ -106,7 +110,7 @@ class ProcessedRawCourseMapperTest {
                 .build();
 
         // When
-        ProcessedRawCourse result = underTest.map(courseCell, startTime);
+        ProcessedRawCourse result = underTest.map(courseCell, scheduleId, startTime);
 
         // Then
         assertThat(result.courseType())
@@ -126,7 +130,7 @@ class ProcessedRawCourseMapperTest {
                 .build();
 
         // When
-        ProcessedRawCourse result = underTest.map(courseCell, startTime);
+        ProcessedRawCourse result = underTest.map(courseCell, scheduleId, startTime);
 
         // Then
         assertThat(result.dayOfWeek())
@@ -146,7 +150,7 @@ class ProcessedRawCourseMapperTest {
                 .build();
 
         // When
-        ProcessedRawCourse result = underTest.map(courseCell, startTime);
+        ProcessedRawCourse result = underTest.map(courseCell, scheduleId, startTime);
 
         // Then
         assertThat(result.weekType())
@@ -169,7 +173,7 @@ class ProcessedRawCourseMapperTest {
                 .build();
 
         // When
-        ProcessedRawCourse result = underTest.map(courseCell, startTime);
+        ProcessedRawCourse result = underTest.map(courseCell, scheduleId, startTime);
 
         // Then
         assertThat(result.additionalInfo())

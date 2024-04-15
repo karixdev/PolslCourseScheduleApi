@@ -122,7 +122,7 @@ class RawScheduleEventHandlerTest {
 
         when(timeIntervalMapper.map(rawTimeInterval))
                 .thenReturn(processedRawTimeInterval);
-        when(courseMapper.map(rawCourse, processedRawTimeInterval.start()))
+        when(courseMapper.map(rawCourse, UUID.fromString(scheduleId), processedRawTimeInterval.start()))
                 .thenReturn(processedRawCourse);
 
         // When

@@ -120,6 +120,7 @@ class DomainModelMapperServiceApplicationIntegrationTest {
                 .build();
 
         ProcessedRawCourse course = ProcessedRawCourse.builder()
+                .scheduleId(UUID.fromString(scheduleId))
                 .startsAt(LocalTime.of(8, 30))
                 .endsAt(LocalTime.of(11, 45))
                 .name("course 1")

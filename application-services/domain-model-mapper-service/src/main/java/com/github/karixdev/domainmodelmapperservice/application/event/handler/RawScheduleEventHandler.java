@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalTime;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Component
@@ -37,7 +38,7 @@ public class RawScheduleEventHandler implements EventHandler<RawScheduleEvent> {
                 .orElseThrow(NoScheduleStartTimeException::new);
 
         Set<ProcessedRawCourse> courses = rawSchedule.courses().stream()
-                .map(course -> courseMapper.map(course, scheduleStartTime))
+                .map(course -> courseMapper.map(course, UUID.fromString(event.scheduleId()),scheduleStartTime))
                 .collect(Collectors.toSet());
 
         if (courses.isEmpty()) {

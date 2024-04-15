@@ -12,12 +12,13 @@ import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Component
 public class ProcessedRawCourseMapper {
 
-    public ProcessedRawCourse map(RawCourse rawCourse, LocalTime startTime) {
+    public ProcessedRawCourse map(RawCourse rawCourse, UUID scheduleId, LocalTime startTime) {
         int scheduleStartTimeHour = startTime.getHour();
 
         LocalTime startsAt = getTime(
@@ -43,6 +44,7 @@ public class ProcessedRawCourseMapper {
         String additionalInfo = getAdditionalInfo(rawCourse.text());
 
         return ProcessedRawCourse.builder()
+                .scheduleId(scheduleId)
                 .startsAt(startsAt)
                 .endsAt(endsAt)
                 .name(name)
