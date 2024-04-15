@@ -4,7 +4,6 @@ import com.github.karixdev.courseservice.infrastructure.security.converter.Realm
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -31,10 +30,8 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers(HttpMethod.POST).hasRole(ADMIN_ROLE)
-                        .requestMatchers(HttpMethod.PUT).hasRole(ADMIN_ROLE)
-                        .requestMatchers(HttpMethod.DELETE).hasRole(ADMIN_ROLE)
-                        .requestMatchers(HttpMethod.GET).permitAll()
+                        .requestMatchers("/api/admin/**").hasRole(ADMIN_ROLE)
+                        .requestMatchers("/api/courses/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(config ->
