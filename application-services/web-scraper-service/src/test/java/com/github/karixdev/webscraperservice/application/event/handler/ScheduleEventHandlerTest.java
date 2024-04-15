@@ -8,10 +8,7 @@ import com.github.karixdev.webscraperservice.application.event.producer.EventPro
 import com.github.karixdev.webscraperservice.application.payload.PlanPolslResponse;
 import com.github.karixdev.webscraperservice.application.props.PlanPolslClientProperties;
 import com.github.karixdev.webscraperservice.application.scraper.PlanPolslResponseContentScraper;
-import com.github.karixdev.webscraperservice.domain.RawCourse;
-import com.github.karixdev.webscraperservice.domain.RawSchedule;
-import com.github.karixdev.webscraperservice.domain.RawTimeInterval;
-import com.github.karixdev.webscraperservice.domain.Schedule;
+import com.github.karixdev.webscraperservice.domain.*;
 import org.jsoup.Jsoup;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -65,10 +62,14 @@ class ScheduleEventHandlerTest {
     @MethodSource("supportedEventTypes")
     void GivenScheduleEventWithSupportedType_WhenHandle_ThenScheduleIsScrapedAndRawScheduleEventIsBeingProduced(EventType type) {
         // Given
-        Schedule schedule = Schedule.builder()
-                .planPolslId(1)
+        PlanPolslData planPolslData = PlanPolslData.builder()
+                .id(1)
                 .type(2)
-                .wd(3)
+                .weekDays(3)
+                .build();
+
+        Schedule schedule = Schedule.builder()
+                .planPolslData(planPolslData)
                 .id(UUID.randomUUID().toString())
                 .build();
 
@@ -83,9 +84,9 @@ class ScheduleEventHandlerTest {
                 .build();
 
         when(planPolslClient.getSchedule(
-                schedule.planPolslId(),
-                schedule.type(),
-                schedule.wd(),
+                planPolslData.id(),
+                planPolslData.type(),
+                planPolslData.weekDays(),
                 PlanPolslClientProperties.WIN_W,
                 PlanPolslClientProperties.WIN_H
         )).thenReturn(planPolslResponse);

@@ -9,7 +9,9 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.junit.jupiter.api.AfterEach;
@@ -109,11 +111,15 @@ class WebScraperServiceApplicationIntegrationIntegrationTest {
         int type = 0;
         int wd = 4;
 
+        PlanPolslData planPolslData = PlanPolslData.builder()
+                .id(planPolslId)
+                .type(type)
+                .weekDays(wd)
+                .build();
+
         Schedule schedule = Schedule.builder()
                 .id(scheduleId)
-                .planPolslId(planPolslId)
-                .type(type)
-                .wd(wd)
+                .planPolslData(planPolslData)
                 .build();
 
         ScheduleEvent scheduleEvent = ScheduleEvent.builder()
@@ -190,11 +196,15 @@ class WebScraperServiceApplicationIntegrationIntegrationTest {
         int type = 0;
         int wd = 4;
 
+        PlanPolslData planPolslData = PlanPolslData.builder()
+                .id(1)
+                .type(2)
+                .weekDays(3)
+                .build();
+
         Schedule schedule = Schedule.builder()
                 .id(scheduleId)
-                .planPolslId(planPolslId)
-                .type(type)
-                .wd(wd)
+                .planPolslData(planPolslData)
                 .build();
 
         ScheduleEvent scheduleEvent = ScheduleEvent.builder()
