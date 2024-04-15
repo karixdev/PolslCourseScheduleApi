@@ -1,0 +1,9 @@
+server:
+  port: 8080
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_BASE_URL}/eureka
+  instance:
+    prefer-ip-address: true

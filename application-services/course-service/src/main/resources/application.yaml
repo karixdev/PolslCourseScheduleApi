@@ -1,0 +1,103 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: course-service
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  datasource:
+    url: jdbc:postgresql://localhost:5434/course-service
+    username: root
+    password: root
+    driver-class-name: org.postgresql.Driver
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8000/realms/polsl-course-api
+
+  kafka:
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.trusted.packages: "*"
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+    bootstrap-servers: localhost:29092
+    security:
+      protocol: PLAINTEXT
+
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      authentication-database: admin
+      username: root
+      password: root
+      database: webhook-service
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+  instance:
+    hostname: localhost
+
+management:
+  tracing:
+    enabled: true
+    sampling:
+      probability: 1.0
+    propagation:
+      type: w3c
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
+
+schedule-service:
+  base-url: http://schedule-service
+
+springdoc:
+  swagger-ui:
+    path: /course-service/v3/swagger-ui.html
+  api-docs:
+    path: /course-service/v3/api-docs
+
+swagger:
+  server-url: http://localhost:8081
+
+keycloak:
+  server-url: http://localhost:8000
+  realm: polsl-course-api
+
+kafka:
+  observation:
+    producer:
+      enabled: true
+    consumer:
+      enabled: true
+  topics:
+    schedule-event: schedule.event
+    schedule-event-dlt: course-service.schedule.event.dlt
+    processed-raw-schedule: schedule.raw-processed
+    processed-raw-schedule-dlt: course-service.schedule.raw-processed.dlt
+  config:
+    back-off:
+      interval: 0
+      max-attempts: 0
+
+logging.pattern.level: "%5p [${spring.application.name},%X{traceId:-},%X{spanId:-}]"

@@ -1,0 +1,32 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/schedule-service
+    username: ${POSTGRES_USERNAME}
+    password: ${POSTGRES_PASSWORD}
+
+  kafka:
+    bootstrap-servers: ${BOOTSTRAP_SERVER_HOST}:${BOOTSTRAP_SERVER_PORT}
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_BASE_URL}/realms/polsl-course-api
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_BASE_URL}/eureka
+  instance:
+    prefer-ip-address: true
+
+management:
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_BASE_URL}/api/v2/spans
+
+swagger:
+  server-url: ${SWAGGER_SERVER_URL}

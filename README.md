@@ -9,30 +9,49 @@
   - The official schedule page works quite slowly - every time we request for another schedule half of the page is re-rendered and all front-end processing (assigning classes to HTML elements, etc.) is done on the server side, not on the client side.
 - The courses are cyclically updated - by default every hour.
 
-## Architecture
-<img src="https://github.com/karixdev/PolslCourseScheduleApi/blob/v2-dev/images/architecture.svg" width="100%"/>
-
-## Current problems and future improvements
-Currently, the biggest problem is the Silesian University of Technology server rejecting the TCP/IP connection when the web scraping microservice is running in a Docker container. This problem makes it impossible to put the entire application in the Docker containers.
-
-For the current time I am looking for a solution. When I do manage to find a fix I will place the whole application in Docker containers so that the microservices do not have to be started manually.
-
-## Requirements
-- `Java (JDK) 17`
+## Requirements to run project
 - `Docker`
 
+For development:
+- `Docker`
+- `Java 17`
+- `Maven 3`
+
 ## How to use it
-To start the application, first run the command:
+
 ```shell
 docker compose up -d
 ```
-And then start all microservices except `discovery-service`, in order so that the `api-gateway` is started last.
+
+Application has `3` Docker profiles:
+- `default` (you don't have to specify any profile in command):
+  - Zookeeper
+  - Kafka broker
+  - AKHQ
+  - Postgres for Keycloak
+  - Keycloak
+  - Jaeger
+  - Postgres for schedule-service
+  - Postgres for course-service
+- `infrastructure-services`:
+  - All services from `default` profile
+  - discovery-server
+  - api-gateway
+- `application-services`: 
+  - All services from `default` and `infrastructure-services` profiles
+  - schedule-service
+  - course-service
+  - domain-model-mapper-service
+  - web-scraper-service
+
+If you're going to use `application-services` profile then you have to add following record to `hosts` file in your OS: `127.0.01 keycloak`
+
+To access `swagger` visit `localhost:8080/swagger-ui.html`. If there's a problem while retrieving `OpenAPI` specification from `course-service` or `schedule-service`, restart `api-gateway` container.
 
 The application exposes a REST interface accessible via the API gateway available at `localhost:9090`.
 For a better overview of the application, it is recommended to first use the swagger available at `localhost:9090/swagger-ui.html`.
 
-All endpoints except those accessible via the `GET` method are secured - the exception is the webhook-service microservice, there all endpoints are secured.
-For authentication, use Keycloak. There is available test client:
+Keycloak test client data:
 - Client ID: `test-client`
 - Client Secret: `i2hDNLcuCBOHSBedlGELOp6RFvVQY4cc`
 - Scope: `openid`
