@@ -14,16 +14,19 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://${KEYCLOAK_HOST}:${KEYCLOAK_PORT}/realms/polsl-course-api
+          issuer-uri: ${KEYCLOAK_BASE_URL}/realms/polsl-course-api
 
 eureka:
   client:
     service-url:
-      defaultZone: http://${EUREKA_HOST}:${EUREKA_PORT}/eureka
+      defaultZone: ${EUREKA_BASE_URL}/eureka
   instance:
     prefer-ip-address: true
 
 management:
   zipkin:
     tracing:
-      endpoint: http://${ZIPKIN_HOST}:${ZIPKIN_PORT}/api/v2/spans
+      endpoint: ${ZIPKIN_BASE_URL}/api/v2/spans
+
+swagger:
+  server-url: ${SWAGGER_SERVER_URL}

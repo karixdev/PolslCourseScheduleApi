@@ -11,4 +11,4 @@ spring:
 management:
   zipkin:
     tracing:
-      endpoint: http://${ZIPKIN_HOST}:${ZIPKIN_PORT}/api/v2/spans
+      endpoint: ${ZIPKIN_BASE_URL}/api/v2/spans

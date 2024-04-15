@@ -48,7 +48,7 @@ class ScheduleServiceClientHttpInterfaceAdapterTest {
         UUID id = UUID.randomUUID();
 
         stubFor(
-                get(urlPathEqualTo("/api/queries/schedules/%s".formatted(id)))
+                get(urlPathEqualTo("/api/schedules/%s".formatted(id)))
                         .willReturn(aResponse().withStatus(500))
         );
 
@@ -80,7 +80,7 @@ class ScheduleServiceClientHttpInterfaceAdapterTest {
         UUID id = UUID.randomUUID();
 
         stubFor(
-                get(urlPathEqualTo("/api/queries/schedules/%s".formatted(id)))
+                get(urlPathEqualTo("/api/schedules/%s".formatted(id)))
                         .willReturn(aResponse().withStatus(200))
         );
 

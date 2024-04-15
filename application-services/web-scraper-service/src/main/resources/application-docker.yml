@@ -11,11 +11,11 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: ${EUREKA_HOST}:${EUREKA_PORT}/eureka
+      defaultZone: ${EUREKA_BASE_URL}/eureka
   instance:
     prefer-ip-address: true
 
 management:
   zipkin:
     tracing:
-      endpoint: http://${ZIPKIN_HOST}:${ZIPKIN_PORT}/api/v2/spans
+      endpoint: ${ZIPKIN_BASE_URL}/api/v2/spans

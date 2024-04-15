@@ -151,7 +151,7 @@ class CourseAdminControllerIT extends RestControllerITContainersEnvironment {
                 """.formatted(scheduleId);
 
         wm.stubFor(
-                get(urlPathEqualTo("/api/queries/schedules/%s".formatted(scheduleId)))
+                get(urlPathEqualTo("/api/schedules/%s".formatted(scheduleId)))
                         .willReturn(ok()
                                 .withHeader(
                                         "Content-Type",
@@ -389,7 +389,7 @@ class CourseAdminControllerIT extends RestControllerITContainersEnvironment {
         courseRepository.save(course);
 
         wm.stubFor(
-                get(urlPathEqualTo("/api/queries/schedules/%s".formatted(newScheduleId)))
+                get(urlPathEqualTo("/api/schedules/%s".formatted(newScheduleId)))
                         .willReturn(ok()
                                 .withHeader(
                                         "Content-Type",
