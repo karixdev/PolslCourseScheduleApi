@@ -35,14 +35,14 @@ Application has `3` Docker profiles:
   - Postgres for course-service
 - `infrastructure-services`:
   - All services from `default` profile
-  - discovery-server
-  - api-gateway
+  - discovery-server - Eureka server for microservice discovery
+  - api-gateway - gateway for routing incoming requests
 - `application-services`: 
   - All services from `default` and `infrastructure-services` profiles
-  - schedule-service
-  - course-service
-  - domain-model-mapper-service
-  - web-scraper-service
+  - schedule-service - holds available schedules data
+  - course-service - holds schedule courses data
+  - domain-model-mapper-service - maps raw web scraped data into domain models
+  - web-scraper-service - web scrapes data from plan.polsl.pl
 
 If you're going to use `application-services` profile then you have to add following record to `hosts` file in your OS: `127.0.01 keycloak`
 
