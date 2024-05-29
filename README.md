@@ -67,13 +67,3 @@ To obtain schedule `planPolslId`, `type`, `wd` you need to go to [plan.polsl.pl]
 
 For example:
 - Inf II 1/1's schedule has `id` equal to `18843`, `type` equal to `0` and `wd` equal to 4
-
-Management endpoints:
-- RabbitMQ Management
-  - port: `15672`
-  - username: `user`
-  - password: `password`
-- Keycloak admin
-  - port: `8080`
-  - username: `admin`
-  - password: `admin`
