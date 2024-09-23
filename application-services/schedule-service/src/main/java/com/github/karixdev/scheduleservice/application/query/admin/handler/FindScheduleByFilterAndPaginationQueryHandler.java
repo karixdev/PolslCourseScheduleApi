@@ -2,7 +2,7 @@ package com.github.karixdev.scheduleservice.application.query.admin.handler;
 
 import com.github.karixdev.scheduleservice.application.dto.ScheduleDTO;
 import com.github.karixdev.scheduleservice.application.mapper.ModelMapper;
-import com.github.karixdev.scheduleservice.application.pagination.Page;
+import com.github.karixdev.scheduleservice.commons.vo.pagination.Page;
 import com.github.karixdev.scheduleservice.application.query.QueryHandler;
 import com.github.karixdev.scheduleservice.application.query.admin.FindScheduleByFilterAndPaginationQuery;
 import com.github.karixdev.scheduleservice.domain.entity.Schedule;

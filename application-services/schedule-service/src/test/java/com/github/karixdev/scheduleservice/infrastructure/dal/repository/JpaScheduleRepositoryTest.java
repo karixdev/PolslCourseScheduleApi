@@ -1,9 +1,8 @@
 package com.github.karixdev.scheduleservice.infrastructure.dal.repository;
 
-import com.github.karixdev.scheduleservice.application.filter.PlanPolslDataFilter;
-import com.github.karixdev.scheduleservice.application.filter.ScheduleFilter;
-import com.github.karixdev.scheduleservice.application.pagination.PageRequest;
-import com.github.karixdev.scheduleservice.domain.entity.Schedule;
+import com.github.karixdev.scheduleservice.commons.vo.filter.PlanPolslDataFilter;
+import com.github.karixdev.scheduleservice.commons.vo.filter.ScheduleFilter;
+import com.github.karixdev.scheduleservice.commons.vo.pagination.PageRequest;
 import com.github.karixdev.scheduleservice.infrastructure.dal.PostgresContainerEnvironment;
 import com.github.karixdev.scheduleservice.infrastructure.dal.entity.ScheduleEntity;
 import org.junit.jupiter.api.Test;

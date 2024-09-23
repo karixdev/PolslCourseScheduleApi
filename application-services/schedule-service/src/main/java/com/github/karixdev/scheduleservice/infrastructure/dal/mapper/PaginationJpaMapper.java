@@ -1,6 +1,6 @@
 package com.github.karixdev.scheduleservice.infrastructure.dal.mapper;
 
-import com.github.karixdev.scheduleservice.application.pagination.PageInfo;
+import com.github.karixdev.scheduleservice.commons.vo.pagination.PageInfo;
 import com.github.karixdev.scheduleservice.domain.entity.Schedule;
 import com.github.karixdev.scheduleservice.infrastructure.dal.entity.ScheduleEntity;
 import lombok.RequiredArgsConstructor;
@@ -26,14 +26,14 @@ public class PaginationJpaMapper {
                 .build();
     }
 
-    public com.github.karixdev.scheduleservice.application.pagination.Page<Schedule> mapToDomain(Page<ScheduleEntity> jpaPage) {
+    public com.github.karixdev.scheduleservice.commons.vo.pagination.Page<Schedule> mapToDomain(Page<ScheduleEntity> jpaPage) {
         PageInfo pageInfo = mapPageInfo(jpaPage);
         List<Schedule> content = jpaPage.getContent()
                 .stream()
                 .map(entityMapper::toDomainEntity)
                 .toList();
 
-        return new com.github.karixdev.scheduleservice.application.pagination.Page<>(content, pageInfo);
+        return new com.github.karixdev.scheduleservice.commons.vo.pagination.Page<>(content, pageInfo);
     }
 
 }

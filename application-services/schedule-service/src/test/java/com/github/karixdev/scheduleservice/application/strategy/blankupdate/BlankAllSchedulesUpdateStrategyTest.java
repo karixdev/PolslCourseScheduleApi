@@ -2,20 +2,17 @@ package com.github.karixdev.scheduleservice.application.strategy.blankupdate;
 
 import com.github.karixdev.scheduleservice.application.event.ScheduleEvent;
 import com.github.karixdev.scheduleservice.application.event.producer.EventProducer;
-import com.github.karixdev.scheduleservice.application.pagination.Page;
-import com.github.karixdev.scheduleservice.application.pagination.PageInfo;
-import com.github.karixdev.scheduleservice.application.pagination.PageRequest;
+import com.github.karixdev.scheduleservice.commons.vo.pagination.Page;
+import com.github.karixdev.scheduleservice.commons.vo.pagination.PageInfo;
+import com.github.karixdev.scheduleservice.commons.vo.pagination.PageRequest;
 import com.github.karixdev.scheduleservice.domain.entity.PlanPolslData;
 import com.github.karixdev.scheduleservice.domain.entity.Schedule;
 import com.github.karixdev.scheduleservice.domain.repository.ScheduleRepository;
-import com.github.karixdev.scheduleservice.infrastructure.dal.entity.ScheduleEntity;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.github.karixdev.scheduleservice.application.pagination;
+package com.github.karixdev.scheduleservice.commons.vo.pagination;
 
 import lombok.Builder;
 

@@ -1,8 +1,8 @@
 package com.github.karixdev.scheduleservice.domain.repository;
 
-import com.github.karixdev.scheduleservice.application.filter.ScheduleFilter;
-import com.github.karixdev.scheduleservice.application.pagination.Page;
-import com.github.karixdev.scheduleservice.application.pagination.PageRequest;
+import com.github.karixdev.scheduleservice.commons.vo.filter.ScheduleFilter;
+import com.github.karixdev.scheduleservice.commons.vo.pagination.Page;
+import com.github.karixdev.scheduleservice.commons.vo.pagination.PageRequest;
 import com.github.karixdev.scheduleservice.domain.entity.Schedule;
 
 import java.util.List;

@@ -1,8 +1,8 @@
 package com.github.karixdev.scheduleservice.infrastructure.dal.repository;
 
-import com.github.karixdev.scheduleservice.application.filter.ScheduleFilter;
-import com.github.karixdev.scheduleservice.application.pagination.Page;
-import com.github.karixdev.scheduleservice.application.pagination.PageRequest;
+import com.github.karixdev.scheduleservice.commons.vo.filter.ScheduleFilter;
+import com.github.karixdev.scheduleservice.commons.vo.pagination.Page;
+import com.github.karixdev.scheduleservice.commons.vo.pagination.PageRequest;
 import com.github.karixdev.scheduleservice.domain.entity.Schedule;
 import com.github.karixdev.scheduleservice.domain.repository.ScheduleRepository;
 import com.github.karixdev.scheduleservice.infrastructure.dal.mapper.PaginationJpaMapper;

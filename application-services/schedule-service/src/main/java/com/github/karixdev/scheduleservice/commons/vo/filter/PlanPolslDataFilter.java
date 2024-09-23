@@ -1,4 +1,4 @@
-package com.github.karixdev.scheduleservice.application.filter;
+package com.github.karixdev.scheduleservice.commons.vo.filter;
 
 import lombok.Builder;
 

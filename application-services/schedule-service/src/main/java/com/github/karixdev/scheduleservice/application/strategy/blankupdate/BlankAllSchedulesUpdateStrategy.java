@@ -2,8 +2,8 @@ package com.github.karixdev.scheduleservice.application.strategy.blankupdate;
 
 import com.github.karixdev.scheduleservice.application.event.ScheduleEvent;
 import com.github.karixdev.scheduleservice.application.event.producer.EventProducer;
-import com.github.karixdev.scheduleservice.application.pagination.Page;
-import com.github.karixdev.scheduleservice.application.pagination.PageRequest;
+import com.github.karixdev.scheduleservice.commons.vo.pagination.Page;
+import com.github.karixdev.scheduleservice.commons.vo.pagination.PageRequest;
 import com.github.karixdev.scheduleservice.domain.entity.Schedule;
 import com.github.karixdev.scheduleservice.domain.repository.ScheduleRepository;
 import org.springframework.stereotype.Component;
